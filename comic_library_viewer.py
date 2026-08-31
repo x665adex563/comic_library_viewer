@@ -4,10 +4,21 @@ import os
 import re
 import sys
 import webbrowser
+from dataclasses import asdict, dataclass
 from tkinter import Tk, filedialog
 from urllib.parse import quote
 
+
 IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp")
+
+@dataclass
+class ViewerItem:
+    name: str
+    path: str
+    images: list[str]
+    type: str
+    link: str = ""
+    thumb: str = ""
 
 # --------------------
 # 執行檔位置 & 統一輸出資料夾
@@ -74,19 +85,19 @@ def scan_directory(folder):
         )
 
         if images:
-            item = {
-                "name": d,
-                "path": d_path,
-                "images": images,
-                "type": "image"
-            }
+            item = ViewerItem(
+                name=d,
+                path=d_path,
+                images=images,
+                type="image"
+            )
         else:
-            item = {
-                "name": d,
-                "path": d_path,
-                "images": [],
-                "type": "folder"
-            }
+            item = ViewerItem(
+                name=d,
+                path=d_path,
+                images=[],
+                type="folder"
+            )
 
         items.append(item)
 
@@ -171,9 +182,9 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
     items = scan_directory(folder)
 
     for item in items:
-        d_path = item["path"]
+        d_path = item.path
 
-        if item["type"] == "image":
+        if item.type == "image":
             chapter_html = generate_chapter_html(
                 d_path,
                 viewer_folder,
@@ -182,15 +193,15 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
 
             link = quote(os.path.basename(chapter_html))
             thumb = html_safe_path(
-                os.path.join(d_path, item["images"][0]),
+                os.path.join(d_path, item.images[0]),
                 chapter_html
             )
 
-            item["link"] = link
-            item["thumb"] = thumb
+            item.link = link
+            item.thumb = thumb
 
         else:
-            sub_index = f'{item["name"]}.html'
+            sub_index = f"{item.name}.html"
 
             generate_index_html(
                 d_path,
@@ -200,12 +211,15 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
                 all_items
             )
 
-            item["link"] = quote(sub_index)
-            item["thumb"] = ""
+            item.link = quote(sub_index)
+            item.thumb = ""
 
         all_items.append(item)
         
-        all_js = json.dumps(all_items, ensure_ascii=False)
+    all_js = json.dumps(
+        [asdict(item) for item in all_items],
+        ensure_ascii=False
+    )
 
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(f"""<!DOCTYPE html>
@@ -362,9 +376,16 @@ li {{
 
         # 列出目錄
         f.write('<ul id="list">\n')
-        for i in items:
-            thumb = f'<img class="thumb-img" src="{i["thumb"]}">' if i["type"]=="image" else '<div class="folder-thumb">📁</div>'
-            f.write(f'<li><a href="{i["link"]}">{thumb}<div>{i["name"]}</div></a></li>\n')
+        for item in items:
+            thumb = (
+                f'<img class="thumb-img" src="{item.thumb}">'
+                if item.type == "image"
+                else '<div class="folder-thumb">📁</div>'
+            )
+
+            f.write(
+                f'<li><a href="{item.link}">{thumb}<div>{item.name}</div></a></li>\n'
+            )
         f.write('</ul>\n')
 
         # JavaScript 搜尋 + 回首頁

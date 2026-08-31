@@ -47,6 +47,52 @@ def html_safe_path(target_path, html_file):
 
 
 # --------------------
+# 掃描漫畫目錄
+# --------------------
+def scan_directory(folder):
+    subdirs = sorted(
+        [
+            d
+            for d in os.listdir(folder)
+            if os.path.isdir(os.path.join(folder, d))
+        ],
+        key=natural_sort_key
+    )
+
+    items = []
+
+    for d in subdirs:
+        d_path = os.path.join(folder, d)
+
+        images = sorted(
+            [
+                f
+                for f in os.listdir(d_path)
+                if f.lower().endswith(IMAGE_EXTS)
+            ],
+            key=natural_sort_key
+        )
+
+        if images:
+            item = {
+                "name": d,
+                "path": d_path,
+                "images": images,
+                "type": "image"
+            }
+        else:
+            item = {
+                "name": d,
+                "path": d_path,
+                "images": [],
+                "type": "folder"
+            }
+
+        items.append(item)
+
+    return items
+
+# --------------------
 # 單話漫畫頁
 # --------------------
 def generate_chapter_html(folder, viewer_folder, parent_index_html):
@@ -122,34 +168,44 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
     html_file = os.path.join(viewer_folder, index_name)
     folder_name = os.path.basename(folder)
 
-    subdirs = sorted(
-        [d for d in os.listdir(folder) if os.path.isdir(os.path.join(folder, d))],
-        key=natural_sort_key
-    )
+    items = scan_directory(folder)
 
-    items = []
+    for item in items:
+        d_path = item["path"]
 
-    for d in subdirs:
-        d_path = os.path.join(folder, d)
-        images = sorted(
-            [f for f in os.listdir(d_path) if f.lower().endswith(IMAGE_EXTS)],
-            key=natural_sort_key
-        )
+        if item["type"] == "image":
+            chapter_html = generate_chapter_html(
+                d_path,
+                viewer_folder,
+                html_file
+            )
 
-        if images:
-            chapter_html = generate_chapter_html(d_path, viewer_folder, html_file)
             link = quote(os.path.basename(chapter_html))
-            thumb = html_safe_path(os.path.join(d_path, images[0]), chapter_html)
-            item = {"name": d, "link": link, "thumb": thumb, "type": "image"}
+            thumb = html_safe_path(
+                os.path.join(d_path, item["images"][0]),
+                chapter_html
+            )
+
+            item["link"] = link
+            item["thumb"] = thumb
+
         else:
-            sub_index = f"{d}.html"
-            generate_index_html(d_path, viewer_folder, sub_index, html_file, all_items)
-            item = {"name": d, "link": quote(sub_index), "thumb": "", "type": "folder"}
+            sub_index = f'{item["name"]}.html'
 
-        items.append(item)
+            generate_index_html(
+                d_path,
+                viewer_folder,
+                sub_index,
+                html_file,
+                all_items
+            )
+
+            item["link"] = quote(sub_index)
+            item["thumb"] = ""
+
         all_items.append(item)
-
-    all_js = json.dumps(all_items, ensure_ascii=False)
+        
+        all_js = json.dumps(all_items, ensure_ascii=False)
 
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(f"""<!DOCTYPE html>

@@ -31,6 +31,14 @@ else:
 OUTPUT_ROOT = os.path.join(SCRIPT_DIR, "_comic_viewer_output")
 os.makedirs(OUTPUT_ROOT, exist_ok=True)
 
+TEMPLATE_DIR = os.path.join(SCRIPT_DIR, "templates")
+INDEX_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "index.html")
+
+
+def load_index_template():
+    with open(INDEX_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        return f.read()
+
 # --------------------
 # 自然排序
 # --------------------
@@ -179,8 +187,22 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
     html_file = os.path.join(viewer_folder, index_name)
     folder_name = os.path.basename(folder)
 
+    template = load_index_template()
+    template = template.replace("{{TITLE}}", folder_name)
+
+    if parent_index_html:
+        back_button_html = (
+            f'<div id="back">'
+            f'<a href="{html_safe_path(parent_index_html, html_file)}">←</a>'
+            f'</div>'
+        )
+    else:
+        back_button_html = ""
+
     items = scan_directory(folder)
 
+    items_html = ""
+    
     for item in items:
         d_path = item.path
 
@@ -215,258 +237,38 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
             item.thumb = ""
 
         all_items.append(item)
-        
+
+        thumb_html = (
+            f'<img class="thumb-img" src="{item.thumb}">'
+            if item.type == "image"
+            else '<div class="folder-thumb">📁</div>'
+        )
+
+        items_html += (
+            f'<li><a href="{item.link}">'
+            f'{thumb_html}'
+            f'<div>{item.name}</div>'
+            f'</a></li>\n'
+        )
+
     all_js = json.dumps(
         [asdict(item) for item in all_items],
         ensure_ascii=False
     )
 
+    template = template.replace("{{ITEMS}}", items_html)
+
+    template = template.replace(
+        "{{BACK_BUTTON}}",
+        back_button_html
+    )
+
+    template = template.replace("{{ALL_ITEMS}}", all_js)
+
+    template = template.replace("{{HOME_PAGE}}", index_name)
+
     with open(html_file, "w", encoding="utf-8") as f:
-        f.write(f"""<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>{folder_name}</title>
-<style>
-body {{
-  background: #000;
-  color: #fff;
-  font-family: sans-serif;
-}}
-a,a:visited,a:hover,a:active {{
-  color: #fff;
-  text-decoration: none;
-}}
-.item-name {{
-  margin-top: 6px;
-  font-size: 14px;
-  text-align: center;
-  word-break: break-word;
-}}
-#search {{
-  display:block;
-  margin: 100px auto 12px auto;
-  width:280px;
-  padding:8px 12px;
-  background:#fff;
-  color:#000;
-  border-radius:6px;
-  border:1px solid #444;
-}}
-#suggestions {{
-  margin:0 auto;
-  width:280px;
-  max-height:150px;
-  overflow-y:auto;
-  background:#222;
-  color:#fff;
-  border-radius:6px;
-  display:none;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:500;
-  font-size:14px;
-}}
-#suggestions div {{
-  padding:6px 10px;
-  cursor:pointer;
-}}
-#suggestions div:hover {{
-  background:#444;
-}}
-ul {{
-  list-style:none;
-  padding:0;
-  display:flex;
-  flex-wrap:wrap;
-  gap:20px;
-  max-width:1200px;
-  margin:20px auto;
-}}
-li {{
-  width:200px;
-  background:#111;
-  padding:10px;
-  text-align:center;
-  border-radius: 8px;
-}}
-.thumb-img {{
-  width:100%;
-  aspect-ratio:3/4;
-  object-fit:cover;
-}}
-.folder-thumb {{
-  width:100%;
-  height:32px;
-  aspect-ratio:3/4;
-  background:#111;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-}}
-#back {{
-  position: fixed;
-  top: 20px;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  text-align: center;
-}}
-#back a {{
-  display: inline-block;
-  width: 100%;
-  padding: 20px 0;
-  background: #000;
-  color: #fff;
-  border-radius: 8px;
-  font-size: 20px;
-  opacity: 0.6;
-}}
-#home {{
-  display:none;
-  position:fixed;
-  top:20px;
-  left:20px;
-  z-index:200;
-}}
-#home a {{
-  display:block;
-  padding:50px 50px;
-  background:#000;
-  color:#fff;
-  border-radius:8px;
-  font-size:20px;
-  opacity:0.4;
-  text-decoration:none;
-}}
-#toTop {{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  width:80px;
-  height:80px;
-  background:#111;
-  color:#524d5e;
-  border:none;
-  border-radius:12px;
-  font-size:28px;
-}}
-#toTop:hover {{
-  background: rgba(255, 255, 255, 0.3);
-  color: rgba(0,0,0,0.35);
-  cursor:pointer;
-}}
-</style>
-</head>
-<body>
-""")
-
-        # 返回上一頁
-        if parent_index_html:
-            f.write(f'<div id="back"><a href="{html_safe_path(parent_index_html, html_file)}">←</a></div>\n')
-
-        # 回首頁按鈕
-        f.write(f'<div id="home"><a href="#" onclick="goHome()">🏠</a></div>\n')
-
-        # 搜尋欄 + 提示欄
-        f.write('<input id="search" placeholder="搜尋資料夾">\n')
-        f.write('<div id="suggestions"></div>\n')
-
-        # 列出目錄
-        f.write('<ul id="list">\n')
-        for item in items:
-            thumb = (
-                f'<img class="thumb-img" src="{item.thumb}">'
-                if item.type == "image"
-                else '<div class="folder-thumb">📁</div>'
-            )
-
-            f.write(
-                f'<li><a href="{item.link}">{thumb}<div>{item.name}</div></a></li>\n'
-            )
-        f.write('</ul>\n')
-
-        # JavaScript 搜尋 + 回首頁
-        f.write(f"""
-<button id="toTop" onclick="window.scrollTo({{top:0,behavior:'smooth'}})">↑</button>
-<script>
-const all = {all_js};
-const HOME_PAGE = "{index_name}";
-
-const searchInput = document.getElementById('search');
-const suggestionBox = document.getElementById('suggestions');
-
-function updateSuggestions() {{
-    const val = searchInput.value.toLowerCase();
-    if(!val) {{
-        suggestionBox.style.display = 'none';
-        return;
-    }}
-    const matches = all.filter(i => i.name.toLowerCase().includes(val));
-    suggestionBox.innerHTML = '';
-    matches.forEach(m => {{
-        const div = document.createElement('div');
-        div.textContent = m.name;
-        div.onclick = () => {{
-            searchInput.value = m.name;
-            search();
-            suggestionBox.style.display = 'none';
-        }};
-        suggestionBox.appendChild(div);
-    }});
-    suggestionBox.style.display = matches.length ? 'block':'none';
-}}
-
-function search(){{
-  const v = searchInput.value.toLowerCase();
-  sessionStorage.setItem('last_search', v);
-  const ul = document.getElementById('list');
-  ul.innerHTML = '';
-  document.getElementById('home').style.display = 'block';
-
-  const r = all.filter(i => i.name.toLowerCase().includes(v));
-  if(!r.length){{
-    ul.innerHTML = '<li>找不到資料</li>';
-    return;
-  }}
-
-  r.forEach(i => {{
-    let thumb = '';
-    if(i.type==='image') {{
-      thumb = '<img class="thumb-img" src="' + i.thumb + '">';
-    }} else {{
-      thumb = '<div class="folder-thumb">📁</div>';
-    }}
-    ul.innerHTML += '<li><a href="' + i.link + '">' + thumb + '<div>' + i.name + '</div></a></li>';
-  }});
-}}
-
-searchInput.addEventListener('input', updateSuggestions);
-searchInput.addEventListener('keydown', e => {{
-    if(e.key==='Enter') {{
-        search();
-        suggestionBox.style.display = 'none';
-    }}
-}});
-
-function goHome(){{
-  sessionStorage.removeItem('last_search');
-  location.href = HOME_PAGE;
-}}
-
-window.addEventListener('DOMContentLoaded', () => {{
-  const last = sessionStorage.getItem('last_search');
-  if(last){{
-    searchInput.value = last;
-    search();
-  }}
-}});
-</script>
-</body>
-</html>
-""")
+        f.write(template)
 
     return html_file
 

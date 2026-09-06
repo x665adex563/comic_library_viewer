@@ -1,15 +1,13 @@
-# 網頁一頁式漫畫瀏覽v3（搜尋欄）
 import json
 import os
 import re
 import sys
-import webbrowser
 from dataclasses import asdict, dataclass
-from tkinter import Tk, filedialog
 from urllib.parse import quote
 
 
 IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp")
+
 
 @dataclass
 class ViewerItem:
@@ -19,6 +17,7 @@ class ViewerItem:
     type: str
     link: str = ""
     thumb: str = ""
+
 
 # --------------------
 # 執行檔位置 & 統一輸出資料夾
@@ -33,7 +32,6 @@ os.makedirs(OUTPUT_ROOT, exist_ok=True)
 
 TEMPLATE_DIR = os.path.join(SCRIPT_DIR, "templates")
 INDEX_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "index.html")
-
 
 def load_index_template():
     with open(INDEX_TEMPLATE_PATH, "r", encoding="utf-8") as f:
@@ -53,7 +51,7 @@ def render_index_template(
         .replace("{{TITLE}}", title)
         .replace("{{ITEMS}}", items_html)
         .replace("{{BACK_BUTTON}}", back_button_html)
-        .replace("{{ALL_ITEMS}}", all_items)
+        .replace('"{{ALL_ITEMS}}"', all_items)
         .replace("{{HOME_PAGE}}", home_page)
     )
 
@@ -129,6 +127,22 @@ def scan_directory(folder):
 
     return items
 
+
+def render_item_html(item):
+    thumb_html = (
+        f'<img class="thumb-img" src="{item.thumb}">'
+        if item.type == "image"
+        else '<div class="folder-thumb">📁</div>'
+    )
+
+    return (
+        f'<li><a href="{item.link}">'
+        f'{thumb_html}'
+        f'<div>{item.name}</div>'
+        f'</a></li>\n'
+    )
+
+
 # --------------------
 # 單話漫畫頁
 # --------------------
@@ -195,19 +209,6 @@ img {{
 
     return html_file
 
-def render_item_html(item):
-    thumb_html = (
-        f'<img class="thumb-img" src="{item.thumb}">'
-        if item.type == "image"
-        else '<div class="folder-thumb">📁</div>'
-    )
-
-    return (
-        f'<li><a href="{item.link}">'
-        f'{thumb_html}'
-        f'<div>{item.name}</div>'
-        f'</a></li>\n'
-    )
 
 # --------------------
 # 目錄頁
@@ -286,29 +287,3 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
         f.write(template)
 
     return html_file
-
-
-
-# --------------------
-# 主程式
-# --------------------
-def main():
-    root = Tk()
-    root.withdraw()
-
-    folder = filedialog.askdirectory(title="選擇漫畫資料夾")
-    if not folder:
-        return
-
-    comic_name = os.path.basename(folder)
-    viewer = os.path.join(OUTPUT_ROOT, comic_name)
-    os.makedirs(viewer, exist_ok=True)
-
-    index_name = f"{comic_name}.html"
-    generate_index_html(folder, viewer, index_name)
-
-    webbrowser.open(os.path.join(viewer, index_name))
-
-
-if __name__ == "__main__":
-    main()

@@ -39,6 +39,24 @@ def load_index_template():
     with open(INDEX_TEMPLATE_PATH, "r", encoding="utf-8") as f:
         return f.read()
 
+def render_index_template(
+    title,
+    items_html,
+    back_button_html,
+    all_items,
+    home_page
+):
+    template = load_index_template()
+
+    return (
+        template
+        .replace("{{TITLE}}", title)
+        .replace("{{ITEMS}}", items_html)
+        .replace("{{BACK_BUTTON}}", back_button_html)
+        .replace("{{ALL_ITEMS}}", all_items)
+        .replace("{{HOME_PAGE}}", home_page)
+    )
+
 # --------------------
 # 自然排序
 # --------------------
@@ -187,9 +205,6 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
     html_file = os.path.join(viewer_folder, index_name)
     folder_name = os.path.basename(folder)
 
-    template = load_index_template()
-    template = template.replace("{{TITLE}}", folder_name)
-
     if parent_index_html:
         back_button_html = (
             f'<div id="back">'
@@ -256,16 +271,13 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
         ensure_ascii=False
     )
 
-    template = template.replace("{{ITEMS}}", items_html)
-
-    template = template.replace(
-        "{{BACK_BUTTON}}",
-        back_button_html
+    template = render_index_template(
+        folder_name,
+        items_html,
+        back_button_html,
+        all_js,
+        index_name
     )
-
-    template = template.replace("{{ALL_ITEMS}}", all_js)
-
-    template = template.replace("{{HOME_PAGE}}", index_name)
 
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(template)

@@ -51,7 +51,7 @@ def render_index_template(
         .replace("{{TITLE}}", title)
         .replace("{{ITEMS}}", items_html)
         .replace("{{BACK_BUTTON}}", back_button_html)
-        .replace("{{ALL_ITEMS}}", all_items)
+        .replace('"{{ALL_ITEMS}}"', all_items)
         .replace("{{HOME_PAGE}}", home_page)
     )
 

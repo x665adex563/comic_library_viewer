@@ -195,6 +195,20 @@ img {{
 
     return html_file
 
+def render_item_html(item):
+    thumb_html = (
+        f'<img class="thumb-img" src="{item.thumb}">'
+        if item.type == "image"
+        else '<div class="folder-thumb">📁</div>'
+    )
+
+    return (
+        f'<li><a href="{item.link}">'
+        f'{thumb_html}'
+        f'<div>{item.name}</div>'
+        f'</a></li>\n'
+    )
+
 # --------------------
 # 目錄頁
 # --------------------
@@ -253,18 +267,7 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
 
         all_items.append(item)
 
-        thumb_html = (
-            f'<img class="thumb-img" src="{item.thumb}">'
-            if item.type == "image"
-            else '<div class="folder-thumb">📁</div>'
-        )
-
-        items_html += (
-            f'<li><a href="{item.link}">'
-            f'{thumb_html}'
-            f'<div>{item.name}</div>'
-            f'</a></li>\n'
-        )
+        items_html += render_item_html(item)
 
     all_js = json.dumps(
         [asdict(item) for item in all_items],

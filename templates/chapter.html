@@ -51,10 +51,40 @@ img {
   z-index: 1000;
   text-align: center;
 
+  width: 360px;
+  box-sizing: border-box;
+
   padding: 10px 20px;
   background: #222;
   border-radius: 8px;
   opacity: 0.9;
+}
+
+#chapter-navigation {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 240px;
+  margin: 0 auto;
+}
+
+#previous-chapter {
+  text-align: left;
+}
+
+#next-chapter {
+  text-align: right;
+}
+
+#previous-chapter a,
+#next-chapter a {
+  color: #fff;
+  text-decoration: none;
+}
+
+#previous-chapter a:hover,
+#next-chapter a:hover {
+  opacity: 0.7;
 }
 
 #comic-title {
@@ -140,7 +170,17 @@ body.single-page img.current-page {
 <div id="page-navigation">
   <div id="comic-title">{{TITLE}}</div>
 
-  <select id="page-select"></select>
+  <div id="chapter-navigation">
+    <div id="previous-chapter">
+      {{PREVIOUS_CHAPTER}}
+    </div>
+
+    <select id="page-select"></select>
+
+    <div id="next-chapter">
+      {{NEXT_CHAPTER}}
+    </div>
+  </div>
 </div>
 
 <div id="reading-mode">
@@ -174,6 +214,18 @@ function updatePageSelect() {
 
     pageSelect.appendChild(option);
   });
+}
+
+function updateCurrentPageSelect() {
+  const currentPage = document.querySelector("img.current-page");
+
+  if (!currentPage) {
+    return;
+  }
+
+  const currentIndex = Array.from(images).indexOf(currentPage);
+
+  pageSelect.value = currentIndex;
 }
 
 function showUI() {
@@ -256,6 +308,35 @@ pageSelect.addEventListener("change", () => {
   }
 });
 
+images.forEach((image) => {
+  image.addEventListener("click", () => {
+    if (readingMode === "single") {
+      showNextPage();
+    }
+  });
+
+  image.addEventListener("contextmenu", (event) => {
+    if (readingMode === "single") {
+      event.preventDefault();
+      showPreviousPage();
+    }
+  });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (readingMode !== "single") {
+    return;
+  }
+
+  if (event.key === "ArrowRight") {
+    showNextPage();
+  }
+
+  if (event.key === "ArrowLeft") {
+    showPreviousPage();
+  }
+});
+
 wheelPageButton.addEventListener("click", () => {
   wheelPageEnabled = !wheelPageEnabled;
   localStorage.setItem(WHEEL_PAGE_KEY, wheelPageEnabled);
@@ -296,6 +377,7 @@ function showNextPage() {
   if (currentIndex < images.length - 1) {
     currentPage.classList.remove("current-page");
     images[currentIndex + 1].classList.add("current-page");
+    updateCurrentPageSelect();
   }
 }
 
@@ -311,6 +393,7 @@ function showPreviousPage() {
   if (currentIndex > 0) {
     currentPage.classList.remove("current-page");
     images[currentIndex - 1].classList.add("current-page");
+    updateCurrentPageSelect();
   }
 }
 

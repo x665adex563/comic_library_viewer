@@ -68,15 +68,33 @@ def render_index_template(
 def render_chapter_template(
     title,
     back_button_html,
-    images_html
+    images_html,
+    previous_item,
+    next_item,
 ):
     template = load_chapter_template()
+
+    previous_chapter_html = ""
+
+    if previous_item:
+        previous_chapter_html = (
+            f'<a href="{previous_item}">上一話</a>'
+        )
+
+    next_chapter_html = ""
+
+    if next_item:
+        next_chapter_html = (
+            f'<a href="{next_item}">下一話</a>'
+        )
 
     return (
         template
         .replace("{{TITLE}}", title)
         .replace("{{BACK_BUTTON}}", back_button_html)
         .replace("{{IMAGES}}", images_html)
+        .replace("{{PREVIOUS_CHAPTER}}", previous_chapter_html)
+        .replace("{{NEXT_CHAPTER}}", next_chapter_html)
     )
 
 # --------------------
@@ -109,16 +127,14 @@ def html_safe_path(target_path, html_file):
 # 掃描漫畫目錄
 # --------------------
 def scan_directory(folder):
-    subdirs = sorted(
-        [
-            d
-            for d in os.listdir(folder)
-            if os.path.isdir(os.path.join(folder, d))
-        ],
-        key=natural_sort_key
-    )
+    subdirs = [
+        d
+        for d in os.listdir(folder)
+        if os.path.isdir(os.path.join(folder, d))
+    ]
 
-    items = []
+    folder_items = []
+    image_items = []
 
     for d in subdirs:
         d_path = os.path.join(folder, d)
@@ -139,6 +155,7 @@ def scan_directory(folder):
                 images=images,
                 type="image"
             )
+            image_items.append(item)
         else:
             item = ViewerItem(
                 name=d,
@@ -146,10 +163,12 @@ def scan_directory(folder):
                 images=[],
                 type="folder"
             )
+            folder_items.append(item)
 
-        items.append(item)
+    folder_items.sort(key=lambda item: natural_sort_key(item.name))
+    image_items.sort(key=lambda item: natural_sort_key(item.name))
 
-    return items
+    return folder_items + image_items
 
 def render_item_html(item):
     template = load_item_template()
@@ -170,7 +189,13 @@ def render_item_html(item):
 # --------------------
 # 單話漫畫頁
 # --------------------
-def generate_chapter_html(folder, viewer_folder, parent_index_html):
+def generate_chapter_html(
+    folder,
+    viewer_folder,
+    parent_index_html,
+    previous_item,
+    next_item
+):
     images = sorted(
         [f for f in os.listdir(folder) if f.lower().endswith(IMAGE_EXTS)],
         key=natural_sort_key
@@ -179,12 +204,34 @@ def generate_chapter_html(folder, viewer_folder, parent_index_html):
     folder_name = os.path.basename(folder)
     html_file = os.path.join(viewer_folder, f"{folder_name}.html")
 
+    previous_link = ""
+    next_link = ""
+
+    if previous_item:
+        previous_link = quote(
+            os.path.basename(
+                os.path.join(viewer_folder, f"{previous_item.name}.html")
+            )
+        )
+
+    if next_item:
+        next_link = quote(
+            os.path.basename(
+                os.path.join(viewer_folder, f"{next_item.name}.html")
+            )
+        )
+
     back_button_html = ""
 
     if parent_index_html:
+        parent_link = html_safe_path(
+            parent_index_html,
+            html_file
+        )
+
         back_button_html = (
             '<div id="back">'
-            '<a href="javascript:history.back()">←</a>'
+            f'<a href="{parent_link}">←</a>'
             '</div>'
         )
 
@@ -192,13 +239,15 @@ def generate_chapter_html(folder, viewer_folder, parent_index_html):
 
     for img in images:
         images_html += (
-            f'<img src="{html_safe_path(os.path.join(folder, img), html_file)}">\n'
+            f'<img loading="lazy" src="{html_safe_path(os.path.join(folder, img), html_file)}">\n'
         )
 
     template = render_chapter_template(
         folder_name,
         back_button_html,
-        images_html
+        images_html,
+        previous_link,
+        next_link,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:
@@ -229,15 +278,35 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
     items = scan_directory(folder)
 
     items_html = ""
-    
+
+    chapter_items = [
+        item
+        for item in items
+        if item.type == "image" and item.name.isdigit()
+    ]
+
     for item in items:
         d_path = item.path
+
+        previous_item = None
+        next_item = None
+
+        if item in chapter_items:
+            chapter_index = chapter_items.index(item)
+
+            if chapter_index > 0:
+                previous_item = chapter_items[chapter_index - 1]
+
+            if chapter_index < len(chapter_items) - 1:
+                next_item = chapter_items[chapter_index + 1]
 
         if item.type == "image":
             chapter_html = generate_chapter_html(
                 d_path,
                 viewer_folder,
-                html_file
+                html_file,
+                previous_item,
+                next_item,
             )
 
             link = quote(os.path.basename(chapter_html))

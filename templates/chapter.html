@@ -43,6 +43,46 @@ img {
   background: #222222;
 }
 
+#page-navigation {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  text-align: center;
+
+  padding: 10px 20px;
+  background: #222;
+  border-radius: 8px;
+  opacity: 0.9;
+}
+
+#comic-title {
+  color: #fff;
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+#page-select {
+  padding: 6px 10px;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  font-family: inherit;
+}
+
+#page-select:hover {
+  opacity: 1;
+}
+
+#page-select option {
+  background: #222;
+  color: #fff;
+}
+
 #reading-mode {
   position: fixed;
   top: 20px;
@@ -69,13 +109,18 @@ img {
 }
 
 #back,
-#reading-mode {
+#reading-mode,
+#page-navigation {
   transition: opacity 0.2s ease;
 }
 
 .ui-hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+#page-navigation.ui-hidden {
+  opacity: 0;
 }
 
 body.single-page img {
@@ -92,6 +137,12 @@ body.single-page img.current-page {
 
 {{BACK_BUTTON}}
 
+<div id="page-navigation">
+  <div id="comic-title">{{TITLE}}</div>
+
+  <select id="page-select"></select>
+</div>
+
 <div id="reading-mode">
   <button id="reading-mode-button"></button>
   <button id="wheel-page-button"></button>
@@ -106,21 +157,41 @@ const WHEEL_PAGE_KEY = "wheelPage";
 const images = document.querySelectorAll("img");
 const button = document.getElementById("reading-mode-button");
 const wheelPageButton = document.getElementById("wheel-page-button");
+const pageSelect = document.getElementById("page-select");
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
 let uiHideTimer;
 
+function updatePageSelect() {
+  pageSelect.innerHTML = "";
+
+  images.forEach((image, index) => {
+    const option = document.createElement("option");
+
+    option.value = index;
+    option.textContent = `${index + 1}/${images.length}`;
+
+    pageSelect.appendChild(option);
+  });
+}
+
 function showUI() {
   const back = document.getElementById("back");
   const readingMode = document.getElementById("reading-mode");
+  const pageNavigation = document.getElementById("page-navigation");
 
   back.classList.remove("ui-hidden");
   readingMode.classList.remove("ui-hidden");
+  pageNavigation.classList.remove("ui-hidden");
 
   clearTimeout(uiHideTimer);
 
-  if (back.matches(":hover") || readingMode.matches(":hover")) {
+  if (
+    back.matches(":hover") ||
+    readingMode.matches(":hover") ||
+    pageNavigation.matches(":hover")
+  ) {
     return;
   }
 
@@ -132,6 +203,7 @@ function showUI() {
 function hideUI() {
   document.getElementById("back").classList.add("ui-hidden");
   document.getElementById("reading-mode").classList.add("ui-hidden");
+  document.getElementById("page-navigation").classList.add("ui-hidden");
 
   clearTimeout(uiHideTimer);
 }
@@ -168,6 +240,20 @@ button.addEventListener("click", () => {
   localStorage.setItem(READING_MODE_KEY, readingMode);
 
   updateReadingMode();
+});
+
+pageSelect.addEventListener("change", () => {
+  const pageIndex = Number(pageSelect.value);
+
+  if (readingMode === "single") {
+    images.forEach((image) => {
+      image.classList.remove("current-page");
+    });
+
+    images[pageIndex].classList.add("current-page");
+  } else {
+    images[pageIndex].scrollIntoView();
+  }
 });
 
 wheelPageButton.addEventListener("click", () => {
@@ -228,6 +314,7 @@ function showPreviousPage() {
   }
 }
 
+updatePageSelect();
 updateReadingMode();
 
 hideUI();

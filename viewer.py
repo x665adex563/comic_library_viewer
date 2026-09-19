@@ -278,12 +278,27 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
     items = scan_directory(folder)
 
     items_html = ""
-    
-    for index, item in enumerate(items):
+
+    chapter_items = [
+        item
+        for item in items
+        if item.type == "image" and item.name.isdigit()
+    ]
+
+    for item in items:
         d_path = item.path
 
-        previous_item = items[index - 1] if index > 0 else None
-        next_item = items[index + 1] if index < len(items) - 1 else None
+        previous_item = None
+        next_item = None
+
+        if item in chapter_items:
+            chapter_index = chapter_items.index(item)
+
+            if chapter_index > 0:
+                previous_item = chapter_items[chapter_index - 1]
+
+            if chapter_index < len(chapter_items) - 1:
+                next_item = chapter_items[chapter_index + 1]
 
         if item.type == "image":
             chapter_html = generate_chapter_html(

@@ -127,20 +127,17 @@ def html_safe_path(target_path, html_file):
 # 掃描漫畫目錄
 # --------------------
 def scan_directory(folder):
-    subdirs = sorted(
-        [
-            d
-            for d in os.listdir(folder)
-            if os.path.isdir(os.path.join(folder, d))
-        ],
-        key=natural_sort_key
-    )
+    subdirs = [
+        d
+        for d in os.listdir(folder)
+        if os.path.isdir(os.path.join(folder, d))
+    ]
 
-    items = []
+    folder_items = []
+    image_items = []
 
     for d in subdirs:
         d_path = os.path.join(folder, d)
-        is_chapter = d.isdigit()
 
         images = sorted(
             [
@@ -158,6 +155,7 @@ def scan_directory(folder):
                 images=images,
                 type="image"
             )
+            image_items.append(item)
         else:
             item = ViewerItem(
                 name=d,
@@ -165,10 +163,12 @@ def scan_directory(folder):
                 images=[],
                 type="folder"
             )
+            folder_items.append(item)
 
-        items.append(item)
+    folder_items.sort(key=lambda item: natural_sort_key(item.name))
+    image_items.sort(key=lambda item: natural_sort_key(item.name))
 
-    return items
+    return folder_items + image_items
 
 def render_item_html(item):
     template = load_item_template()

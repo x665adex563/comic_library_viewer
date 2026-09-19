@@ -32,9 +32,14 @@ os.makedirs(OUTPUT_ROOT, exist_ok=True)
 
 TEMPLATE_DIR = os.path.join(SCRIPT_DIR, "templates")
 INDEX_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "index.html")
+CHAPTER_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "chapter.html")
 
 def load_index_template():
     with open(INDEX_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        return f.read()
+
+def load_chapter_template():
+    with open(CHAPTER_TEMPLATE_PATH, "r", encoding="utf-8") as f:
         return f.read()
 
 def render_index_template(
@@ -53,6 +58,20 @@ def render_index_template(
         .replace("{{BACK_BUTTON}}", back_button_html)
         .replace('"{{ALL_ITEMS}}"', all_items)
         .replace("{{HOME_PAGE}}", home_page)
+    )
+
+def render_chapter_template(
+    title,
+    back_button_html,
+    images_html
+):
+    template = load_chapter_template()
+
+    return (
+        template
+        .replace("{{TITLE}}", title)
+        .replace("{{BACK_BUTTON}}", back_button_html)
+        .replace("{{IMAGES}}", images_html)
     )
 
 # --------------------
@@ -155,57 +174,30 @@ def generate_chapter_html(folder, viewer_folder, parent_index_html):
     folder_name = os.path.basename(folder)
     html_file = os.path.join(viewer_folder, f"{folder_name}.html")
 
+    back_button_html = ""
+
+    if parent_index_html:
+        back_button_html = (
+            '<div id="back">'
+            '<a href="javascript:history.back()">←</a>'
+            '</div>'
+        )
+
+    images_html = ""
+
+    for img in images:
+        images_html += (
+            f'<img src="{html_safe_path(os.path.join(folder, img), html_file)}">\n'
+        )
+
+    template = render_chapter_template(
+        folder_name,
+        back_button_html,
+        images_html
+    )
+
     with open(html_file, "w", encoding="utf-8") as f:
-        f.write(f"""<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>{folder_name}</title>
-<style>
-body {{
-  margin:0;
-  background:#000;
-  overflow-x: hidden;
-}}
-img {{
-  display:block;
-  max-width:100vw;
-  height: auto;
-  margin: 0 auto;
-}}
-#back {{
-  position:fixed;
-  top:20px;
-  left:20px;
-}}
-#back a {{
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 50px 50px;
-  background: #000000;
-  color: #ffffff;
-  text-decoration: none;
-  border-radius: 8px;
-  font-size: 20px;
-  opacity: 0.1;
-  transition: opacity 0.25s ease, background 0.25s ease;
-}}
-#back:hover a {{
-  opacity: 1;
-  background: #222222;
-}}
-</style>
-</head>
-<body>
-""")
-        if parent_index_html:
-            f.write('<div id="back"><a href="javascript:history.back()">←</a></div>\n')
-
-        for img in images:
-            f.write(f'<img src="{html_safe_path(os.path.join(folder, img), html_file)}">\n')
-
-        f.write("</body></html>\n")
+        f.write(template)
 
     return html_file
 

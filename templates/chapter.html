@@ -207,6 +207,18 @@ function updatePageSelect() {
   });
 }
 
+function updateCurrentPageSelect() {
+  const currentPage = document.querySelector("img.current-page");
+
+  if (!currentPage) {
+    return;
+  }
+
+  const currentIndex = Array.from(images).indexOf(currentPage);
+
+  pageSelect.value = currentIndex;
+}
+
 function showUI() {
   const back = document.getElementById("back");
   const readingMode = document.getElementById("reading-mode");
@@ -302,6 +314,20 @@ images.forEach((image) => {
   });
 });
 
+document.addEventListener("keydown", (event) => {
+  if (readingMode !== "single") {
+    return;
+  }
+
+  if (event.key === "ArrowRight") {
+    showNextPage();
+  }
+
+  if (event.key === "ArrowLeft") {
+    showPreviousPage();
+  }
+});
+
 wheelPageButton.addEventListener("click", () => {
   wheelPageEnabled = !wheelPageEnabled;
   localStorage.setItem(WHEEL_PAGE_KEY, wheelPageEnabled);
@@ -342,6 +368,7 @@ function showNextPage() {
   if (currentIndex < images.length - 1) {
     currentPage.classList.remove("current-page");
     images[currentIndex + 1].classList.add("current-page");
+    updateCurrentPageSelect();
   }
 }
 
@@ -357,6 +384,7 @@ function showPreviousPage() {
   if (currentIndex > 0) {
     currentPage.classList.remove("current-page");
     images[currentIndex - 1].classList.add("current-page");
+    updateCurrentPageSelect();
   }
 }
 

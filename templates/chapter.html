@@ -34,13 +34,101 @@ img {
   text-decoration: none;
   border-radius: 8px;
   font-size: 20px;
-  opacity: 0.1;
+  opacity: 0.4;
   transition: opacity 0.25s ease, background 0.25s ease;
 }
 
 #back:hover a {
   opacity: 1;
   background: #222222;
+}
+
+#page-navigation {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  text-align: center;
+
+  padding: 10px 20px;
+  background: #222;
+  border-radius: 8px;
+  opacity: 0.9;
+}
+
+#comic-title {
+  color: #fff;
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+#page-select {
+  padding: 6px 10px;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  font-family: inherit;
+}
+
+#page-select:hover {
+  opacity: 1;
+}
+
+#page-select option {
+  background: #222;
+  color: #fff;
+}
+
+#reading-mode {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+#reading-mode button {
+  padding: 10px 14px;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.4;
+}
+
+#wheel-page-button {
+  display: none;
+}
+
+#reading-mode button:hover {
+  opacity: 1;
+}
+
+#back,
+#reading-mode,
+#page-navigation {
+  transition: opacity 0.2s ease;
+}
+
+.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#page-navigation.ui-hidden {
+  opacity: 0;
+}
+
+body.single-page img {
+  display: none;
+}
+
+body.single-page img.current-page {
+  display: block;
 }
 </style>
 </head>
@@ -49,7 +137,187 @@ img {
 
 {{BACK_BUTTON}}
 
+<div id="page-navigation">
+  <div id="comic-title">{{TITLE}}</div>
+
+  <select id="page-select"></select>
+</div>
+
+<div id="reading-mode">
+  <button id="reading-mode-button"></button>
+  <button id="wheel-page-button"></button>
+</div>
+
 {{IMAGES}}
 
+<script>
+const READING_MODE_KEY = "readingMode";
+const WHEEL_PAGE_KEY = "wheelPage";
+
+const images = document.querySelectorAll("img");
+const button = document.getElementById("reading-mode-button");
+const wheelPageButton = document.getElementById("wheel-page-button");
+const pageSelect = document.getElementById("page-select");
+
+let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
+let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
+let uiHideTimer;
+
+function updatePageSelect() {
+  pageSelect.innerHTML = "";
+
+  images.forEach((image, index) => {
+    const option = document.createElement("option");
+
+    option.value = index;
+    option.textContent = `${index + 1}/${images.length}`;
+
+    pageSelect.appendChild(option);
+  });
+}
+
+function showUI() {
+  const back = document.getElementById("back");
+  const readingMode = document.getElementById("reading-mode");
+  const pageNavigation = document.getElementById("page-navigation");
+
+  back.classList.remove("ui-hidden");
+  readingMode.classList.remove("ui-hidden");
+  pageNavigation.classList.remove("ui-hidden");
+
+  clearTimeout(uiHideTimer);
+
+  if (
+    back.matches(":hover") ||
+    readingMode.matches(":hover") ||
+    pageNavigation.matches(":hover")
+  ) {
+    return;
+  }
+
+  uiHideTimer = setTimeout(() => {
+    hideUI();
+  }, 300);
+}
+
+function hideUI() {
+  document.getElementById("back").classList.add("ui-hidden");
+  document.getElementById("reading-mode").classList.add("ui-hidden");
+  document.getElementById("page-navigation").classList.add("ui-hidden");
+
+  clearTimeout(uiHideTimer);
+}
+
+document.getElementById("back").addEventListener("mouseleave", showUI);
+document.getElementById("reading-mode").addEventListener("mouseleave", showUI);
+
+function updateReadingMode() {
+  if (readingMode === "single") {
+    document.body.classList.add("single-page");
+
+    if (!document.querySelector("img.current-page") && images.length > 0) {
+      images[0].classList.add("current-page");
+    }
+
+    button.textContent = "閱覽模式：單頁";
+    wheelPageButton.style.display = "block";
+    wheelPageButton.textContent = wheelPageEnabled ? "滾輪翻頁：開" : "滾輪翻頁：關";
+  } else {
+    document.body.classList.remove("single-page");
+
+    images.forEach((image) => {
+      image.classList.remove("current-page");
+    });
+
+    button.textContent = "閱覽模式：直立";
+    wheelPageButton.style.display = "none";
+  }
+}
+
+button.addEventListener("click", () => {
+  readingMode = readingMode === "vertical" ? "single" : "vertical";
+
+  localStorage.setItem(READING_MODE_KEY, readingMode);
+
+  updateReadingMode();
+});
+
+pageSelect.addEventListener("change", () => {
+  const pageIndex = Number(pageSelect.value);
+
+  if (readingMode === "single") {
+    images.forEach((image) => {
+      image.classList.remove("current-page");
+    });
+
+    images[pageIndex].classList.add("current-page");
+  } else {
+    images[pageIndex].scrollIntoView();
+  }
+});
+
+wheelPageButton.addEventListener("click", () => {
+  wheelPageEnabled = !wheelPageEnabled;
+  localStorage.setItem(WHEEL_PAGE_KEY, wheelPageEnabled);
+  updateReadingMode();
+});
+
+document.addEventListener("mousemove", () => {
+  showUI();
+});
+
+document.addEventListener("wheel", (event) => {
+  if (readingMode === "single" && wheelPageEnabled) {
+    if (event.deltaY > 0) {
+      showNextPage();
+    } else if (event.deltaY < 0) {
+      showPreviousPage();
+    }
+
+    return;
+  }
+
+  if (event.deltaY < 0) {
+    showUI();
+  } else if (event.deltaY > 0) {
+    hideUI();
+  }
+});
+
+function showNextPage() {
+  const currentPage = document.querySelector("img.current-page");
+
+  if (!currentPage) {
+    return;
+  }
+
+  const currentIndex = Array.from(images).indexOf(currentPage);
+
+  if (currentIndex < images.length - 1) {
+    currentPage.classList.remove("current-page");
+    images[currentIndex + 1].classList.add("current-page");
+  }
+}
+
+function showPreviousPage() {
+  const currentPage = document.querySelector("img.current-page");
+
+  if (!currentPage) {
+    return;
+  }
+
+  const currentIndex = Array.from(images).indexOf(currentPage);
+
+  if (currentIndex > 0) {
+    currentPage.classList.remove("current-page");
+    images[currentIndex - 1].classList.add("current-page");
+  }
+}
+
+updatePageSelect();
+updateReadingMode();
+
+hideUI();
+</script>
 </body>
 </html>

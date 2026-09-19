@@ -256,6 +256,21 @@ pageSelect.addEventListener("change", () => {
   }
 });
 
+images.forEach((image) => {
+  image.addEventListener("click", () => {
+    if (readingMode === "single") {
+      showNextPage();
+    }
+  });
+
+  image.addEventListener("contextmenu", (event) => {
+    if (readingMode === "single") {
+      event.preventDefault();
+      showPreviousPage();
+    }
+  });
+});
+
 wheelPageButton.addEventListener("click", () => {
   wheelPageEnabled = !wheelPageEnabled;
   localStorage.setItem(WHEEL_PAGE_KEY, wheelPageEnabled);

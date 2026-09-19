@@ -42,6 +42,35 @@ img {
   opacity: 1;
   background: #222222;
 }
+
+#reading-mode {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+#reading-mode button {
+  padding: 10px 14px;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.4;
+}
+
+#reading-mode button:hover {
+  opacity: 1;
+}
+
+body.single-page img {
+  display: none;
+}
+
+body.single-page img.current-page {
+  display: block;
+}
 </style>
 </head>
 
@@ -49,7 +78,49 @@ img {
 
 {{BACK_BUTTON}}
 
+<div id="reading-mode">
+  <button id="reading-mode-button"></button>
+</div>
+
 {{IMAGES}}
 
+<script>
+const READING_MODE_KEY = "readingMode";
+
+const images = document.querySelectorAll("img");
+const button = document.getElementById("reading-mode-button");
+
+let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
+
+function updateReadingMode() {
+  if (readingMode === "single") {
+    document.body.classList.add("single-page");
+
+    if (!document.querySelector("img.current-page") && images.length > 0) {
+      images[0].classList.add("current-page");
+    }
+
+    button.textContent = "直立式";
+  } else {
+    document.body.classList.remove("single-page");
+
+    images.forEach((image) => {
+      image.classList.remove("current-page");
+    });
+
+    button.textContent = "單頁式";
+  }
+}
+
+button.addEventListener("click", () => {
+  readingMode = readingMode === "vertical" ? "single" : "vertical";
+
+  localStorage.setItem(READING_MODE_KEY, readingMode);
+
+  updateReadingMode();
+});
+
+updateReadingMode();
+</script>
 </body>
 </html>

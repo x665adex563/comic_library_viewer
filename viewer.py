@@ -224,9 +224,14 @@ def generate_chapter_html(
     back_button_html = ""
 
     if parent_index_html:
+        parent_link = html_safe_path(
+            parent_index_html,
+            html_file
+        )
+
         back_button_html = (
             '<div id="back">'
-            '<a href="javascript:history.back()">←</a>'
+            f'<a href="{parent_link}">←</a>'
             '</div>'
         )
 

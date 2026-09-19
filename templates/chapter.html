@@ -34,7 +34,7 @@ img {
   text-decoration: none;
   border-radius: 8px;
   font-size: 20px;
-  opacity: 0.1;
+  opacity: 0.4;
   transition: opacity 0.25s ease, background 0.25s ease;
 }
 
@@ -62,6 +62,16 @@ img {
 
 #reading-mode button:hover {
   opacity: 1;
+}
+
+#back,
+#reading-mode {
+  transition: opacity 0.2s ease;
+}
+
+.ui-hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 body.single-page img {
@@ -92,6 +102,36 @@ const button = document.getElementById("reading-mode-button");
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 
+let uiHideTimer;
+
+function showUI() {
+  const back = document.getElementById("back");
+  const readingMode = document.getElementById("reading-mode");
+
+  back.classList.remove("ui-hidden");
+  readingMode.classList.remove("ui-hidden");
+
+  clearTimeout(uiHideTimer);
+
+  if (back.matches(":hover") || readingMode.matches(":hover")) {
+    return;
+  }
+
+  uiHideTimer = setTimeout(() => {
+    hideUI();
+  }, 300);
+}
+
+function hideUI() {
+  document.getElementById("back").classList.add("ui-hidden");
+  document.getElementById("reading-mode").classList.add("ui-hidden");
+
+  clearTimeout(uiHideTimer);
+}
+
+document.getElementById("back").addEventListener("mouseleave", showUI);
+document.getElementById("reading-mode").addEventListener("mouseleave", showUI);
+
 function updateReadingMode() {
   if (readingMode === "single") {
     document.body.classList.add("single-page");
@@ -120,7 +160,21 @@ button.addEventListener("click", () => {
   updateReadingMode();
 });
 
+document.addEventListener("mousemove", () => {
+  showUI();
+});
+
+document.addEventListener("wheel", (event) => {
+  if (event.deltaY < 0) {
+    showUI();
+  } else if (event.deltaY > 0) {
+    hideUI();
+  }
+});
+
 updateReadingMode();
+
+hideUI();
 </script>
 </body>
 </html>

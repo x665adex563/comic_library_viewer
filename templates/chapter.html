@@ -60,6 +60,10 @@ img {
   opacity: 0.4;
 }
 
+#wheel-page-button {
+  display: none;
+}
+
 #reading-mode button:hover {
   opacity: 1;
 }
@@ -90,18 +94,21 @@ body.single-page img.current-page {
 
 <div id="reading-mode">
   <button id="reading-mode-button"></button>
+  <button id="wheel-page-button"></button>
 </div>
 
 {{IMAGES}}
 
 <script>
 const READING_MODE_KEY = "readingMode";
+const WHEEL_PAGE_KEY = "wheelPage";
 
 const images = document.querySelectorAll("img");
 const button = document.getElementById("reading-mode-button");
+const wheelPageButton = document.getElementById("wheel-page-button");
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
-
+let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
 let uiHideTimer;
 
 function showUI() {
@@ -141,6 +148,8 @@ function updateReadingMode() {
     }
 
     button.textContent = "直立式";
+    wheelPageButton.style.display = "block";
+    wheelPageButton.textContent = wheelPageEnabled ? "滾輪翻頁：開" : "滾輪翻頁：關";
   } else {
     document.body.classList.remove("single-page");
 
@@ -149,6 +158,7 @@ function updateReadingMode() {
     });
 
     button.textContent = "單頁式";
+    wheelPageButton.style.display = "none";
   }
 }
 
@@ -160,17 +170,63 @@ button.addEventListener("click", () => {
   updateReadingMode();
 });
 
+wheelPageButton.addEventListener("click", () => {
+  wheelPageEnabled = !wheelPageEnabled;
+  localStorage.setItem(WHEEL_PAGE_KEY, wheelPageEnabled);
+  updateReadingMode();
+});
+
 document.addEventListener("mousemove", () => {
   showUI();
 });
 
 document.addEventListener("wheel", (event) => {
+  if (readingMode === "single" && wheelPageEnabled) {
+    if (event.deltaY > 0) {
+      showNextPage();
+    } else if (event.deltaY < 0) {
+      showPreviousPage();
+    }
+
+    return;
+  }
+
   if (event.deltaY < 0) {
     showUI();
   } else if (event.deltaY > 0) {
     hideUI();
   }
 });
+
+function showNextPage() {
+  const currentPage = document.querySelector("img.current-page");
+
+  if (!currentPage) {
+    return;
+  }
+
+  const currentIndex = Array.from(images).indexOf(currentPage);
+
+  if (currentIndex < images.length - 1) {
+    currentPage.classList.remove("current-page");
+    images[currentIndex + 1].classList.add("current-page");
+  }
+}
+
+function showPreviousPage() {
+  const currentPage = document.querySelector("img.current-page");
+
+  if (!currentPage) {
+    return;
+  }
+
+  const currentIndex = Array.from(images).indexOf(currentPage);
+
+  if (currentIndex > 0) {
+    currentPage.classList.remove("current-page");
+    images[currentIndex - 1].classList.add("current-page");
+  }
+}
 
 updateReadingMode();
 

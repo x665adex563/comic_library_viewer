@@ -57,6 +57,27 @@ img {
   opacity: 0.9;
 }
 
+#chapter-navigation {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 240px;
+}
+
+#previous-chapter {
+  text-align: left;
+}
+
+#next-chapter {
+  text-align: right;
+}
+
+#previous-chapter a,
+#next-chapter a {
+  color: #fff;
+  text-decoration: none;
+}
+
 #comic-title {
   color: #fff;
   margin-bottom: 8px;
@@ -140,7 +161,17 @@ body.single-page img.current-page {
 <div id="page-navigation">
   <div id="comic-title">{{TITLE}}</div>
 
-  <select id="page-select"></select>
+  <div id="chapter-navigation">
+    <div id="previous-chapter">
+      {{PREVIOUS_CHAPTER}}
+    </div>
+
+    <select id="page-select"></select>
+
+    <div id="next-chapter">
+      {{NEXT_CHAPTER}}
+    </div>
+  </div>
 </div>
 
 <div id="reading-mode">

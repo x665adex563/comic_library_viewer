@@ -239,7 +239,7 @@ def generate_chapter_html(
 
     for img in images:
         images_html += (
-            f'<img src="{html_safe_path(os.path.join(folder, img), html_file)}">\n'
+            f'<img loading="lazy" src="{html_safe_path(os.path.join(folder, img), html_file)}">\n'
         )
 
     template = render_chapter_template(

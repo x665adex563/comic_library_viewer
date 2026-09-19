@@ -33,6 +33,7 @@ os.makedirs(OUTPUT_ROOT, exist_ok=True)
 TEMPLATE_DIR = os.path.join(SCRIPT_DIR, "templates")
 INDEX_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "index.html")
 CHAPTER_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "chapter.html")
+ITEM_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "item.html")
 
 def load_index_template():
     with open(INDEX_TEMPLATE_PATH, "r", encoding="utf-8") as f:
@@ -40,6 +41,10 @@ def load_index_template():
 
 def load_chapter_template():
     with open(CHAPTER_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        return f.read()
+
+def load_item_template():
+    with open(ITEM_TEMPLATE_PATH, "r", encoding="utf-8") as f:
         return f.read()
 
 def render_index_template(
@@ -146,8 +151,9 @@ def scan_directory(folder):
 
     return items
 
-
 def render_item_html(item):
+    template = load_item_template()
+
     thumb_html = (
         f'<img class="thumb-img" src="{item.thumb}">'
         if item.type == "image"
@@ -155,12 +161,11 @@ def render_item_html(item):
     )
 
     return (
-        f'<li><a href="{item.link}">'
-        f'{thumb_html}'
-        f'<div>{item.name}</div>'
-        f'</a></li>\n'
+        template
+        .replace("{{LINK}}", item.link)
+        .replace("{{THUMB}}", thumb_html)
+        .replace("{{NAME}}", item.name)
     )
-
 
 # --------------------
 # 單話漫畫頁

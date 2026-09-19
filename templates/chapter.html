@@ -147,7 +147,7 @@ function updateReadingMode() {
       images[0].classList.add("current-page");
     }
 
-    button.textContent = "直立式";
+    button.textContent = "閱覽模式：單頁";
     wheelPageButton.style.display = "block";
     wheelPageButton.textContent = wheelPageEnabled ? "滾輪翻頁：開" : "滾輪翻頁：關";
   } else {
@@ -157,7 +157,7 @@ function updateReadingMode() {
       image.classList.remove("current-page");
     });
 
-    button.textContent = "單頁式";
+    button.textContent = "閱覽模式：直立";
     wheelPageButton.style.display = "none";
   }
 }

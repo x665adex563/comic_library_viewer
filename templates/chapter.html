@@ -428,7 +428,7 @@ function showUI() {
 
   uiHideTimer = setTimeout(() => {
     hideUI();
-  }, 300);
+  }, 500);
 }
 
 function hideUI() {
@@ -522,8 +522,18 @@ wheelPageButton.addEventListener("click", () => {
   updateReadingMode();
 });
 
-document.addEventListener("mousemove", () => {
-  showUI();
+document.addEventListener("mousemove", (event) => {
+  const upperAreaHeight = window.innerHeight * 0.3;
+
+  if (event.clientY <= upperAreaHeight) {
+    showUI();
+  }
+});
+
+document.addEventListener("click", (event) => {
+  if (event.target === document.body) {
+    showUI();
+  }
 });
 
 document.addEventListener("wheel", (event) => {

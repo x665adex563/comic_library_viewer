@@ -290,19 +290,35 @@ readingHistoryButton.addEventListener("click", () => {
 
   readingHistoryPanel.innerHTML = history.length
     ? history.map((item, index) => `
-        <div class="reading-history-item" data-index="${index}">
-          ${item.comicTitle}${item.isSeries ? ` — 第 ${item.title} 話` : ""}
-        </div>
+          <div class="reading-history-item" data-index="${index}">
+            <span class="reading-history-title">${item.comicTitle}</span>
+            ${item.isSeries
+              ? `<span class="reading-history-chapter">第 ${item.title} 話</span>`
+              : ""}
+          </div>
       `).join("")
     : "目前沒有閱讀紀錄";
 
   document.querySelectorAll(".reading-history-item").forEach((item) => {
-    item.addEventListener("click", () => {
-      const index = Number(item.dataset.index);
-      const record = history[index];
+    const index = Number(item.dataset.index);
+    const record = history[index];
 
-      location.href = `${record.url}?page=${record.page}`;
+    const title = item.querySelector(".reading-history-title");
+    const chapter = item.querySelector(".reading-history-chapter");
+
+    title.addEventListener("click", () => {
+      if (record.isSeries) {
+        location.href = record.parentIndex;
+      } else {
+        location.href = record.url;
+      }
     });
+
+    if (chapter) {
+      chapter.addEventListener("click", () => {
+        location.href = `${record.url}?page=${record.page}`;
+      });
+    }
   });
 
   readingHistoryPanel.style.display = "block";
@@ -332,27 +348,23 @@ function updateCurrentPageSelect() {
 
   pageSelect.value = currentIndex;
   currentReadingPage = currentIndex;
-}
 
-function restoreReadingHistory() {
   const history = JSON.parse(
     localStorage.getItem(READING_HISTORY_KEY) || "[]"
   );
 
-  const record = history.find((item) => item.url === location.href);
+  const record = history.find(
+    (item) => item.comicTitle === comicTitle
+  );
 
-  if (!record) {
-    return;
+  if (record) {
+    record.page = currentIndex;
+
+    localStorage.setItem(
+      READING_HISTORY_KEY,
+      JSON.stringify(history)
+    );
   }
-
-  const page = Math.min(record.page, images.length - 1);
-
-  images.forEach((image) => {
-    image.classList.remove("current-page");
-  });
-
-  images[page].classList.add("current-page");
-  currentReadingPage = page;
 }
 
 function saveReadingHistory() {
@@ -369,8 +381,9 @@ function saveReadingHistory() {
   const record = {
     title: document.title,
     comicTitle: comicTitle,
+    parentIndex: parentIndex,
     isSeries: isSeries,
-    url: location.href,
+    url: location.href.split("?")[0],
     page: currentIndex,
     updatedAt: Date.now()
   };
@@ -619,6 +632,7 @@ if (!Number.isNaN(page) && page >= 0 && page < images.length) {
 
   images[page].classList.add("current-page");
   currentReadingPage = page;
+  pageSelect.value = page;
 }
 
 hideUI();

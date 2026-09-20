@@ -430,6 +430,17 @@ function showChapterPrompt(message, buttonText, link) {
   };
 }
 
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    const prompt = document.getElementById("chapter-prompt");
+
+    if (prompt.style.display === "block") {
+      const button = document.getElementById("chapter-prompt-button");
+      button.click();
+    }
+  }
+});
+
 function showNextPage() {
   const currentPage = document.querySelector("img.current-page");
 

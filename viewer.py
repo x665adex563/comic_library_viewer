@@ -69,23 +69,24 @@ def render_chapter_template(
     title,
     back_button_html,
     images_html,
-    previous_item,
-    next_item,
+    previous_link,
+    next_link,
+    parent_link,
 ):
     template = load_chapter_template()
 
     previous_chapter_html = ""
 
-    if previous_item:
+    if previous_link:
         previous_chapter_html = (
-            f'<a href="{previous_item}">上一話</a>'
+            f'<a href="{previous_link}">上一話</a>'
         )
 
     next_chapter_html = ""
 
-    if next_item:
+    if next_link:
         next_chapter_html = (
-            f'<a href="{next_item}">下一話</a>'
+            f'<a href="{next_link}">下一話</a>'
         )
 
     return (
@@ -94,7 +95,10 @@ def render_chapter_template(
         .replace("{{BACK_BUTTON}}", back_button_html)
         .replace("{{IMAGES}}", images_html)
         .replace("{{PREVIOUS_CHAPTER}}", previous_chapter_html)
+        .replace("{{PREVIOUS_CHAPTER_URL}}", previous_link)
         .replace("{{NEXT_CHAPTER}}", next_chapter_html)
+        .replace("{{NEXT_CHAPTER_URL}}", next_link)
+        .replace("{{PARENT_INDEX_URL}}", parent_link)
     )
 
 # --------------------
@@ -222,6 +226,7 @@ def generate_chapter_html(
         )
 
     back_button_html = ""
+    parent_link = ""
 
     if parent_index_html:
         parent_link = html_safe_path(
@@ -248,6 +253,7 @@ def generate_chapter_html(
         images_html,
         previous_link,
         next_link,
+        parent_link,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

@@ -144,6 +144,39 @@ img {
   opacity: 1;
 }
 
+#chapter-prompt {
+  display: none;
+
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  padding: 20px;
+  background: #222;
+  color: #fff;
+  border-radius: 8px;
+  text-align: center;
+  z-index: 2000;
+}
+
+#chapter-prompt-message {
+  margin-bottom: 12px;
+}
+
+#chapter-prompt-button {
+  padding: 8px 14px;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#chapter-prompt-button:hover {
+  opacity: 0.8;
+}
+
 #back,
 #reading-mode,
 #page-navigation {
@@ -173,6 +206,12 @@ body.single-page img.current-page {
 
 {{BACK_BUTTON}}
 
+<script>
+  const previousChapter = "{{PREVIOUS_CHAPTER_URL}}";
+  const nextChapter = "{{NEXT_CHAPTER_URL}}";
+  const parentIndex = "{{PARENT_INDEX_URL}}";
+</script>
+
 <div id="page-navigation">
   <div id="comic-title">{{TITLE}}</div>
 
@@ -192,6 +231,11 @@ body.single-page img.current-page {
 <div id="reading-mode">
   <button id="reading-mode-button"></button>
   <button id="wheel-page-button"></button>
+</div>
+
+<div id="chapter-prompt">
+  <div id="chapter-prompt-message"></div>
+  <button id="chapter-prompt-button"></button>
 </div>
 
 {{IMAGES}}
@@ -371,6 +415,32 @@ document.addEventListener("wheel", (event) => {
   }
 });
 
+function showChapterPrompt(message, buttonText, link) {
+  const prompt = document.getElementById("chapter-prompt");
+  const messageElement = document.getElementById("chapter-prompt-message");
+  const button = document.getElementById("chapter-prompt-button");
+
+  messageElement.textContent = message;
+  button.textContent = buttonText;
+
+  prompt.style.display = "block";
+
+  button.onclick = () => {
+    window.location.href = link;
+  };
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    const prompt = document.getElementById("chapter-prompt");
+
+    if (prompt.style.display === "block") {
+      const button = document.getElementById("chapter-prompt-button");
+      button.click();
+    }
+  }
+});
+
 function showNextPage() {
   const currentPage = document.querySelector("img.current-page");
 
@@ -384,6 +454,21 @@ function showNextPage() {
     currentPage.classList.remove("current-page");
     images[currentIndex + 1].classList.add("current-page");
     updateCurrentPageSelect();
+    return;
+  }
+
+  if (nextChapter) {
+    showChapterPrompt(
+      "要前往下一話嗎？",
+      "前往下一話",
+      nextChapter
+    );
+  } else if (parentIndex) {
+    showChapterPrompt(
+      "已達最新話，是否返回目錄？",
+      "返回目錄",
+      parentIndex
+    );
   }
 }
 
@@ -400,6 +485,15 @@ function showPreviousPage() {
     currentPage.classList.remove("current-page");
     images[currentIndex - 1].classList.add("current-page");
     updateCurrentPageSelect();
+    return;
+  }
+
+  if (previousChapter) {
+    showChapterPrompt(
+      "要前往上一話嗎？",
+      "前往上一話",
+      previousChapter
+    );
   }
 }
 

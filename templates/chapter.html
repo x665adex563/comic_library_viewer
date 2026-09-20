@@ -13,9 +13,60 @@ body {
 
 body.single-page {
   min-height: 100vh;
+}
+
+body.single-page img {
+  display: none;
+}
+
+body.single-page img.current-page {
+  display: block;
+  margin: auto;
+  transform: translateY(
+    calc((var(--single-page-position) - 50) * 1vh)
+  );
+}
+
+#settings-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 200px;
+  padding: 16px;
+  box-sizing: border-box;
+  background: #222;
+  color: #fff;
+  border-radius: 8px;
+  opacity: 0.4;
+}
+
+#single-page-position-control {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 120px;
+}
+
+#single-page-position {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 8px;
+  height: 120px;
+  accent-color: #444;
+}
+
+#single-page-position-value {
+  width: 45px;
+  font-size: 16px;
+  box-sizing: border-box;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+  text-align: center;
 }
 
 img {
@@ -151,6 +202,10 @@ img {
   opacity: 1;
 }
 
+#settings-panel:hover {
+  opacity: 1;
+}
+
 #reading-history-panel {
   display: none;
   position: fixed;
@@ -242,15 +297,6 @@ img {
 #page-navigation.ui-hidden {
   opacity: 0;
 }
-
-body.single-page img {
-  display: none;
-}
-
-body.single-page img.current-page {
-  display: block;
-  margin: auto;
-}
 </style>
 </head>
 
@@ -288,8 +334,34 @@ body.single-page img.current-page {
   <button id="reading-mode-button"></button>
   <button id="wheel-page-button"></button>
   <button id="reading-history-button">閱讀紀錄</button>
-  <div id="reading-history-panel"></div>
+
+  <button id="settings-button">設定</button>
+
+  <div id="settings-panel">
+    <div id="single-page-position-control">
+      <label for="single-page-position">圖片垂直位置</label>
+
+      <input
+        id="single-page-position-value"
+        type="number"
+        min="0"
+        max="100"
+        value="50"
+      >
+
+      <input
+        id="single-page-position"
+        type="range"
+        min="0"
+        max="100"
+        value="50"
+        orient="vertical"
+      >
+    </div>
+  </div>
 </div>
+
+<div id="reading-history-panel"></div>
 
 <div id="chapter-prompt">
   <div id="chapter-prompt-message"></div>
@@ -301,6 +373,7 @@ body.single-page img.current-page {
 <script>
 const READING_MODE_KEY = "readingMode";
 const WHEEL_PAGE_KEY = "wheelPage";
+const SINGLE_PAGE_POSITION_KEY = "singlePagePosition";
 
 const images = document.querySelectorAll("img");
 const button = document.getElementById("reading-mode-button");
@@ -308,11 +381,65 @@ const wheelPageButton = document.getElementById("wheel-page-button");
 const pageSelect = document.getElementById("page-select");
 const readingHistoryButton = document.getElementById("reading-history-button");
 const readingHistoryPanel = document.getElementById("reading-history-panel");
+const settingsButton = document.getElementById("settings-button");
+const settingsPanel = document.getElementById("settings-panel");
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
 let uiHideTimer;
 let currentReadingPage = 0;
+let singlePagePosition =
+  Number(localStorage.getItem(SINGLE_PAGE_POSITION_KEY)) || 50;
+
+const singlePagePositionControl =
+  document.getElementById("single-page-position");
+
+const singlePagePositionValue =
+  document.getElementById("single-page-position-value");
+
+singlePagePositionControl.value = singlePagePosition;
+
+singlePagePositionControl.addEventListener("input", () => {
+  singlePagePosition = Number(singlePagePositionControl.value);
+
+  singlePagePositionValue.value = singlePagePosition;
+
+  localStorage.setItem(
+    SINGLE_PAGE_POSITION_KEY,
+    singlePagePosition
+  );
+
+  document.body.style.setProperty(
+    "--single-page-position",
+    singlePagePosition
+  );
+});
+
+singlePagePositionValue.addEventListener("input", () => {
+  let value = Number(singlePagePositionValue.value);
+
+  if (value < 0) {
+    value = 0;
+  }
+
+  if (value > 100) {
+    value = 100;
+  }
+
+  singlePagePosition = value;
+  singlePagePositionValue.value = value;
+  singlePagePositionControl.value = value;
+
+  localStorage.setItem(
+    SINGLE_PAGE_POSITION_KEY,
+    singlePagePosition
+  );
+
+  document.body.style.setProperty(
+    "--single-page-position",
+    singlePagePosition
+  );
+});
 
 readingHistoryButton.addEventListener("click", () => {
   const isVisible = readingHistoryPanel.style.display === "block";
@@ -377,6 +504,12 @@ readingHistoryButton.addEventListener("click", () => {
   });
 
   readingHistoryPanel.style.display = "block";
+});
+
+settingsButton.addEventListener("click", () => {
+  const isVisible = settingsPanel.style.display === "block";
+
+  settingsPanel.style.display = isVisible ? "none" : "block";
 });
 
 function updatePageSelect() {
@@ -497,6 +630,11 @@ function updateReadingMode() {
     if (!document.querySelector("img.current-page") && images.length > 0) {
       images[0].classList.add("current-page");
     }
+
+    document.body.style.setProperty(
+      "--single-page-position",
+      singlePagePosition
+    );
 
     button.textContent = "閱覽模式：單頁";
     wheelPageButton.style.display = "block";

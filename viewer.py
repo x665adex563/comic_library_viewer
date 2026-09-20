@@ -71,6 +71,7 @@ def render_chapter_template(
     images_html,
     previous_link,
     next_link,
+    parent_link,
 ):
     template = load_chapter_template()
 
@@ -97,6 +98,7 @@ def render_chapter_template(
         .replace("{{PREVIOUS_CHAPTER_URL}}", previous_link)
         .replace("{{NEXT_CHAPTER}}", next_chapter_html)
         .replace("{{NEXT_CHAPTER_URL}}", next_link)
+        .replace("{{PARENT_INDEX_URL}}", parent_link)
     )
 
 # --------------------
@@ -224,6 +226,7 @@ def generate_chapter_html(
         )
 
     back_button_html = ""
+    parent_link = ""
 
     if parent_index_html:
         parent_link = html_safe_path(
@@ -250,6 +253,7 @@ def generate_chapter_html(
         images_html,
         previous_link,
         next_link,
+        parent_link,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

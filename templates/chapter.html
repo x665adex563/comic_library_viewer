@@ -209,6 +209,7 @@ body.single-page img.current-page {
 <script>
   const previousChapter = "{{PREVIOUS_CHAPTER_URL}}";
   const nextChapter = "{{NEXT_CHAPTER_URL}}";
+  const parentIndex = "{{PARENT_INDEX_URL}}";
 </script>
 
 <div id="page-navigation">
@@ -450,6 +451,12 @@ function showNextPage() {
       "要前往下一話嗎？",
       "前往下一話",
       nextChapter
+    );
+  } else if (parentIndex) {
+    showChapterPrompt(
+      "已達最新話，是否返回目錄？",
+      "返回目錄",
+      parentIndex
     );
   }
 }

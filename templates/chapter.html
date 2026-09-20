@@ -618,6 +618,14 @@ document.addEventListener("keydown", (event) => {
       button.click();
     }
   }
+
+  if (event.key === "Escape") {
+    const prompt = document.getElementById("chapter-prompt");
+
+    if (prompt.style.display === "block") {
+      prompt.style.display = "none";
+    }
+  }
 });
 
 function showNextPage() {

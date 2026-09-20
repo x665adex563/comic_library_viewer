@@ -72,6 +72,9 @@ def render_chapter_template(
     previous_link,
     next_link,
     parent_link,
+    viewer_path,
+    comic_title,
+    is_series,
 ):
     template = load_chapter_template()
 
@@ -99,6 +102,9 @@ def render_chapter_template(
         .replace("{{NEXT_CHAPTER}}", next_chapter_html)
         .replace("{{NEXT_CHAPTER_URL}}", next_link)
         .replace("{{PARENT_INDEX_URL}}", parent_link)
+        .replace("{{VIEWER_PATH}}", json.dumps(viewer_path))
+        .replace("{{COMIC_TITLE}}", json.dumps(comic_title))
+        .replace("{{IS_SERIES}}", json.dumps(is_series))
     )
 
 # --------------------
@@ -198,7 +204,9 @@ def generate_chapter_html(
     viewer_folder,
     parent_index_html,
     previous_item,
-    next_item
+    next_item,
+    library_root,
+    is_series,
 ):
     images = sorted(
         [f for f in os.listdir(folder) if f.lower().endswith(IMAGE_EXTS)],
@@ -207,6 +215,12 @@ def generate_chapter_html(
 
     folder_name = os.path.basename(folder)
     html_file = os.path.join(viewer_folder, f"{folder_name}.html")
+
+    comic_title = (
+        os.path.splitext(os.path.basename(parent_index_html))[0]
+        if is_series
+        else folder_name
+    )
 
     previous_link = ""
     next_link = ""
@@ -254,6 +268,9 @@ def generate_chapter_html(
         previous_link,
         next_link,
         parent_link,
+        library_root,
+        comic_title,
+        is_series,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:
@@ -265,7 +282,14 @@ def generate_chapter_html(
 # --------------------
 # 目錄頁
 # --------------------
-def generate_index_html(folder, viewer_folder, index_name, parent_index_html=None, all_items=None):
+def generate_index_html(
+    folder,
+    viewer_folder,
+    index_name,
+    parent_index_html=None,
+    all_items=None,
+    library_root=None
+):
     if all_items is None:
         all_items = []
 
@@ -307,12 +331,15 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
                 next_item = chapter_items[chapter_index + 1]
 
         if item.type == "image":
+            is_series = len(chapter_items) > 1
             chapter_html = generate_chapter_html(
                 d_path,
                 viewer_folder,
                 html_file,
                 previous_item,
                 next_item,
+                library_root,
+                is_series,
             )
 
             link = quote(os.path.basename(chapter_html))
@@ -332,7 +359,8 @@ def generate_index_html(folder, viewer_folder, index_name, parent_index_html=Non
                 viewer_folder,
                 sub_index,
                 html_file,
-                all_items
+                all_items,
+                library_root,
             )
 
             item.link = quote(sub_index)

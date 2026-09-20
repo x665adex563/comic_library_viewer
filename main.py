@@ -21,7 +21,12 @@ def main():
     os.makedirs(viewer, exist_ok=True)
 
     index_name = f"{comic_name}.html"
-    generate_index_html(folder, viewer, index_name)
+    generate_index_html(
+        folder,
+        viewer,
+        index_name,
+        library_root=folder
+    )
 
     webbrowser.open(os.path.join(viewer, index_name))
 

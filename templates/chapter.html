@@ -144,6 +144,20 @@ img {
   opacity: 1;
 }
 
+#reading-history-panel {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 180px;
+  width: 300px;
+  min-height: 500px;
+  padding: 12px;
+  background: #222;
+  color: #fff;
+  border-radius: 8px;
+  z-index: 1001;
+}
+
 #chapter-prompt {
   display: none;
 
@@ -210,6 +224,10 @@ body.single-page img.current-page {
   const previousChapter = "{{PREVIOUS_CHAPTER_URL}}";
   const nextChapter = "{{NEXT_CHAPTER_URL}}";
   const parentIndex = "{{PARENT_INDEX_URL}}";
+  const viewerPath = {{VIEWER_PATH}};
+  const comicTitle = {{COMIC_TITLE}};
+  const isSeries = {{IS_SERIES}};
+  const READING_HISTORY_KEY = `readingHistory:${viewerPath}`;
 </script>
 
 <div id="page-navigation">
@@ -231,6 +249,8 @@ body.single-page img.current-page {
 <div id="reading-mode">
   <button id="reading-mode-button"></button>
   <button id="wheel-page-button"></button>
+  <button id="reading-history-button">閱讀紀錄</button>
+  <div id="reading-history-panel"></div>
 </div>
 
 <div id="chapter-prompt">
@@ -248,10 +268,45 @@ const images = document.querySelectorAll("img");
 const button = document.getElementById("reading-mode-button");
 const wheelPageButton = document.getElementById("wheel-page-button");
 const pageSelect = document.getElementById("page-select");
+const readingHistoryButton = document.getElementById("reading-history-button");
+const readingHistoryPanel = document.getElementById("reading-history-panel");
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
 let uiHideTimer;
+let currentReadingPage = 0;
+
+readingHistoryButton.addEventListener("click", () => {
+  const isVisible = readingHistoryPanel.style.display === "block";
+
+  if (isVisible) {
+    readingHistoryPanel.style.display = "none";
+    return;
+  }
+
+  const history = JSON.parse(
+    localStorage.getItem(READING_HISTORY_KEY) || "[]"
+  );
+
+  readingHistoryPanel.innerHTML = history.length
+    ? history.map((item, index) => `
+        <div class="reading-history-item" data-index="${index}">
+          ${item.comicTitle}${item.isSeries ? ` — 第 ${item.title} 話` : ""}
+        </div>
+      `).join("")
+    : "目前沒有閱讀紀錄";
+
+  document.querySelectorAll(".reading-history-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      const index = Number(item.dataset.index);
+      const record = history[index];
+
+      location.href = `${record.url}?page=${record.page}`;
+    });
+  });
+
+  readingHistoryPanel.style.display = "block";
+});
 
 function updatePageSelect() {
   pageSelect.innerHTML = "";
@@ -276,6 +331,60 @@ function updateCurrentPageSelect() {
   const currentIndex = Array.from(images).indexOf(currentPage);
 
   pageSelect.value = currentIndex;
+  currentReadingPage = currentIndex;
+}
+
+function restoreReadingHistory() {
+  const history = JSON.parse(
+    localStorage.getItem(READING_HISTORY_KEY) || "[]"
+  );
+
+  const record = history.find((item) => item.url === location.href);
+
+  if (!record) {
+    return;
+  }
+
+  const page = Math.min(record.page, images.length - 1);
+
+  images.forEach((image) => {
+    image.classList.remove("current-page");
+  });
+
+  images[page].classList.add("current-page");
+  currentReadingPage = page;
+}
+
+function saveReadingHistory() {
+  const history = JSON.parse(
+    localStorage.getItem(READING_HISTORY_KEY) || "[]"
+  );
+
+  const currentIndex = currentReadingPage;
+
+  const existingIndex = history.findIndex(
+    (item) => item.comicTitle === comicTitle
+  );
+
+  const record = {
+    title: document.title,
+    comicTitle: comicTitle,
+    isSeries: isSeries,
+    url: location.href,
+    page: currentIndex,
+    updatedAt: Date.now()
+  };
+
+  if (existingIndex >= 0) {
+    history.splice(existingIndex, 1);
+  }
+
+  history.unshift(record);
+
+  localStorage.setItem(
+    READING_HISTORY_KEY,
+    JSON.stringify(history.slice(0, 10))
+  );
 }
 
 function showUI() {
@@ -500,7 +609,20 @@ function showPreviousPage() {
 updatePageSelect();
 updateReadingMode();
 
+const params = new URLSearchParams(location.search);
+const page = Number(params.get("page"));
+
+if (!Number.isNaN(page) && page >= 0 && page < images.length) {
+  images.forEach((image) => {
+    image.classList.remove("current-page");
+  });
+
+  images[page].classList.add("current-page");
+  currentReadingPage = page;
+}
+
 hideUI();
+saveReadingHistory();
 </script>
 </body>
 </html>

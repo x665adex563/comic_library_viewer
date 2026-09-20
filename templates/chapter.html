@@ -207,6 +207,7 @@ body.single-page img.current-page {
 {{BACK_BUTTON}}
 
 <script>
+  const previousChapter = "{{PREVIOUS_CHAPTER_URL}}";
   const nextChapter = "{{NEXT_CHAPTER_URL}}";
 </script>
 
@@ -466,6 +467,15 @@ function showPreviousPage() {
     currentPage.classList.remove("current-page");
     images[currentIndex - 1].classList.add("current-page");
     updateCurrentPageSelect();
+    return;
+  }
+
+  if (previousChapter) {
+    showChapterPrompt(
+      "要前往上一話嗎？",
+      "前往上一話",
+      previousChapter
+    );
   }
 }
 

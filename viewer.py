@@ -94,6 +94,7 @@ def render_chapter_template(
         .replace("{{BACK_BUTTON}}", back_button_html)
         .replace("{{IMAGES}}", images_html)
         .replace("{{PREVIOUS_CHAPTER}}", previous_chapter_html)
+        .replace("{{PREVIOUS_CHAPTER_URL}}", previous_link)
         .replace("{{NEXT_CHAPTER}}", next_chapter_html)
         .replace("{{NEXT_CHAPTER_URL}}", next_link)
     )

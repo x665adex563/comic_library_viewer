@@ -24,7 +24,7 @@ body.single-page img.current-page {
   max-width: var(--single-page-max-width);
   margin: auto;
   transform: translateY(
-    calc((var(--single-page-position) - 50) * 1vh)
+    calc((50 - var(--single-page-position)) * 1vh)
   );
 }
 
@@ -498,6 +498,9 @@ const singlePagePositionControl =
 const singlePagePositionValue =
   document.getElementById("single-page-position-value");
 
+const singlePagePositionTop =
+  document.getElementById("single-page-position-top");
+
 const singlePageMaxWidthControl =
   document.getElementById("single-page-max-width");
 
@@ -512,8 +515,30 @@ const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
 let singlePageMaxWidth =
   Number(localStorage.getItem(SINGLE_PAGE_MAX_WIDTH_KEY)) || 100;
 
+singlePagePositionTop.addEventListener("click", () => {
+  singlePagePosition = 100;
+
+  singlePagePositionValue.value = 100;
+  singlePagePositionControl.value = 100;
+
+  localStorage.setItem(
+    SINGLE_PAGE_POSITION_KEY,
+    singlePagePosition
+  );
+
+  document.body.style.setProperty(
+    "--single-page-position",
+    singlePagePosition
+  );
+});
+
 singlePageMaxWidthControl.value = singlePageMaxWidth;
 singlePageMaxWidthValue.value = singlePageMaxWidth;
+
+document.body.style.setProperty(
+  "--single-page-max-width",
+  `${singlePageMaxWidth}vw`
+);
 
 singlePageMaxWidthControl.addEventListener("input", () => {
   singlePageMaxWidth = Number(singlePageMaxWidthControl.value);
@@ -575,6 +600,7 @@ singlePageMaxWidthValue.addEventListener("input", () => {
 });
 
 singlePagePositionControl.value = singlePagePosition;
+singlePagePositionValue.value = singlePagePosition;
 
 singlePagePositionControl.addEventListener("input", () => {
   singlePagePosition = Number(singlePagePositionControl.value);
@@ -713,6 +739,12 @@ function updateCurrentPageSelect() {
 
   pageSelect.value = currentIndex;
   currentReadingPage = currentIndex;
+
+  window.history.replaceState(
+    null,
+    "",
+    `?page=${currentIndex}`
+  );
 
   const history = JSON.parse(
     localStorage.getItem(READING_HISTORY_KEY) || "[]"

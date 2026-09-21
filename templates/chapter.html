@@ -45,9 +45,29 @@ body.single-page img.current-page {
 #single-page-position-control {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
+  justify-content: center;
+  gap: 20px;
   min-height: 120px;
+}
+
+#single-page-position-value-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#single-page-position-value-control label {
+  height: 29px;
+  display: flex;
+  align-items: center;
+}
+
+#single-page-position-top {
+  height: 29px;
+  padding: 4px 14px !important;
+  font-size: 16px !important;
+  box-sizing: border-box;
 }
 
 #single-page-position {
@@ -56,6 +76,7 @@ body.single-page img.current-page {
   width: 8px;
   height: 120px;
   accent-color: #444;
+  transform: translateY(-3px);
 }
 
 #single-page-position-value {
@@ -68,6 +89,7 @@ body.single-page img.current-page {
   border-radius: 4px;
   padding: 4px;
   text-align: center;
+  transform: translateY(3px);
 }
 
 #single-page-max-width-control {
@@ -390,15 +412,19 @@ img {
 
   <div id="settings-panel">
     <div id="single-page-position-control">
-      <label for="single-page-position">圖片垂直位置</label>
+      <div id="single-page-position-value-control">
+        <label for="single-page-position">圖片垂直位置</label>
 
-      <input
-        id="single-page-position-value"
-        type="number"
-        min="0"
-        max="100"
-        value="50"
-      >
+        <input
+          id="single-page-position-value"
+          type="number"
+          min="0"
+          max="100"
+          value="50"
+        >
+
+        <button id="single-page-position-top">置頂</button>
+      </div>
 
       <input
         id="single-page-position"

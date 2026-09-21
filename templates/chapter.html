@@ -303,6 +303,12 @@ img {
   color: #fff;
   border-radius: 8px;
   z-index: 1001;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+#reading-history-panel:hover {
+  opacity: 1;
 }
 
 .reading-history-item {
@@ -472,9 +478,9 @@ img {
       >
     </div>
   </div>
-</div>
 
-<div id="reading-history-panel"></div>
+  <div id="reading-history-panel"></div>
+</div>
 
 <div id="chapter-prompt">
   <div id="chapter-prompt-message"></div>

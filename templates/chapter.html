@@ -21,10 +21,11 @@ body.single-page img {
 
 body.single-page img.current-page {
   display: block;
+  max-width: var(--single-page-max-width);
   margin: auto;
-  transform: translateY(
-    calc((var(--single-page-position) - 50) * 1vh)
-  );
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 #settings-panel {
@@ -44,9 +45,41 @@ body.single-page img.current-page {
 #single-page-position-control {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
+  justify-content: center;
+  gap: 20px;
   min-height: 120px;
+}
+
+#single-page-position-value-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#single-page-position-value-control label {
+  height: 29px;
+  display: flex;
+  align-items: center;
+}
+
+#single-page-position-top {
+  height: 29px;
+  font-size: 16px !important;
+  box-sizing: border-box;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#single-page-position-top:hover {
+  background: #555;
 }
 
 #single-page-position {
@@ -55,10 +88,11 @@ body.single-page img.current-page {
   width: 8px;
   height: 120px;
   accent-color: #444;
+  transform: translateY(-3px);
 }
 
 #single-page-position-value {
-  width: 45px;
+  width: 50px;
   font-size: 16px;
   box-sizing: border-box;
   background: #444;
@@ -67,6 +101,57 @@ body.single-page img.current-page {
   border-radius: 4px;
   padding: 4px;
   text-align: center;
+  transform: translateY(3px);
+}
+
+#single-page-max-width-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 60px;
+}
+
+#single-page-max-width-value-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#single-page-max-width-value {
+  width: 50px;
+  font-size: 16px;
+  box-sizing: border-box;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+  text-align: center;
+}
+
+#single-page-max-width-full {
+  height: 29px;
+  font-size: 16px !important;
+  box-sizing: border-box;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#single-page-max-width-full:hover {
+  background: #555;
+}
+
+#single-page-max-width {
+  width: 100%;
+  accent-color: #444;
 }
 
 img {
@@ -339,15 +424,19 @@ img {
 
   <div id="settings-panel">
     <div id="single-page-position-control">
-      <label for="single-page-position">圖片垂直位置</label>
+      <div id="single-page-position-value-control">
+        <label for="single-page-position">圖片垂直位置</label>
 
-      <input
-        id="single-page-position-value"
-        type="number"
-        min="0"
-        max="100"
-        value="50"
-      >
+        <input
+          id="single-page-position-value"
+          type="number"
+          min="0"
+          max="100"
+          value="50"
+        >
+
+        <button id="single-page-position-top">置頂</button>
+      </div>
 
       <input
         id="single-page-position"
@@ -356,6 +445,30 @@ img {
         max="100"
         value="50"
         orient="vertical"
+      >
+    </div>
+
+    <div id="single-page-max-width-control">
+      <label for="single-page-max-width">圖片最大寬度</label>
+
+      <div id="single-page-max-width-value-control">
+        <input
+          id="single-page-max-width-value"
+          type="number"
+          min="10"
+          max="100"
+          value="100"
+        >
+
+        <button id="single-page-max-width-full">滿版</button>
+      </div>
+
+      <input
+        id="single-page-max-width"
+        type="range"
+        min="10"
+        max="100"
+        value="100"
       >
     </div>
   </div>
@@ -397,7 +510,127 @@ const singlePagePositionControl =
 const singlePagePositionValue =
   document.getElementById("single-page-position-value");
 
+const singlePagePositionTop =
+  document.getElementById("single-page-position-top");
+
+const singlePageMaxWidthControl =
+  document.getElementById("single-page-max-width");
+
+const singlePageMaxWidthValue =
+  document.getElementById("single-page-max-width-value");
+
+const singlePageMaxWidthFull =
+  document.getElementById("single-page-max-width-full");
+
+const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
+
+let singlePageMaxWidth =
+  Number(localStorage.getItem(SINGLE_PAGE_MAX_WIDTH_KEY)) || 100;
+
+function updateSinglePagePosition() {
+  const currentPage = document.querySelector("img.current-page");
+
+  if (!currentPage) {
+    return;
+  }
+
+  const maxOffset =
+    currentPage.offsetHeight - window.innerHeight;
+
+  const offset =
+    maxOffset * (1 - singlePagePosition / 100);
+
+  currentPage.style.top = `${-offset}px`;
+}
+
+singlePagePositionTop.addEventListener("click", () => {
+  singlePagePosition = 100;
+
+  singlePagePositionValue.value = 100;
+  singlePagePositionControl.value = 100;
+
+  localStorage.setItem(
+    SINGLE_PAGE_POSITION_KEY,
+    singlePagePosition
+  );
+
+  document.body.style.setProperty(
+    "--single-page-position",
+    singlePagePosition
+  );
+
+  updateSinglePagePosition();
+});
+
+singlePageMaxWidthControl.value = singlePageMaxWidth;
+singlePageMaxWidthValue.value = singlePageMaxWidth;
+
+document.body.style.setProperty(
+  "--single-page-max-width",
+  `${singlePageMaxWidth}vw`
+);
+
+singlePageMaxWidthControl.addEventListener("input", () => {
+  singlePageMaxWidth = Number(singlePageMaxWidthControl.value);
+
+  singlePageMaxWidthValue.value = singlePageMaxWidth;
+
+  localStorage.setItem(
+    SINGLE_PAGE_MAX_WIDTH_KEY,
+    singlePageMaxWidth
+  );
+
+  document.body.style.setProperty(
+    "--single-page-max-width",
+    `${singlePageMaxWidth}vw`
+  );
+});
+
+singlePageMaxWidthFull.addEventListener("click", () => {
+  singlePageMaxWidth = 100;
+
+  singlePageMaxWidthValue.value = 100;
+  singlePageMaxWidthControl.value = 100;
+
+  localStorage.setItem(
+    SINGLE_PAGE_MAX_WIDTH_KEY,
+    singlePageMaxWidth
+  );
+
+  document.body.style.setProperty(
+    "--single-page-max-width",
+    "100vw"
+  );
+});
+
+singlePageMaxWidthValue.addEventListener("input", () => {
+  let value = Number(singlePageMaxWidthValue.value);
+
+  if (value < 10) {
+    value = 10;
+  }
+
+  if (value > 100) {
+    value = 100;
+  }
+
+  singlePageMaxWidth = value;
+  singlePageMaxWidthValue.value = value;
+  singlePageMaxWidthControl.value = value;
+
+  localStorage.setItem(
+    SINGLE_PAGE_MAX_WIDTH_KEY,
+    singlePageMaxWidth
+  );
+
+  document.body.style.setProperty(
+    "--single-page-max-width",
+    `${singlePageMaxWidth}vw`
+  );
+});
+
 singlePagePositionControl.value = singlePagePosition;
+singlePagePositionValue.value = singlePagePosition;
 
 singlePagePositionControl.addEventListener("input", () => {
   singlePagePosition = Number(singlePagePositionControl.value);
@@ -413,6 +646,8 @@ singlePagePositionControl.addEventListener("input", () => {
     "--single-page-position",
     singlePagePosition
   );
+
+  updateSinglePagePosition();
 });
 
 singlePagePositionValue.addEventListener("input", () => {
@@ -439,6 +674,8 @@ singlePagePositionValue.addEventListener("input", () => {
     "--single-page-position",
     singlePagePosition
   );
+
+  updateSinglePagePosition();
 });
 
 readingHistoryButton.addEventListener("click", () => {
@@ -536,6 +773,12 @@ function updateCurrentPageSelect() {
 
   pageSelect.value = currentIndex;
   currentReadingPage = currentIndex;
+
+  window.history.replaceState(
+    null,
+    "",
+    `?page=${currentIndex}`
+  );
 
   const history = JSON.parse(
     localStorage.getItem(READING_HISTORY_KEY) || "[]"
@@ -836,6 +1079,7 @@ function showPreviousPage() {
 
 updatePageSelect();
 updateReadingMode();
+updateSinglePagePosition();
 
 const params = new URLSearchParams(location.search);
 const page = Number(params.get("page"));

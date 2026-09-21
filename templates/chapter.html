@@ -460,7 +460,7 @@ img {
   <div id="settings-panel">
     <button id="wheel-page-button">
       <span>滾輪翻頁</span>
-      <span>[ 開 ]</span>
+      <span>[ <span id="wheel-page-status">開</span> ]</span>
     </button>
 
     <div id="single-page-position-control">
@@ -929,7 +929,7 @@ function updateReadingMode() {
 
     button.textContent = "閱覽模式：直立";
   }
-  wheelPageButton.querySelector("span:last-child").textContent =
+  document.getElementById("wheel-page-status").textContent =
     wheelPageEnabled ? "開" : "關";
 }
 

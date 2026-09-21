@@ -21,6 +21,7 @@ body.single-page img {
 
 body.single-page img.current-page {
   display: block;
+  max-width: var(--single-page-max-width);
   margin: auto;
   transform: translateY(
     calc((var(--single-page-position) - 50) * 1vh)
@@ -58,7 +59,7 @@ body.single-page img.current-page {
 }
 
 #single-page-position-value {
-  width: 45px;
+  width: 50px;
   font-size: 16px;
   box-sizing: border-box;
   background: #444;
@@ -67,6 +68,56 @@ body.single-page img.current-page {
   border-radius: 4px;
   padding: 4px;
   text-align: center;
+}
+
+#single-page-max-width-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 60px;
+}
+
+#single-page-max-width-value-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#single-page-max-width-value {
+  width: 50px;
+  font-size: 16px;
+  box-sizing: border-box;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+  text-align: center;
+}
+
+#single-page-max-width-full {
+  height: 29px;
+  font-size: 16px !important;
+  box-sizing: border-box;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#single-page-max-width-full:hover {
+  background: #555;
+}
+
+#single-page-max-width {
+  width: 100%;
+  accent-color: #444;
 }
 
 img {
@@ -358,6 +409,30 @@ img {
         orient="vertical"
       >
     </div>
+
+    <div id="single-page-max-width-control">
+      <label for="single-page-max-width">圖片最大寬度</label>
+
+      <div id="single-page-max-width-value-control">
+        <input
+          id="single-page-max-width-value"
+          type="number"
+          min="10"
+          max="100"
+          value="100"
+        >
+
+        <button id="single-page-max-width-full">滿版</button>
+      </div>
+
+      <input
+        id="single-page-max-width"
+        type="range"
+        min="10"
+        max="100"
+        value="100"
+      >
+    </div>
   </div>
 </div>
 
@@ -396,6 +471,82 @@ const singlePagePositionControl =
 
 const singlePagePositionValue =
   document.getElementById("single-page-position-value");
+
+const singlePageMaxWidthControl =
+  document.getElementById("single-page-max-width");
+
+const singlePageMaxWidthValue =
+  document.getElementById("single-page-max-width-value");
+
+const singlePageMaxWidthFull =
+  document.getElementById("single-page-max-width-full");
+
+const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
+
+let singlePageMaxWidth =
+  Number(localStorage.getItem(SINGLE_PAGE_MAX_WIDTH_KEY)) || 100;
+
+singlePageMaxWidthControl.value = singlePageMaxWidth;
+singlePageMaxWidthValue.value = singlePageMaxWidth;
+
+singlePageMaxWidthControl.addEventListener("input", () => {
+  singlePageMaxWidth = Number(singlePageMaxWidthControl.value);
+
+  singlePageMaxWidthValue.value = singlePageMaxWidth;
+
+  localStorage.setItem(
+    SINGLE_PAGE_MAX_WIDTH_KEY,
+    singlePageMaxWidth
+  );
+
+  document.body.style.setProperty(
+    "--single-page-max-width",
+    `${singlePageMaxWidth}vw`
+  );
+});
+
+singlePageMaxWidthFull.addEventListener("click", () => {
+  singlePageMaxWidth = 100;
+
+  singlePageMaxWidthValue.value = 100;
+  singlePageMaxWidthControl.value = 100;
+
+  localStorage.setItem(
+    SINGLE_PAGE_MAX_WIDTH_KEY,
+    singlePageMaxWidth
+  );
+
+  document.body.style.setProperty(
+    "--single-page-max-width",
+    "100vw"
+  );
+});
+
+singlePageMaxWidthValue.addEventListener("input", () => {
+  let value = Number(singlePageMaxWidthValue.value);
+
+  if (value < 10) {
+    value = 10;
+  }
+
+  if (value > 100) {
+    value = 100;
+  }
+
+  singlePageMaxWidth = value;
+  singlePageMaxWidthValue.value = value;
+  singlePageMaxWidthControl.value = value;
+
+  localStorage.setItem(
+    SINGLE_PAGE_MAX_WIDTH_KEY,
+    singlePageMaxWidth
+  );
+
+  document.body.style.setProperty(
+    "--single-page-max-width",
+    `${singlePageMaxWidth}vw`
+  );
+});
 
 singlePagePositionControl.value = singlePagePosition;
 

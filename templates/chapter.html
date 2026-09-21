@@ -33,7 +33,7 @@ body.single-page img.current-page {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 200px;
+  width: 100%;
   padding: 16px;
   box-sizing: border-box;
   background: #222;
@@ -43,17 +43,24 @@ body.single-page img.current-page {
 }
 
 #single-page-position-control {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 1px;
+  row-gap: 8px;
   min-height: 120px;
+  justify-content: center;
+  justify-items: center;
+}
+
+#single-page-position-control > label {
+  grid-column: 1 / -1;
 }
 
 #single-page-position-value-control {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -430,9 +437,9 @@ img {
 
   <div id="settings-panel">
     <div id="single-page-position-control">
-      <div id="single-page-position-value-control">
-        <label for="single-page-position">圖片垂直位置</label>
+      <label for="single-page-position">圖片垂直位置</label>
 
+      <div id="single-page-position-value-control">
         <input
           id="single-page-position-value"
           type="number"

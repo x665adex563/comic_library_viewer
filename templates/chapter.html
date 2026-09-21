@@ -23,9 +23,9 @@ body.single-page img.current-page {
   display: block;
   max-width: var(--single-page-max-width);
   margin: auto;
-  transform: translateY(
-    calc((50 - var(--single-page-position)) * 1vh)
-  );
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 #settings-panel {
@@ -515,6 +515,22 @@ const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
 let singlePageMaxWidth =
   Number(localStorage.getItem(SINGLE_PAGE_MAX_WIDTH_KEY)) || 100;
 
+function updateSinglePagePosition() {
+  const currentPage = document.querySelector("img.current-page");
+
+  if (!currentPage) {
+    return;
+  }
+
+  const maxOffset =
+    currentPage.offsetHeight - window.innerHeight;
+
+  const offset =
+    maxOffset * (1 - singlePagePosition / 100);
+
+  currentPage.style.top = `${-offset}px`;
+}
+
 singlePagePositionTop.addEventListener("click", () => {
   singlePagePosition = 100;
 
@@ -530,6 +546,8 @@ singlePagePositionTop.addEventListener("click", () => {
     "--single-page-position",
     singlePagePosition
   );
+
+  updateSinglePagePosition();
 });
 
 singlePageMaxWidthControl.value = singlePageMaxWidth;
@@ -616,6 +634,8 @@ singlePagePositionControl.addEventListener("input", () => {
     "--single-page-position",
     singlePagePosition
   );
+
+  updateSinglePagePosition();
 });
 
 singlePagePositionValue.addEventListener("input", () => {
@@ -642,6 +662,8 @@ singlePagePositionValue.addEventListener("input", () => {
     "--single-page-position",
     singlePagePosition
   );
+
+  updateSinglePagePosition();
 });
 
 readingHistoryButton.addEventListener("click", () => {
@@ -1045,6 +1067,7 @@ function showPreviousPage() {
 
 updatePageSelect();
 updateReadingMode();
+updateSinglePagePosition();
 
 const params = new URLSearchParams(location.search);
 const page = Number(params.get("page"));

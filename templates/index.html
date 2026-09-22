@@ -12,17 +12,7 @@ body {
   font-family: sans-serif;
 }
 
-.reading-history-chapter {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 3px 8px;
-  background: #444;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.reading-history-title:hover,
-.reading-history-chapter:hover {
+.reading-history-title:hover {
   text-decoration: underline;
   opacity: 0.7;
   cursor: pointer;
@@ -128,7 +118,7 @@ readingHistoryButton.addEventListener("click", () => {
             <div>
               <span class="reading-history-title">${item.comicTitle}</span>
               ${item.isSeries
-                ? `<span class="reading-history-chapter">第 ${item.title} 話</span>`
+                ? `<span class="reading-history-chapter inline-block ml-2 py-[3px] px-2 bg-[#444] rounded-[5px] cursor-pointer hover:underline hover:opacity-70">第 ${item.title} 話</span>`
                 : ""}
             </div>
             <button class="reading-history-delete hover:opacity-70">×</button>

@@ -188,7 +188,7 @@ def render_item_html(item):
     template = load_item_template()
 
     thumb_html = (
-        f'<img class="thumb-img" src="{item.thumb}">'
+        f'<img class="w-full aspect-[3/4] object-cover" src="{item.thumb}">'
         if item.type == "image"
         else '<div class="folder-thumb">📁</div>'
     )

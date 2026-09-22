@@ -105,25 +105,6 @@ a,a:visited,a:hover,a:active {
   background:#444;
 }
 
-#home {
-  display:none;
-  position:fixed;
-  top:20px;
-  left:20px;
-  z-index:200;
-}
-
-#home a {
-  display:block;
-  padding:50px 50px;
-  background:#000;
-  color:#fff;
-  border-radius:8px;
-  font-size:20px;
-  opacity:0.4;
-  text-decoration:none;
-}
-
 #toTop {
   position:fixed;
   bottom:20px;
@@ -149,8 +130,12 @@ a,a:visited,a:hover,a:active {
 
     {{BACK_BUTTON}}
 
-<div id="home">
-  <a href="#" onclick="goHome()">🏠</a>
+<div id="home" class="hidden fixed top-5 left-5 z-[200]">
+  <a
+    href="#"
+    onclick="goHome()"
+    class="block py-[50px] px-[50px] bg-black text-white rounded-lg text-[20px] opacity-40 no-underline"
+  >🏠</a>
 </div>
 
 <input

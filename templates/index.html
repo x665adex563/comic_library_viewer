@@ -104,25 +104,6 @@ a,a:visited,a:hover,a:active {
 #suggestions div:hover {
   background:#444;
 }
-
-#toTop {
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  width:80px;
-  height:80px;
-  background:#111;
-  color:#524d5e;
-  border:none;
-  border-radius:12px;
-  font-size:28px;
-}
-
-#toTop:hover {
-  background: rgba(255, 255, 255, 0.3);
-  color: rgba(0,0,0,0.35);
-  cursor:pointer;
-}
 </style>
 </head>
 
@@ -154,7 +135,11 @@ a,a:visited,a:hover,a:active {
 {{ITEMS}}
 </ul>
 
-<button id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<button
+  id="toTop"
+  class="fixed bottom-5 right-5 w-20 h-20 bg-[#111] text-[#524d5e] border-none rounded-[12px] text-[28px] hover:bg-[rgba(255,255,255,0.3)] hover:text-[rgba(0,0,0,0.35)] hover:cursor-pointer"
+  onclick="window.scrollTo({top:0,behavior:'smooth'})"
+>↑</button>
 
 <script>
 const all = "{{ALL_ITEMS}}";

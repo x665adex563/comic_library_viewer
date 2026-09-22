@@ -17,31 +17,6 @@ body {
   opacity: 0.7;
   cursor: pointer;
 }
-
-#suggestions {
-  margin:0 auto;
-  width:280px;
-  max-height:150px;
-  overflow-y:auto;
-  background:#222;
-  color:#fff;
-  border-radius:6px;
-  display:none;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:500;
-  font-size:14px;
-}
-
-#suggestions div {
-  padding:6px 10px;
-  cursor:pointer;
-}
-
-#suggestions div:hover {
-  background:#444;
-}
 </style>
 </head>
 
@@ -74,7 +49,11 @@ body {
   style="display: none;"
 ></div>
 
-<div id="suggestions"></div>
+<div
+  id="suggestions"
+  class="mx-auto w-[280px] max-h-[150px] overflow-y-auto bg-[#222] text-white rounded-[6px] absolute left-1/2 -translate-x-1/2 z-[500] text-[14px]"
+  style="display: none;"
+></div>
 
 <ul id="list" class="list-none p-0 flex flex-wrap gap-5 my-5 mx-auto max-w-[1180px]">
 {{ITEMS}}
@@ -191,6 +170,7 @@ function updateSuggestions() {
 
     matches.forEach(m => {
         const div = document.createElement('div');
+        div.className = 'py-[6px] px-[10px] cursor-pointer hover:bg-[#444]';
 
         div.textContent = m.name;
 

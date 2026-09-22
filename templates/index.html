@@ -12,16 +12,6 @@ body {
   font-family: sans-serif;
 }
 
-.reading-history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border: 1px solid #555;
-  border-radius: 6px;
-  margin-bottom: 8px;
-}
-
 .reading-history-delete:hover {
   opacity: 0.7;
 }
@@ -135,7 +125,10 @@ readingHistoryButton.addEventListener("click", () => {
 
   readingHistoryPanel.innerHTML = history.length
     ? history.map((item, index) => `
-          <div class="reading-history-item" data-index="${index}">
+          <div
+            class="reading-history-item flex justify-between items-center p-[10px] border border-[#555] rounded-md mb-2"
+            data-index="${index}"
+          >
             <div>
               <span class="reading-history-title">${item.comicTitle}</span>
               ${item.isSeries

@@ -12,23 +12,6 @@ body {
   font-family: sans-serif;
 }
 
-#reading-history-panel {
-  display: none;
-  position: absolute;
-  top: 145px;
-  left: calc(50% + 165px);
-  width: 300px;
-  height: 523px;
-  padding: 12px;
-  background: #222;
-  color: #fff;
-  border-radius: 8px;
-  z-index: 1001;
-  opacity: 1;
-  transition: opacity 0.2s ease;
-  overflow-y: auto;
-}
-
 .reading-history-item {
   display: flex;
   justify-content: space-between;
@@ -109,7 +92,11 @@ body {
   class="absolute top-[100px] left-[calc(50%+165px)] h-[34px] box-border px-3 py-2 bg-[#222] text-white border border-[#444] rounded-md cursor-pointer leading-4 text-[14px]"
 >閱讀紀錄</button>
 
-<div id="reading-history-panel"></div>
+<div
+  id="reading-history-panel"
+  class="absolute top-[145px] left-[calc(50%+165px)] w-[300px] h-[523px] p-3 bg-[#222] text-white rounded-lg z-[1001] opacity-100 transition-opacity duration-200 overflow-y-auto"
+  style="display: none;"
+></div>
 
 <div id="suggestions"></div>
 

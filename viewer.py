@@ -52,7 +52,8 @@ def render_index_template(
     items_html,
     back_button_html,
     all_items,
-    home_page
+    home_page,
+    viewer_path,
 ):
     template = load_index_template()
 
@@ -63,6 +64,7 @@ def render_index_template(
         .replace("{{BACK_BUTTON}}", back_button_html)
         .replace('"{{ALL_ITEMS}}"', all_items)
         .replace("{{HOME_PAGE}}", home_page)
+        .replace("{{VIEWER_PATH}}", json.dumps(viewer_path))
     )
 
 def render_chapter_template(
@@ -380,7 +382,8 @@ def generate_index_html(
         items_html,
         back_button_html,
         all_js,
-        index_name
+        index_name,
+        library_root,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

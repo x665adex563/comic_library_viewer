@@ -178,6 +178,7 @@ img {
   position: fixed;
   top: 20px;
   left: 20px;
+  z-index: 1000;
 }
 
 #back a {
@@ -327,7 +328,7 @@ img {
   top: 20px;
   right: 180px;
   width: 300px;
-  min-height: 500px;
+  height: 523px;
   padding: 12px;
   background: #222;
   color: #fff;
@@ -335,6 +336,7 @@ img {
   z-index: 1001;
   opacity: 0.4;
   transition: opacity 0.2s ease;
+  overflow-y: auto;
 }
 
 #reading-history-panel:hover {
@@ -956,6 +958,12 @@ pageSelect.addEventListener("change", () => {
 });
 
 images.forEach((image) => {
+  image.addEventListener("load", () => {
+    if (image.classList.contains("current-page")) {
+      updateSinglePagePosition();
+    }
+  });
+
   image.addEventListener("click", () => {
     if (readingMode === "single") {
       showNextPage();
@@ -1009,6 +1017,10 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("wheel", (event) => {
+  if (readingHistoryPanel.contains(event.target)) {
+    return;
+  }
+
   if (readingMode === "single" && wheelPageEnabled) {
     if (event.deltaY > 0) {
       showNextPage();
@@ -1072,6 +1084,7 @@ function showNextPage() {
   if (currentIndex < images.length - 1) {
     currentPage.classList.remove("current-page");
     images[currentIndex + 1].classList.add("current-page");
+    updateSinglePagePosition();
     updateCurrentPageSelect();
     return;
   }
@@ -1103,6 +1116,7 @@ function showPreviousPage() {
   if (currentIndex > 0) {
     currentPage.classList.remove("current-page");
     images[currentIndex - 1].classList.add("current-page");
+    updateSinglePagePosition();
     updateCurrentPageSelect();
     return;
   }

@@ -12,11 +12,6 @@ body {
   font-family: sans-serif;
 }
 
-a,a:visited,a:hover,a:active {
-  color: #fff;
-  text-decoration: none;
-}
-
 #reading-history-button {
   position: absolute;
   top: 100px;
@@ -280,13 +275,13 @@ function search() {
         let thumb = '';
 
         if(i.type === 'image') {
-            thumb = '<img class="thumb-img" src="' + i.thumb + '">';
+            thumb = '<img class="w-full aspect-[3/4] object-cover" src="' + i.thumb + '">';
         } else {
             thumb = '<div class="w-full h-[32px] aspect-[3/4] bg-[#111] flex items-center justify-center text-[24px]">📁</div>';
         }
 
         ul.innerHTML +=
-            '<li><a href="' +
+            '<li class="w-[200px] bg-[#111] p-[10px] text-center rounded-lg"><a class="text-white no-underline" href="' +
             i.link +
             '">' +
             thumb +

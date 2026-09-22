@@ -957,6 +957,12 @@ pageSelect.addEventListener("change", () => {
 });
 
 images.forEach((image) => {
+  image.addEventListener("load", () => {
+    if (image.classList.contains("current-page")) {
+      updateSinglePagePosition();
+    }
+  });
+
   image.addEventListener("click", () => {
     if (readingMode === "single") {
       showNextPage();

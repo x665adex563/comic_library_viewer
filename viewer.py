@@ -54,6 +54,7 @@ def render_index_template(
     all_items,
     home_page,
     viewer_path,
+    tailwind_css_path,
 ):
     template = load_index_template()
 
@@ -65,6 +66,7 @@ def render_index_template(
         .replace('"{{ALL_ITEMS}}"', all_items)
         .replace("{{HOME_PAGE}}", home_page)
         .replace("{{VIEWER_PATH}}", json.dumps(viewer_path))
+        .replace("{{TAILWIND_CSS}}", tailwind_css_path)
     )
 
 def render_chapter_template(
@@ -377,6 +379,11 @@ def generate_index_html(
         ensure_ascii=False
     )
 
+    tailwind_css_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "tailwind-output.css"),
+        html_file,
+    )
+
     template = render_index_template(
         folder_name,
         items_html,
@@ -384,6 +391,7 @@ def generate_index_html(
         all_js,
         index_name,
         library_root,
+        tailwind_css_path,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

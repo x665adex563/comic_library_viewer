@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>{{TITLE}}</title>
+<link rel="stylesheet" href="{{TAILWIND_CSS}}">
 
 <style>
 body {
@@ -14,17 +15,6 @@ body {
 a,a:visited,a:hover,a:active {
   color: #fff;
   text-decoration: none;
-}
-
-#search {
-  display:block;
-  margin: 100px auto 12px auto;
-  width:280px;
-  padding:8px 12px;
-  background:#fff;
-  color:#000;
-  border-radius:6px;
-  border:1px solid #444;
 }
 
 #reading-history-button {
@@ -113,16 +103,6 @@ a,a:visited,a:hover,a:active {
 
 #suggestions div:hover {
   background:#444;
-}
-
-ul {
-  list-style:none;
-  padding:0;
-  display:flex;
-  flex-wrap:wrap;
-  gap:20px;
-  max-width:1200px;
-  margin:20px auto;
 }
 
 li {
@@ -218,7 +198,11 @@ li {
   <a href="#" onclick="goHome()">🏠</a>
 </div>
 
-<input id="search" placeholder="搜尋資料夾">
+<input
+  id="search"
+  class="block mx-auto mt-[100px] mb-[12px] w-[280px] px-3 py-2 bg-white text-black rounded-md border border-[#444]"
+  placeholder="搜尋資料夾"
+>
 
 <button id="reading-history-button">閱讀紀錄</button>
 
@@ -226,7 +210,7 @@ li {
 
 <div id="suggestions"></div>
 
-<ul id="list">
+<ul id="list" class="list-none p-0 flex flex-wrap justify-center gap-5 my-5 mx-auto max-w-[1180px]">
 {{ITEMS}}
 </ul>
 

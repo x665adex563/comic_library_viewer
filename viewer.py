@@ -253,8 +253,8 @@ def generate_chapter_html(
         )
 
         back_button_html = (
-            '<div id="back">'
-            f'<a href="{parent_link}">←</a>'
+            '<div id="back" class="fixed top-5 left-0 w-full z-[1000] text-center">'
+            f'<a class="inline-block w-full py-5 bg-black text-white rounded-lg text-[20px] opacity-60" href="{parent_link}">←</a>'
             '</div>'
         )
 
@@ -302,8 +302,8 @@ def generate_index_html(
 
     if parent_index_html:
         back_button_html = (
-            f'<div id="back">'
-            f'<a href="{html_safe_path(parent_index_html, html_file)}">←</a>'
+            f'<div id="back" class="fixed top-5 left-0 w-full z-[1000] text-center">'
+            f'<a class="inline-block w-full py-5 bg-black text-white rounded-lg text-[20px] opacity-60" href="{html_safe_path(parent_index_html, html_file)}">←</a>'
             f'</div>'
         )
     else:

@@ -39,15 +39,6 @@ body.single-page img.current-page {
   align-items: center;
 }
 
-#single-page-position {
-  writing-mode: vertical-lr;
-  direction: rtl;
-  width: 8px;
-  height: 120px;
-  accent-color: #444;
-  transform: translateY(-3px);
-}
-
 #single-page-position-value {
   width: 50px;
   font-size: 16px;
@@ -429,6 +420,7 @@ img {
 
       <input
         id="single-page-position"
+        class="[writing-mode:vertical-lr] [direction:rtl] w-2 h-[120px] accent-[#444] -translate-y-[3px]"
         type="range"
         min="0"
         max="100"

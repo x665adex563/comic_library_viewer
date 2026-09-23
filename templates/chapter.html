@@ -39,12 +39,6 @@ body.single-page img.current-page {
   align-items: center;
 }
 
-#single-page-max-width-value-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
 #single-page-max-width-value {
   width: 50px;
   font-size: 16px;
@@ -409,7 +403,7 @@ img {
     <div id="single-page-max-width-control" class="flex flex-col items-center gap-1 min-h-[60px] border-t border-[#555] pt-3 mt-3">
       <label for="single-page-max-width">圖片最大寬度</label>
 
-      <div id="single-page-max-width-value-control">
+      <div id="single-page-max-width-value-control" class="flex items-center gap-1">
         <input
           id="single-page-max-width-value"
           type="number"

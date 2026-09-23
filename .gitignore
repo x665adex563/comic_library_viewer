@@ -1,2 +1,4 @@
 _comic_viewer_output/
 __pycache__/
+node_modules/
+assets/tailwind-output.css

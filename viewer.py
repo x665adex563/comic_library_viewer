@@ -54,6 +54,7 @@ def render_index_template(
     all_items,
     home_page,
     viewer_path,
+    tailwind_css_path,
 ):
     template = load_index_template()
 
@@ -65,6 +66,7 @@ def render_index_template(
         .replace('"{{ALL_ITEMS}}"', all_items)
         .replace("{{HOME_PAGE}}", home_page)
         .replace("{{VIEWER_PATH}}", json.dumps(viewer_path))
+        .replace("{{TAILWIND_CSS}}", tailwind_css_path)
     )
 
 def render_chapter_template(
@@ -77,6 +79,7 @@ def render_chapter_template(
     viewer_path,
     comic_title,
     is_series,
+    tailwind_css_path,
 ):
     template = load_chapter_template()
 
@@ -107,6 +110,7 @@ def render_chapter_template(
         .replace("{{VIEWER_PATH}}", json.dumps(viewer_path))
         .replace("{{COMIC_TITLE}}", json.dumps(comic_title))
         .replace("{{IS_SERIES}}", json.dumps(is_series))
+        .replace("{{TAILWIND_CSS}}", tailwind_css_path)
     )
 
 # --------------------
@@ -186,7 +190,7 @@ def render_item_html(item):
     template = load_item_template()
 
     thumb_html = (
-        f'<img class="thumb-img" src="{item.thumb}">'
+        f'<img class="w-full aspect-[3/4] object-cover" src="{item.thumb}">'
         if item.type == "image"
         else '<div class="folder-thumb">📁</div>'
     )
@@ -251,8 +255,12 @@ def generate_chapter_html(
         )
 
         back_button_html = (
-            '<div id="back">'
-            f'<a href="{parent_link}">←</a>'
+            '<div id="back" class="ui-fade fixed top-5 left-5 z-[1000]">'
+            f'<a class="absolute top-[10px] left-[10px] p-[50px] bg-black text-white '
+            f'no-underline rounded-lg text-[20px] opacity-40 '
+            f'hover:opacity-100 hover:bg-[#222222] transition-[opacity,background] '
+            f'duration-[250ms] ease-in-out" '
+            f'href="{parent_link}">←</a>'
             '</div>'
         )
 
@@ -260,8 +268,15 @@ def generate_chapter_html(
 
     for img in images:
         images_html += (
-            f'<img loading="lazy" src="{html_safe_path(os.path.join(folder, img), html_file)}">\n'
+            f'<img class="block max-w-[var(--single-page-max-width)] h-auto mx-auto" '
+            f'loading="lazy" '
+            f'src="{html_safe_path(os.path.join(folder, img), html_file)}">\n'
         )
+
+    tailwind_css_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "tailwind-output.css"),
+        html_file,
+    )
 
     template = render_chapter_template(
         folder_name,
@@ -273,6 +288,7 @@ def generate_chapter_html(
         library_root,
         comic_title,
         is_series,
+        tailwind_css_path,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:
@@ -300,8 +316,8 @@ def generate_index_html(
 
     if parent_index_html:
         back_button_html = (
-            f'<div id="back">'
-            f'<a href="{html_safe_path(parent_index_html, html_file)}">←</a>'
+            f'<div id="back" class="fixed top-5 left-0 w-full z-[1000] text-center">'
+            f'<a class="inline-block w-full py-5 bg-black text-white rounded-lg text-[20px] opacity-60" href="{html_safe_path(parent_index_html, html_file)}">←</a>'
             f'</div>'
         )
     else:
@@ -377,6 +393,11 @@ def generate_index_html(
         ensure_ascii=False
     )
 
+    tailwind_css_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "tailwind-output.css"),
+        html_file,
+    )
+
     template = render_index_template(
         folder_name,
         items_html,
@@ -384,6 +405,7 @@ def generate_index_html(
         all_js,
         index_name,
         library_root,
+        tailwind_css_path,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

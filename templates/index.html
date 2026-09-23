@@ -3,241 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <title>{{TITLE}}</title>
+<link rel="stylesheet" href="{{TAILWIND_CSS}}">
 
-<style>
-body {
-  background: #000;
-  color: #fff;
-  font-family: sans-serif;
-}
-
-a,a:visited,a:hover,a:active {
-  color: #fff;
-  text-decoration: none;
-}
-
-.item-name {
-  margin-top: 6px;
-  font-size: 14px;
-  text-align: center;
-  word-break: break-word;
-}
-
-#search {
-  display:block;
-  margin: 100px auto 12px auto;
-  width:280px;
-  padding:8px 12px;
-  background:#fff;
-  color:#000;
-  border-radius:6px;
-  border:1px solid #444;
-}
-
-#reading-history-button {
-  position: absolute;
-  top: 100px;
-  left: calc(50% + 165px);
-  height: 34px;
-  padding: 8px 12px;
-  box-sizing: border-box;
-  background: #222;
-  color: #fff;
-  border: 1px solid #444;
-  border-radius: 6px;
-  cursor: pointer;
-  line-height: 16px;
-  font-size: 14px;
-}
-
-#reading-history-panel {
-  display: none;
-  position: absolute;
-  top: 145px;
-  left: calc(50% + 165px);
-  width: 300px;
-  height: 523px;
-  padding: 12px;
-  background: #222;
-  color: #fff;
-  border-radius: 8px;
-  z-index: 1001;
-  opacity: 1;
-  transition: opacity 0.2s ease;
-  overflow-y: auto;
-}
-
-.reading-history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border: 1px solid #555;
-  border-radius: 6px;
-  margin-bottom: 8px;
-}
-
-.reading-history-delete:hover {
-  opacity: 0.7;
-}
-
-.reading-history-chapter {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 3px 8px;
-  background: #444;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.reading-history-title:hover,
-.reading-history-chapter:hover {
-  text-decoration: underline;
-  opacity: 0.7;
-  cursor: pointer;
-}
-
-#suggestions {
-  margin:0 auto;
-  width:280px;
-  max-height:150px;
-  overflow-y:auto;
-  background:#222;
-  color:#fff;
-  border-radius:6px;
-  display:none;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:500;
-  font-size:14px;
-}
-
-#suggestions div {
-  padding:6px 10px;
-  cursor:pointer;
-}
-
-#suggestions div:hover {
-  background:#444;
-}
-
-ul {
-  list-style:none;
-  padding:0;
-  display:flex;
-  flex-wrap:wrap;
-  gap:20px;
-  max-width:1200px;
-  margin:20px auto;
-}
-
-li {
-  width:200px;
-  background:#111;
-  padding:10px;
-  text-align:center;
-  border-radius: 8px;
-}
-
-.thumb-img {
-  width:100%;
-  aspect-ratio:3/4;
-  object-fit:cover;
-}
-
-.folder-thumb {
-  width:100%;
-  height:32px;
-  aspect-ratio:3/4;
-  background:#111;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-}
-
-#back {
-  position: fixed;
-  top: 20px;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  text-align: center;
-}
-
-#back a {
-  display: inline-block;
-  width: 100%;
-  padding: 20px 0;
-  background: #000;
-  color: #fff;
-  border-radius: 8px;
-  font-size: 20px;
-  opacity: 0.6;
-}
-
-#home {
-  display:none;
-  position:fixed;
-  top:20px;
-  left:20px;
-  z-index:200;
-}
-
-#home a {
-  display:block;
-  padding:50px 50px;
-  background:#000;
-  color:#fff;
-  border-radius:8px;
-  font-size:20px;
-  opacity:0.4;
-  text-decoration:none;
-}
-
-#toTop {
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  width:80px;
-  height:80px;
-  background:#111;
-  color:#524d5e;
-  border:none;
-  border-radius:12px;
-  font-size:28px;
-}
-
-#toTop:hover {
-  background: rgba(255, 255, 255, 0.3);
-  color: rgba(0,0,0,0.35);
-  cursor:pointer;
-}
-</style>
 </head>
 
-<body>
+<body class="bg-black text-white font-sans">
 
     {{BACK_BUTTON}}
 
-<div id="home">
-  <a href="#" onclick="goHome()">🏠</a>
+<div id="home" class="hidden fixed top-5 left-5 z-[200]">
+  <a
+    href="#"
+    onclick="goHome()"
+    class="block py-[50px] px-[50px] bg-black text-white rounded-lg text-[20px] opacity-40 no-underline"
+  >🏠</a>
 </div>
 
-<input id="search" placeholder="搜尋資料夾">
+<input
+  id="search"
+  class="block mx-auto mt-[100px] mb-[12px] w-[280px] px-3 py-2 bg-white text-black rounded-md border border-[#444]"
+  placeholder="搜尋資料夾"
+>
 
-<button id="reading-history-button">閱讀紀錄</button>
+<button
+  id="reading-history-button"
+  class="absolute top-[100px] left-[calc(50%+165px)] h-[34px] box-border px-3 py-2 bg-[#222] text-white border border-[#444] rounded-md cursor-pointer leading-4 text-[14px]"
+>閱讀紀錄</button>
 
-<div id="reading-history-panel"></div>
+<div
+  id="reading-history-panel"
+  class="absolute top-[145px] left-[calc(50%+165px)] w-[300px] h-[523px] p-3 bg-[#222] text-white rounded-lg z-[1001] opacity-100 transition-opacity duration-200 overflow-y-auto"
+  style="display: none;"
+></div>
 
-<div id="suggestions"></div>
+<div
+  id="suggestions"
+  class="mx-auto w-[280px] max-h-[150px] overflow-y-auto bg-[#222] text-white rounded-[6px] absolute left-1/2 -translate-x-1/2 z-[500] text-[14px]"
+  style="display: none;"
+></div>
 
-<ul id="list">
+<ul id="list" class="list-none p-0 flex flex-wrap gap-5 my-5 mx-auto max-w-[1180px]">
 {{ITEMS}}
 </ul>
 
-<button id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<button
+  id="toTop"
+  class="fixed bottom-5 right-5 w-20 h-20 bg-[#111] text-[#524d5e] border-none rounded-[12px] text-[28px] hover:bg-[rgba(255,255,255,0.3)] hover:text-[rgba(0,0,0,0.35)] hover:cursor-pointer"
+  onclick="window.scrollTo({top:0,behavior:'smooth'})"
+>↑</button>
 
 <script>
 const all = "{{ALL_ITEMS}}";
@@ -264,14 +77,17 @@ readingHistoryButton.addEventListener("click", () => {
 
   readingHistoryPanel.innerHTML = history.length
     ? history.map((item, index) => `
-          <div class="reading-history-item" data-index="${index}">
+          <div
+            class="reading-history-item flex justify-between items-center p-[10px] border border-[#555] rounded-md mb-2"
+            data-index="${index}"
+          >
             <div>
-              <span class="reading-history-title">${item.comicTitle}</span>
+              <span class="reading-history-title hover:underline hover:opacity-70 cursor-pointer">${item.comicTitle}</span>
               ${item.isSeries
-                ? `<span class="reading-history-chapter">第 ${item.title} 話</span>`
+                ? `<span class="reading-history-chapter inline-block ml-2 py-[3px] px-2 bg-[#444] rounded-[5px] cursor-pointer hover:underline hover:opacity-70">第 ${item.title} 話</span>`
                 : ""}
             </div>
-            <button class="reading-history-delete">×</button>
+            <button class="reading-history-delete hover:opacity-70">×</button>
           </div>
       `).join("")
     : "目前沒有閱讀紀錄";
@@ -341,6 +157,7 @@ function updateSuggestions() {
 
     matches.forEach(m => {
         const div = document.createElement('div');
+        div.className = 'py-[6px] px-[10px] cursor-pointer hover:bg-[#444]';
 
         div.textContent = m.name;
 
@@ -378,13 +195,13 @@ function search() {
         let thumb = '';
 
         if(i.type === 'image') {
-            thumb = '<img class="thumb-img" src="' + i.thumb + '">';
+            thumb = '<img class="w-full aspect-[3/4] object-cover" src="' + i.thumb + '">';
         } else {
-            thumb = '<div class="folder-thumb">📁</div>';
+            thumb = '<div class="w-full h-[32px] aspect-[3/4] bg-[#111] flex items-center justify-center text-[24px]">📁</div>';
         }
 
         ul.innerHTML +=
-            '<li><a href="' +
+            '<li class="w-[200px] bg-[#111] p-[10px] text-center rounded-lg"><a class="text-white no-underline" href="' +
             i.link +
             '">' +
             thumb +

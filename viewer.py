@@ -389,7 +389,15 @@ def generate_index_html(
         items_html += render_item_html(item)
 
     all_js = json.dumps(
-        [asdict(item) for item in all_items],
+        [
+            {
+                "name": item.name,
+                "type": item.type,
+                "link": item.link,
+                "thumb": item.thumb,
+            }
+            for item in all_items
+        ],
         ensure_ascii=False
     )
 

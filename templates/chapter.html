@@ -33,19 +33,6 @@ body.single-page img.current-page {
   opacity: 0.4;
 }
 
-#single-page-position-control {
-  display: grid;
-  grid-template-columns: auto auto;
-  column-gap: 1px;
-  row-gap: 8px;
-  min-height: 120px;
-  justify-content: center;
-  justify-items: center;
-  border-top: 1px solid #555;
-  padding-top: 12px;
-  margin-top: 12px;
-}
-
 #single-page-position-control > label {
   grid-column: 1 / -1;
 }
@@ -456,7 +443,7 @@ img {
       <span>[ <span id="wheel-page-status">開</span> ]</span>
     </button>
 
-    <div id="single-page-position-control">
+    <div id="single-page-position-control" class="grid grid-cols-[auto_auto] gap-x-px gap-y-2 min-h-[120px] justify-center justify-items-center border-t border-[#555] pt-3 mt-3">
       <label for="single-page-position">圖片垂直位置</label>
 
       <div id="single-page-position-value-control">

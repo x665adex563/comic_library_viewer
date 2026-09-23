@@ -255,7 +255,7 @@ def generate_chapter_html(
         )
 
         back_button_html = (
-            '<div id="back">'
+            '<div id="back" class="fixed top-5 left-5 z-[1000]">'
             f'<a class="absolute top-[10px] left-[10px] p-[50px] bg-black text-white '
             f'no-underline rounded-lg text-[20px] opacity-40 '
             f'hover:opacity-100 hover:bg-[#222222] transition-[opacity,background] '
@@ -314,8 +314,8 @@ def generate_index_html(
 
     if parent_index_html:
         back_button_html = (
-            f'<div id="back">'
-            f'<a href="{html_safe_path(parent_index_html, html_file)}">←</a>'
+            f'<div id="back" class="fixed top-5 left-0 w-full z-[1000] text-center">'
+            f'<a class="inline-block w-full py-5 bg-black text-white rounded-lg text-[20px] opacity-60" href="{html_safe_path(parent_index_html, html_file)}">←</a>'
             f'</div>'
         )
     else:

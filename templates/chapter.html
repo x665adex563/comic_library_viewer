@@ -33,14 +33,6 @@ body.single-page img.current-page {
   opacity: 0.4;
 }
 
-#single-page-position-value-control {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
 #single-page-position-value-control label {
   height: 29px;
   display: flex;
@@ -442,7 +434,7 @@ img {
     <div id="single-page-position-control" class="grid grid-cols-[auto_auto] gap-x-px gap-y-2 min-h-[120px] justify-center justify-items-center border-t border-[#555] pt-3 mt-3">
       <label class="col-span-full" for="single-page-position">圖片垂直位置</label>
 
-      <div id="single-page-position-value-control">
+      <div id="single-page-position-value-control" class="flex flex-col items-center justify-center gap-2">
         <input
           id="single-page-position-value"
           type="number"

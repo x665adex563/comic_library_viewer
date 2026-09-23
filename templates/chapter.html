@@ -53,12 +53,6 @@ img {
   z-index: 1000;
 }
 
-#comic-title {
-  color: #fff;
-  margin-bottom: 8px;
-  font-size: 20px;
-}
-
 #page-select {
   padding: 6px 10px;
   background: #222;
@@ -250,7 +244,7 @@ img {
   id="page-navigation"
   class="fixed top-5 left-1/2 -translate-x-1/2 z-[1000] text-center w-[360px] box-border py-[10px] px-5 bg-[#222] rounded-lg opacity-90"
 >
-  <div id="comic-title">{{TITLE}}</div>
+  <div id="comic-title" class="text-white mb-2 text-xl">{{TITLE}}</div>
 
   <div id="chapter-navigation" class="grid grid-cols-[1fr_auto_1fr] items-center w-[240px] mx-auto">
     <div id="previous-chapter" class="text-left text-white [&_a]:no-underline [&_a:hover]:opacity-70">

@@ -33,61 +33,6 @@ img {
   z-index: 1000;
 }
 
-#reading-mode button:hover {
-  opacity: 1;
-}
-
-#reading-history-panel {
-  display: none;
-  position: fixed;
-  top: 20px;
-  right: 180px;
-  width: 300px;
-  height: 523px;
-  padding: 12px;
-  background: #222;
-  color: #fff;
-  border-radius: 8px;
-  z-index: 1001;
-  opacity: 0.4;
-  transition: opacity 0.2s ease;
-  overflow-y: auto;
-}
-
-#reading-history-panel:hover {
-  opacity: 1;
-}
-
-.reading-history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border: 1px solid #555;
-  border-radius: 6px;
-  margin-bottom: 8px;
-}
-
-.reading-history-delete:hover {
-  opacity: 0.7;
-}
-
-.reading-history-chapter {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 3px 8px;
-  background: #444;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.reading-history-title:hover,
-.reading-history-chapter:hover {
-  text-decoration: underline;
-  opacity: 0.7;
-  cursor: pointer;
-}
-
 #chapter-prompt {
   display: none;
 
@@ -237,7 +182,7 @@ img {
     </div>
   </div>
 
-  <div id="reading-history-panel"></div>
+  <div id="reading-history-panel" class="hidden fixed top-5 right-[180px] w-[300px] h-[523px] p-3 bg-[#222] text-white rounded-lg z-[1001] opacity-40 transition-opacity duration-200 overflow-y-auto hover:opacity-100"></div>
 </div>
 
 <div id="chapter-prompt">
@@ -482,14 +427,14 @@ readingHistoryButton.addEventListener("click", () => {
 
   readingHistoryPanel.innerHTML = history.length
     ? history.map((item, index) => `
-          <div class="reading-history-item" data-index="${index}">
+          <div class="reading-history-item flex justify-between items-center p-2.5 border border-[#555] rounded-md mb-2" data-index="${index}">
             <div>
-              <span class="reading-history-title">${item.comicTitle}</span>
+              <span class="reading-history-title hover:underline hover:opacity-70">${item.comicTitle}</span>
               ${item.isSeries
-                ? `<span class="reading-history-chapter">第 ${item.title} 話</span>`
+                ? `<span class="reading-history-chapter inline-block ml-2 py-[3px] px-2 bg-[#444] rounded-[5px] cursor-pointer hover:underline hover:opacity-70">第 ${item.title} 話</span>`
                 : ""}
             </div>
-            <button class="reading-history-delete">×</button>
+            <button class="reading-history-delete hover:opacity-70">×</button>
           </div>
       `).join("")
     : "目前沒有閱讀紀錄";

@@ -5,13 +5,6 @@
 <title>{{TITLE}}</title>
 <link rel="stylesheet" href="{{TAILWIND_CSS}}">
 
-<style>
-.reading-history-title:hover {
-  text-decoration: underline;
-  opacity: 0.7;
-  cursor: pointer;
-}
-</style>
 </head>
 
 <body class="bg-black text-white font-sans">
@@ -89,7 +82,7 @@ readingHistoryButton.addEventListener("click", () => {
             data-index="${index}"
           >
             <div>
-              <span class="reading-history-title">${item.comicTitle}</span>
+              <span class="reading-history-title hover:underline hover:opacity-70 cursor-pointer">${item.comicTitle}</span>
               ${item.isSeries
                 ? `<span class="reading-history-chapter inline-block ml-2 py-[3px] px-2 bg-[#444] rounded-[5px] cursor-pointer hover:underline hover:opacity-70">第 ${item.title} 話</span>`
                 : ""}

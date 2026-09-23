@@ -6,10 +6,6 @@
 <link rel="stylesheet" href="{{TAILWIND_CSS}}">
 
 <style>
-body.single-page {
-  min-height: 100vh;
-}
-
 body.single-page img {
   display: none;
 }
@@ -418,7 +414,7 @@ img {
 </style>
 </head>
 
-<body class="m-0 bg-black overflow-x-hidden">
+<body class="m-0 bg-black overflow-x-hidden [&.single-page]:min-h-screen">
 
 {{BACK_BUTTON}}
 

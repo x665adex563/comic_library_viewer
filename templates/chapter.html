@@ -39,17 +39,6 @@ body.single-page img.current-page {
   align-items: center;
 }
 
-#single-page-max-width-control {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-height: 60px;
-  border-top: 1px solid #555;
-  padding-top: 12px;
-  margin-top: 12px;
-}
-
 #single-page-max-width-value-control {
   display: flex;
   align-items: center;
@@ -417,7 +406,7 @@ img {
       >
     </div>
 
-    <div id="single-page-max-width-control">
+    <div id="single-page-max-width-control" class="flex flex-col items-center gap-1 min-h-[60px] border-t border-[#555] pt-3 mt-3">
       <label for="single-page-max-width">圖片最大寬度</label>
 
       <div id="single-page-max-width-value-control">

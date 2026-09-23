@@ -918,7 +918,10 @@ wheelPageButton.addEventListener("click", () => {
 document.addEventListener("mousemove", (event) => {
   const upperAreaHeight = window.innerHeight * 0.3;
 
-  if (event.clientY <= upperAreaHeight) {
+  if (
+    event.clientY <= upperAreaHeight ||
+    settingsPanel.contains(event.target)
+  ) {
     showUI();
   }
 });

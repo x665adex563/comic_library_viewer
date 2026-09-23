@@ -268,7 +268,9 @@ def generate_chapter_html(
 
     for img in images:
         images_html += (
-            f'<img loading="lazy" src="{html_safe_path(os.path.join(folder, img), html_file)}">\n'
+            f'<img class="block max-w-[var(--single-page-max-width)] h-auto mx-auto" '
+            f'loading="lazy" '
+            f'src="{html_safe_path(os.path.join(folder, img), html_file)}">\n'
         )
 
     tailwind_css_path = html_safe_path(

@@ -258,7 +258,8 @@ def generate_chapter_html(
             '<div id="back">'
             f'<a class="absolute top-[10px] left-[10px] p-[50px] bg-black text-white '
             f'no-underline rounded-lg text-[20px] opacity-40 '
-            f'transition-[opacity,background] duration-[250ms] ease-in-out" '
+            f'hover:opacity-100 hover:bg-[#222222] transition-[opacity,background] '
+            f'duration-[250ms] ease-in-out" '
             f'href="{parent_link}">←</a>'
             '</div>'
         )

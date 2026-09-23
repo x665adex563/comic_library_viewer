@@ -33,10 +33,6 @@ body.single-page img.current-page {
   opacity: 0.4;
 }
 
-#single-page-position-control > label {
-  grid-column: 1 / -1;
-}
-
 #single-page-position-value-control {
   display: flex;
   flex-direction: column;
@@ -444,7 +440,7 @@ img {
     </button>
 
     <div id="single-page-position-control" class="grid grid-cols-[auto_auto] gap-x-px gap-y-2 min-h-[120px] justify-center justify-items-center border-t border-[#555] pt-3 mt-3">
-      <label for="single-page-position">圖片垂直位置</label>
+      <label class="col-span-full" for="single-page-position">圖片垂直位置</label>
 
       <div id="single-page-position-value-control">
         <input

@@ -53,50 +53,6 @@ img {
   z-index: 1000;
 }
 
-#reading-mode {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-}
-
-#reading-mode button {
-  padding: 10px 14px;
-  background: #222;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  opacity: 0.4;
-  font-size: 18px;
-  text-align: left;
-}
-
-#settings-panel #wheel-page-button {
-  width: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  box-sizing: border-box;
-  margin: 0 auto;
-
-  height: auto;
-  min-height: 0;
-  padding: 4px 8px;
-  background: #222;
-  color: #fff;
-  border: 1px solid #fff !important;
-  border-radius: 8px;
-  cursor: pointer;
-  opacity: 1;
-}
-
 #reading-mode button:hover {
   opacity: 1;
 }
@@ -239,14 +195,14 @@ img {
   </div>
 </div>
 
-<div id="reading-mode">
+<div id="reading-mode" class="flex flex-col gap-2 fixed top-5 right-5 z-[1000] [&_button]:py-2.5 [&_button]:px-3.5 [&_button]:bg-[#222] [&_button]:text-white [&_button]:border-0 [&_button]:rounded-lg [&_button]:cursor-pointer [&_button]:opacity-40 [&_button]:text-lg [&_button]:text-left [&_button:hover]:opacity-100">
   <button id="reading-mode-button"></button>
   <button id="reading-history-button">閱讀紀錄</button>
 
   <button id="settings-button">設定</button>
 
   <div id="settings-panel">
-    <button id="wheel-page-button">
+    <button id="wheel-page-button" class="!w-auto !flex !flex-col !items-center !justify-center !gap-1 !box-border !mx-auto !h-auto !min-h-0 !py-1 !px-2 !bg-[#222] !text-white !border !border-white !rounded-lg !cursor-pointer !opacity-100">
       <span>滾輪翻頁</span>
       <span>[ <span id="wheel-page-status">開</span> ]</span>
     </button>

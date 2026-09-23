@@ -19,26 +19,6 @@ body.single-page img.current-page {
   transform: translateX(-50%);
 }
 
-#settings-panel {
-  display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 100%;
-  padding: 16px;
-  box-sizing: border-box;
-  background: #222;
-  color: #fff;
-  border-radius: 8px;
-  opacity: 0.4;
-}
-
-#single-page-position-value-control label {
-  height: 29px;
-  display: flex;
-  align-items: center;
-}
-
 img {
   display: block;
   max-width: var(--single-page-max-width);
@@ -54,10 +34,6 @@ img {
 }
 
 #reading-mode button:hover {
-  opacity: 1;
-}
-
-#settings-panel:hover {
   opacity: 1;
 }
 
@@ -201,7 +177,7 @@ img {
 
   <button id="settings-button">設定</button>
 
-  <div id="settings-panel">
+  <div id="settings-panel" class="hidden absolute top-[calc(100%+8px)] right-0 w-full p-4 box-border bg-[#222] text-white rounded-lg opacity-40 hover:opacity-100">
     <button id="wheel-page-button" class="!w-auto !flex !flex-col !items-center !justify-center !gap-1 !box-border !mx-auto !h-auto !min-h-0 !py-1 !px-2 !bg-[#222] !text-white !border !border-white !rounded-lg !cursor-pointer !opacity-100">
       <span>滾輪翻頁</span>
       <span>[ <span id="wheel-page-status">開</span> ]</span>

@@ -53,26 +53,6 @@ img {
   z-index: 1000;
 }
 
-#page-select {
-  padding: 6px 10px;
-  background: #222;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 20px;
-  font-family: inherit;
-}
-
-#page-select:hover {
-  opacity: 1;
-}
-
-#page-select option {
-  background: #222;
-  color: #fff;
-}
-
 #reading-mode {
   display: flex;
   flex-direction: column;
@@ -251,7 +231,7 @@ img {
       {{PREVIOUS_CHAPTER}}
     </div>
 
-    <select id="page-select"></select>
+    <select id="page-select" class="py-1.5 px-2.5 bg-[#222] text-white border-0 rounded-lg cursor-pointer text-xl font-[inherit] hover:opacity-100 [&_option]:bg-[#222] [&_option]:text-white"></select>
 
     <div id="next-chapter" class="text-right text-white [&_a]:no-underline [&_a:hover]:opacity-70">
       {{NEXT_CHAPTER}}

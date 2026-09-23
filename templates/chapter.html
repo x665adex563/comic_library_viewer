@@ -19,9 +19,7 @@ body.single-page img.current-page {
   transform: translateX(-50%);
 }
 
-#back,
-#reading-mode,
-#page-navigation {
+.ui-fade {
   transition: opacity 0.2s ease;
 }
 
@@ -52,7 +50,7 @@ body.single-page img.current-page {
 
 <div
   id="page-navigation"
-  class="fixed top-5 left-1/2 -translate-x-1/2 z-[1000] text-center w-[360px] box-border py-[10px] px-5 bg-[#222] rounded-lg opacity-90"
+  class="fixed top-5 left-1/2 -translate-x-1/2 z-[1000] text-center w-[360px] box-border py-[10px] px-5 bg-[#222] rounded-lg opacity-90 ui-fade"
 >
   <div id="comic-title" class="text-white mb-2 text-xl">{{TITLE}}</div>
 
@@ -69,7 +67,7 @@ body.single-page img.current-page {
   </div>
 </div>
 
-<div id="reading-mode" class="flex flex-col gap-2 fixed top-5 right-5 z-[1000] [&_button]:py-2.5 [&_button]:px-3.5 [&_button]:bg-[#222] [&_button]:text-white [&_button]:border-0 [&_button]:rounded-lg [&_button]:cursor-pointer [&_button]:opacity-40 [&_button]:text-lg [&_button]:text-left [&_button:hover]:opacity-100">
+<div id="reading-mode" class="flex flex-col gap-2 fixed top-5 right-5 z-[1000] [&_button]:py-2.5 [&_button]:px-3.5 [&_button]:bg-[#222] [&_button]:text-white [&_button]:border-0 [&_button]:rounded-lg [&_button]:cursor-pointer [&_button]:opacity-40 [&_button]:text-lg [&_button]:text-left [&_button:hover]:opacity-100 ui-fade">
   <button id="reading-mode-button"></button>
   <button id="reading-history-button">閱讀紀錄</button>
 

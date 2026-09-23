@@ -255,7 +255,7 @@ def generate_chapter_html(
         )
 
         back_button_html = (
-            '<div id="back" class="fixed top-5 left-5 z-[1000]">'
+            '<div id="back" class="ui-fade fixed top-5 left-5 z-[1000]">'
             f'<a class="absolute top-[10px] left-[10px] p-[50px] bg-black text-white '
             f'no-underline rounded-lg text-[20px] opacity-40 '
             f'hover:opacity-100 hover:bg-[#222222] transition-[opacity,background] '

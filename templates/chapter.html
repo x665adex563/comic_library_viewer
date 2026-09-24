@@ -32,6 +32,58 @@ body[data-display-mode="remote"] #page-navigation,
 body[data-display-mode="remote"] #reading-mode > :not(#mobile-mode-button) {
   display: none;
 }
+
+body[data-display-mode="remote"] #comic-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  transform-origin: center center;
+}
+
+body[data-display-mode="remote"] #mobile-mode-button,
+body[data-display-mode="remote"] #remote-settings-panel {
+  width: 110px;
+  padding: 10px;
+  box-sizing: border-box;
+  background: #222;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+}
+
+body[data-display-mode="remote"] #remote-settings-panel {
+  width: 110px;
+  padding: 10px;
+  box-sizing: border-box;
+  background: #222;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  transform: rotate(-90deg);
+  transform-origin: center center;
+}
+
+body[data-display-mode="remote"] #remote-image-size-control {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+body[data-display-mode="remote"] #remote-image-size-value {
+  width: 45px;
+  font-size: 14px;
+  color: white;
+}
+
+body[data-display-mode="remote"] #remote-image-size-full {
+  font-size: 14px !important;
+  color: white;
+}
+
+body[data-display-mode="remote"] #remote-image-size {
+  width: 100%;
+}
 </style>
 </head>
 
@@ -145,7 +197,43 @@ body[data-display-mode="remote"] #reading-mode > :not(#mobile-mode-button) {
   <button id="chapter-prompt-button" class="py-2 px-3.5 bg-[#444] text-white border-0 rounded-md cursor-pointer hover:opacity-80"></button>
 </div>
 
-{{IMAGES}}
+<!-- Remote Mode 專用 UI -->
+<div id="remote-settings-panel">
+  <div id="remote-image-size-control" class="hidden flex flex-col items-center gap-1">
+    <label for="remote-image-size">遠端模式圖片大小</label>
+
+    <div id="remote-image-size-value-control" class="flex items-center gap-1">
+      <input
+        id="remote-image-size-value"
+        class="w-[50px] text-base box-border bg-[#444] text-white border-0 rounded p-1 text-center"
+        type="number"
+        min="0"
+        max="100"
+        value="100"
+      >
+
+      <button
+        id="remote-image-size-full"
+        class="h-[29px] !text-base box-border bg-[#444] text-white border-0 rounded p-1 cursor-pointer flex items-center justify-center hover:bg-[#555]"
+      >
+        滿版
+      </button>
+    </div>
+
+    <input
+      id="remote-image-size"
+      class="w-full accent-[#444]"
+      type="range"
+      min="0"
+      max="100"
+      value="100"
+    >
+  </div>
+</div>
+
+<div id="comic-content">
+  {{IMAGES}}
+</div>
 
 <script>
 const READING_MODE_KEY = "readingMode";
@@ -192,6 +280,30 @@ const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
 
 const displayMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
 document.body.dataset.displayMode = displayMode;
+
+const remoteImageSizeControl = document.getElementById("remote-image-size-control");
+
+if (displayMode === "remote") {
+  remoteImageSizeControl.classList.remove("hidden");
+}
+
+const remoteImageSize = document.getElementById("remote-image-size");
+const remoteImageSizeValue = document.getElementById("remote-image-size-value");
+const remoteImageSizeFull = document.getElementById("remote-image-size-full");
+
+remoteImageSize.addEventListener("input", () => {
+  remoteImageSizeValue.value = remoteImageSize.value;
+});
+
+remoteImageSizeValue.addEventListener("input", () => {
+  const value = Math.min(100, Math.max(0, Number(remoteImageSizeValue.value)));
+  remoteImageSize.value = value;
+});
+
+remoteImageSizeFull.addEventListener("click", () => {
+  remoteImageSize.value = 100;
+  remoteImageSizeValue.value = 100;
+});
 
 mobileModeButton.textContent =
   displayMode === "remote" ? "網頁模式" : "手機模式";
@@ -446,6 +558,13 @@ mobileModeButton.addEventListener("click", () => {
 
   localStorage.setItem(DISPLAY_MODE_KEY, nextMode);
   document.body.dataset.displayMode = nextMode;
+
+  if (nextMode === "remote") {
+    remoteImageSizeControl.classList.remove("hidden");
+  } else {
+    remoteImageSizeControl.classList.add("hidden");
+  }
+
   mobileModeButton.textContent =
     nextMode === "remote" ? "網頁模式" : "手機模式";
 });

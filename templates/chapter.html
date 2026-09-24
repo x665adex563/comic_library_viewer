@@ -27,6 +27,11 @@ body.single-page img.current-page {
   opacity: 0;
   pointer-events: none;
 }
+
+body[data-display-mode="remote"] #page-navigation,
+body[data-display-mode="remote"] #reading-mode > :not(#mobile-mode-button) {
+  display: none;
+}
 </style>
 </head>
 
@@ -42,6 +47,7 @@ body.single-page img.current-page {
   const comicTitle = {{COMIC_TITLE}};
   const isSeries = {{IS_SERIES}};
   const READING_HISTORY_KEY = `readingHistory:${viewerPath}`;
+  const DISPLAY_MODE_KEY = "displayMode";
 </script>
 
 <div
@@ -66,7 +72,9 @@ body.single-page img.current-page {
 <div id="reading-mode" class="flex flex-col gap-2 fixed top-5 right-5 z-[1000] [&_button]:py-2.5 [&_button]:px-3.5 [&_button]:bg-[#222] [&_button]:text-white [&_button]:border-0 [&_button]:rounded-lg [&_button]:cursor-pointer [&_button]:opacity-40 [&_button]:text-lg [&_button]:text-left [&_button:hover]:opacity-100 ui-fade">
   <button id="reading-mode-button"></button>
   <button id="reading-history-button">閱讀紀錄</button>
-
+  <button id="mobile-mode-button">
+    Mobile Mode
+  </button>
   <button id="settings-button">設定</button>
 
   <div id="settings-panel" class="hidden absolute top-[calc(100%+8px)] right-0 w-full p-4 box-border bg-[#222] text-white rounded-lg opacity-40 hover:opacity-100">
@@ -153,6 +161,7 @@ const readingHistoryButton = document.getElementById("reading-history-button");
 const readingHistoryPanel = document.getElementById("reading-history-panel");
 const settingsButton = document.getElementById("settings-button");
 const settingsPanel = document.getElementById("settings-panel");
+const mobileModeButton = document.getElementById("mobile-mode-button");
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
@@ -180,6 +189,12 @@ const singlePageMaxWidthFull =
   document.getElementById("single-page-max-width-full");
 
 const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
+
+const displayMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
+document.body.dataset.displayMode = displayMode;
+
+mobileModeButton.textContent =
+  displayMode === "remote" ? "網頁模式" : "手機模式";
 
 let singlePageMaxWidth =
   Number(localStorage.getItem(SINGLE_PAGE_MAX_WIDTH_KEY)) || 100;
@@ -423,6 +438,16 @@ readingHistoryButton.addEventListener("click", () => {
   });
 
   readingHistoryPanel.style.display = "block";
+});
+
+mobileModeButton.addEventListener("click", () => {
+  const currentMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
+  const nextMode = currentMode === "remote" ? "normal" : "remote";
+
+  localStorage.setItem(DISPLAY_MODE_KEY, nextMode);
+  document.body.dataset.displayMode = nextMode;
+  mobileModeButton.textContent =
+    nextMode === "remote" ? "網頁模式" : "手機模式";
 });
 
 settingsButton.addEventListener("click", () => {

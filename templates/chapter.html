@@ -37,8 +37,15 @@ body[data-display-mode="remote"] #comic-content {
   position: fixed;
   top: 50%;
   left: 50%;
+  width: var(--remote-image-size);
   transform: translate(-50%, -50%) rotate(-90deg);
   transform-origin: center center;
+  --remote-image-size: 100%;
+}
+
+body[data-display-mode="remote"] #comic-content img {
+  width: 100%;
+  max-width: none;
 }
 
 body[data-display-mode="remote"] #mobile-mode-button,
@@ -290,19 +297,58 @@ if (displayMode === "remote") {
 const remoteImageSize = document.getElementById("remote-image-size");
 const remoteImageSizeValue = document.getElementById("remote-image-size-value");
 const remoteImageSizeFull = document.getElementById("remote-image-size-full");
+const comicContent = document.getElementById("comic-content");
+
+function getRemoteImageFullSize() {
+  return (window.innerHeight / window.innerWidth) * 100;
+}
+
+let remoteImageFullSize = getRemoteImageFullSize();
 
 remoteImageSize.addEventListener("input", () => {
   remoteImageSizeValue.value = remoteImageSize.value;
+
+  const size = (Number(remoteImageSize.value) / 100) * remoteImageFullSize;
+
+  comicContent.style.setProperty(
+    "--remote-image-size",
+    `${size}%`
+  );
 });
 
 remoteImageSizeValue.addEventListener("input", () => {
   const value = Math.min(100, Math.max(0, Number(remoteImageSizeValue.value)));
+
   remoteImageSize.value = value;
+
+  const size = (value / 100) * remoteImageFullSize;
+
+  comicContent.style.setProperty(
+    "--remote-image-size",
+    `${size}%`
+  );
 });
 
 remoteImageSizeFull.addEventListener("click", () => {
   remoteImageSize.value = 100;
   remoteImageSizeValue.value = 100;
+
+  comicContent.style.setProperty(
+    "--remote-image-size",
+    `${remoteImageFullSize}%`
+  );
+});
+
+window.addEventListener("resize", () => {
+  remoteImageFullSize = getRemoteImageFullSize();
+
+  const value = Number(remoteImageSize.value);
+  const size = (value / 100) * remoteImageFullSize;
+
+  comicContent.style.setProperty(
+    "--remote-image-size",
+    `${size}%`
+  );
 });
 
 mobileModeButton.textContent =

@@ -35,7 +35,7 @@ body[data-display-mode="remote"] #page-navigation {
 body[data-display-mode="remote"] #comic-content {
   position: fixed;
   top: 50%;
-  left: 50%;
+  left: var(--remote-image-position);
   width: var(--remote-image-size);
   transform: translate(-50%, -50%) rotate(-90deg);
   transform-origin: center center;
@@ -79,6 +79,29 @@ body[data-display-mode="remote"] #remote-image-size-control {
   border-top: 0;
   padding-top: 0;
   margin-top: 0;
+}
+
+body[data-display-mode="remote"] #remote-image-position-control {
+  min-height: 160px;
+}
+
+body[data-display-mode="remote"] #remote-image-size-control {
+  min-height: 120px;
+}
+
+body[data-display-mode="remote"] #remote-image-position {
+  transform: rotate(180deg);
+}
+
+body[data-display-mode="remote"] #remote-image-position-value {
+  width: 45px;
+  font-size: 14px;
+  color: white;
+  transform: rotate(-90deg);
+}
+
+body[data-display-mode="remote"] #remote-image-position-top {
+  transform: rotate(-90deg);
 }
 
 body[data-display-mode="remote"] #remote-image-size-value {
@@ -273,7 +296,44 @@ body[data-display-mode="remote"] #reading-mode-button {
     ←
   </button>
 
-  <div id="remote-settings-panel">
+  <div id="remote-settings-panel" class="flex flex-col items-center gap-2">
+    <div id="remote-image-position-control" class="hidden flex flex-row items-center gap-2">
+
+      <label for="remote-image-position">
+        圖片垂直位置
+      </label>
+
+      <div class="flex flex-col items-center gap-6 rotate-90 w-fit">
+        <input
+          id="remote-image-position"
+          class="w-full accent-[#444]"
+          type="range"
+          min="0"
+          max="100"
+          value="100"
+        >
+
+        <div class="flex flex-row items-center justify-center gap-2">
+          <input
+            id="remote-image-position-value"
+            type="number"
+            min="0"
+            max="100"
+            value="100"
+          >
+
+          <button
+            id="remote-image-position-top"
+            class="h-[29px] !text-base box-border bg-[#444] text-white border-0 rounded p-1 cursor-pointer flex items-center justify-center hover:bg-[#555]"
+            type="button"
+          >
+            置頂
+          </button>
+        </div>
+      </div>
+
+    </div>
+
     <div id="remote-image-size-control" class="hidden flex flex-col items-center gap-1">
       <label for="remote-image-size">遠端模式圖片大小</label>
 
@@ -290,6 +350,7 @@ body[data-display-mode="remote"] #reading-mode-button {
         <button
           id="remote-image-size-full"
           class="h-[29px] !text-base box-border bg-[#444] text-white border-0 rounded p-1 cursor-pointer flex items-center justify-center hover:bg-[#555]"
+          type="button"
         >
           滿版
         </button>
@@ -360,6 +421,7 @@ const displayMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
 document.body.dataset.displayMode = displayMode;
 
 const remoteImageSizeControl = document.getElementById("remote-image-size-control");
+const remoteImagePositionControl = document.getElementById("remote-image-position-control");
 
 if (displayMode === "remote") {
   remoteImageSizeControl.classList.remove("hidden");
@@ -369,12 +431,35 @@ const remoteImageSize = document.getElementById("remote-image-size");
 const remoteImageSizeValue = document.getElementById("remote-image-size-value");
 const remoteImageSizeFull = document.getElementById("remote-image-size-full");
 const comicContent = document.getElementById("comic-content");
+const remoteImagePosition = document.getElementById("remote-image-position");
+const remoteImagePositionValue = document.getElementById("remote-image-position-value");
 const remoteSettingsPanel = document.getElementById("remote-settings-panel");
 const remoteSettingsObserver = new ResizeObserver(() => {
   updateRemoteWebModeButtonSize();
 });
 
 remoteSettingsObserver.observe(remoteSettingsPanel);
+
+function updateRemoteImagePosition() {
+  const value = Number(remoteImagePosition.value);
+  const position = 100 - value;
+
+  comicContent.style.left = `${position}%`;
+}
+
+remoteImagePosition.addEventListener("input", () => {
+  remoteImagePositionValue.value = remoteImagePosition.value;
+  updateRemoteImagePosition();
+});
+
+remoteImagePositionValue.addEventListener("input", () => {
+  const value = Math.min(100, Math.max(0, Number(remoteImagePositionValue.value)));
+
+  remoteImagePosition.value = value;
+  remoteImagePositionValue.value = value;
+
+  updateRemoteImagePosition();
+});
 
 function updateRemoteWebModeButtonSize() {
   const height = remoteSettingsPanel.getBoundingClientRect().height;
@@ -690,8 +775,10 @@ webModeButton.addEventListener("click", () => {
 
   if (nextMode === "remote") {
     remoteImageSizeControl.classList.remove("hidden");
+    remoteImagePositionControl.classList.remove("hidden");
   } else {
     remoteImageSizeControl.classList.add("hidden");
+    remoteImagePositionControl.classList.add("hidden");
   }
 
   webModeButton.textContent =

@@ -433,6 +433,7 @@ const remoteImageSizeFull = document.getElementById("remote-image-size-full");
 const comicContent = document.getElementById("comic-content");
 const remoteImagePosition = document.getElementById("remote-image-position");
 const remoteImagePositionValue = document.getElementById("remote-image-position-value");
+const remoteImagePositionTop = document.getElementById("remote-image-position-top");
 const remoteSettingsPanel = document.getElementById("remote-settings-panel");
 const remoteSettingsObserver = new ResizeObserver(() => {
   updateRemoteWebModeButtonSize();
@@ -469,6 +470,13 @@ remoteImagePositionValue.addEventListener("input", () => {
 
   remoteImagePosition.value = value;
   remoteImagePositionValue.value = value;
+
+  updateRemoteImagePosition();
+});
+
+remoteImagePositionTop.addEventListener("click", () => {
+  remoteImagePosition.value = 100;
+  remoteImagePositionValue.value = 100;
 
   updateRemoteImagePosition();
 });

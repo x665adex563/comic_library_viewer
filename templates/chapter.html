@@ -28,8 +28,7 @@ body.single-page img.current-page {
   pointer-events: none;
 }
 
-body[data-display-mode="remote"] #page-navigation,
-body[data-display-mode="remote"] #reading-mode > :not(#mobile-mode-button) {
+body[data-display-mode="remote"] #page-navigation {
   display: none;
 }
 
@@ -48,7 +47,7 @@ body[data-display-mode="remote"] #comic-content img {
   max-width: none;
 }
 
-body[data-display-mode="remote"] #mobile-mode-button,
+body[data-display-mode="remote"] #web-mode-button,
 body[data-display-mode="remote"] #remote-settings-panel {
   width: 110px;
   padding: 10px;
@@ -97,9 +96,8 @@ body[data-display-mode="remote"] #remote-image-size {
   width: 100%;
 }
 
-body[data-display-mode="remote"] #mobile-mode-ui {
-  position: fixed;
-  z-index: 1001;
+body[data-display-mode="remote"] #web-mode-ui {
+  display: none;
 }
 
 body[data-display-mode="normal"] #remote-mode-ui {
@@ -112,6 +110,10 @@ body[data-display-mode="remote"] #remote-web-mode-button {
   left:4%;
   z-index: 1003;
   transform: rotate(-90deg);
+}
+
+body[data-display-mode="remote"] #reading-mode-button {
+  display: none;
 }
 </style>
 </head>
@@ -152,6 +154,16 @@ body[data-display-mode="remote"] #remote-web-mode-button {
 
 <div id="reading-mode" class="flex flex-col gap-2 fixed top-5 right-5 z-[1000] [&_button]:py-2.5 [&_button]:px-3.5 [&_button]:bg-[#222] [&_button]:text-white [&_button]:border-0 [&_button]:rounded-lg [&_button]:cursor-pointer [&_button]:opacity-40 [&_button]:text-lg [&_button]:text-left [&_button:hover]:opacity-100 ui-fade">
   <button id="reading-mode-button"></button>
+
+  <div id="web-mode-ui" class="w-full">
+    <button
+      id="web-mode-button"
+      class="w-full py-2.5 px-3.5 bg-[#222] text-white border-0 rounded-lg cursor-pointer opacity-40 text-lg text-left hover:opacity-100"
+    >
+      Mobile Mode
+    </button>
+  </div>
+
   <button id="reading-history-button">閱讀紀錄</button>
   <button id="settings-button">設定</button>
 
@@ -218,15 +230,6 @@ body[data-display-mode="remote"] #remote-web-mode-button {
   <div id="reading-history-panel" class="hidden fixed top-5 right-[180px] w-[300px] h-[552px] p-3 bg-[#222] text-white rounded-lg z-[1001] opacity-40 transition-opacity duration-200 overflow-y-auto hover:opacity-100"></div>
 </div>
 
-<div id="mobile-mode-ui" class="w-fit">
-  <button
-    id="mobile-mode-button"
-    class="py-2.5 px-3.5 bg-[#222] text-white border-0 rounded-lg cursor-pointer opacity-40 text-lg text-left hover:opacity-100"
-  >
-    Mobile Mode
-  </button>
-</div>
-
 <div id="chapter-prompt" class="hidden fixed top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 p-5 bg-[#222] text-white rounded-lg text-center z-[2000]">
   <div id="chapter-prompt-message" class="mb-3"></div>
   <button id="chapter-prompt-button" class="py-2 px-3.5 bg-[#444] text-white border-0 rounded-md cursor-pointer hover:opacity-80"></button>
@@ -238,7 +241,7 @@ body[data-display-mode="remote"] #remote-web-mode-button {
     id="remote-web-mode-button"
     class="py-2.5 px-3.5 bg-[#222] text-white border-0 rounded-lg cursor-pointer opacity-40 text-lg text-left hover:opacity-100"
   >
-    Web Mode
+   遠端手機模式
   </button>
 
   <div id="remote-settings-panel">
@@ -293,7 +296,7 @@ const readingHistoryButton = document.getElementById("reading-history-button");
 const readingHistoryPanel = document.getElementById("reading-history-panel");
 const settingsButton = document.getElementById("settings-button");
 const settingsPanel = document.getElementById("settings-panel");
-const mobileModeButton = document.getElementById("mobile-mode-button");
+const webModeButton = document.getElementById("web-mode-button");
 const remoteWebModeButton = document.getElementById("remote-web-mode-button");
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
@@ -401,7 +404,7 @@ window.addEventListener("resize", () => {
   );
 });
 
-mobileModeButton.textContent =
+webModeButton.textContent =
   displayMode === "remote" ? "網頁模式" : "手機模式";
 
 let singlePageMaxWidth =
@@ -648,7 +651,7 @@ readingHistoryButton.addEventListener("click", () => {
   readingHistoryPanel.style.display = "block";
 });
 
-mobileModeButton.addEventListener("click", () => {
+webModeButton.addEventListener("click", () => {
   const currentMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
   const nextMode = currentMode === "remote" ? "normal" : "remote";
 
@@ -661,7 +664,7 @@ mobileModeButton.addEventListener("click", () => {
     remoteImageSizeControl.classList.add("hidden");
   }
 
-  mobileModeButton.textContent =
+  webModeButton.textContent =
     nextMode === "remote" ? "網頁模式" : "手機模式";
 });
 

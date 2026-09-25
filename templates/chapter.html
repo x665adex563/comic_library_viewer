@@ -96,6 +96,10 @@ body[data-display-mode="remote"] #remote-image-size {
   width: 100%;
 }
 
+body[data-display-mode="remote"] #back {
+  display: none;
+}
+
 body[data-display-mode="remote"] #web-mode-ui {
   display: none;
 }
@@ -109,6 +113,24 @@ body[data-display-mode="remote"] #remote-web-mode-button {
   top:3%;
   left:4%;
   z-index: 1003;
+  transform: rotate(-90deg);
+}
+
+body[data-display-mode="remote"] #remote-exit-button {
+  position: fixed;
+  bottom: 3%;
+  left: 4%;
+  z-index: 1003;
+  width: 130px;
+  height: 117px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1b1b1b;
+  border-radius: 8px;
+  font-size: 20px;
+  text-align: center;
   transform: rotate(-90deg);
 }
 
@@ -244,6 +266,13 @@ body[data-display-mode="remote"] #reading-mode-button {
    遠端手機模式
   </button>
 
+  <button
+    id="remote-exit-button"
+    class="bg-[#222] text-white border-0 rounded-lg cursor-pointer hover:opacity-100"
+  >
+    ←
+  </button>
+
   <div id="remote-settings-panel">
     <div id="remote-image-size-control" class="hidden flex flex-col items-center gap-1">
       <label for="remote-image-size">遠端模式圖片大小</label>
@@ -298,6 +327,7 @@ const settingsButton = document.getElementById("settings-button");
 const settingsPanel = document.getElementById("settings-panel");
 const webModeButton = document.getElementById("web-mode-button");
 const remoteWebModeButton = document.getElementById("remote-web-mode-button");
+const remoteExitButton = document.getElementById("remote-exit-button");
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
@@ -673,6 +703,10 @@ remoteWebModeButton.addEventListener("click", () => {
   document.body.dataset.displayMode = "normal";
 
   remoteImageSizeControl.classList.add("hidden");
+});
+
+remoteExitButton.addEventListener("click", () => {
+  document.querySelector("#back a").click();
 });
 
 settingsButton.addEventListener("click", () => {

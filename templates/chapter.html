@@ -37,7 +37,7 @@ body[data-display-mode="remote"] #comic-content {
   top: 50%;
   left: var(--remote-image-position);
   width: var(--remote-image-size);
-  transform: translate(-50%, -50%) rotate(-90deg);
+  transform: translateY(-50%) rotate(-90deg);
   transform-origin: center center;
   --remote-image-size: 100%;
 }
@@ -442,9 +442,21 @@ remoteSettingsObserver.observe(remoteSettingsPanel);
 
 function updateRemoteImagePosition() {
   const value = Number(remoteImagePosition.value);
-  const position = 100 - value;
+  const image = comicContent.querySelector("img.current-page");
 
-  comicContent.style.left = `${position}%`;
+  comicContent.style.left = "0px";
+
+  const rect = image.getBoundingClientRect();
+
+  const leftPosition = -rect.left;
+  const rightPosition = window.innerWidth - rect.width;
+
+  const progress = (100 - value) / 100;
+
+  const position =
+    leftPosition + progress * (rightPosition - leftPosition);
+
+  comicContent.style.left = `${position}px`;
 }
 
 remoteImagePosition.addEventListener("input", () => {
@@ -979,6 +991,7 @@ images.forEach((image) => {
   image.addEventListener("load", () => {
     if (image.classList.contains("current-page")) {
       updateSinglePagePosition();
+      updateRemoteImagePosition();
     }
   });
 

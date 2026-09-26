@@ -1134,6 +1134,13 @@ function showChapterPrompt(message, buttonText, link) {
   };
 }
 
+const currentPageImage = comicContent.querySelector("img.current-page");
+
+if (currentPageImage && currentPageImage.complete) {
+  updateSinglePagePosition();
+  updateRemoteImagePosition();
+}
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const prompt = document.getElementById("chapter-prompt");

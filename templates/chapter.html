@@ -100,7 +100,9 @@ body[data-display-mode="remote"] #remote-image-position-value {
   transform: rotate(-90deg);
 }
 
-body[data-display-mode="remote"] #remote-image-position-top {
+body[data-display-mode="remote"] .remote-image-position-top-label {
+  display: inline-block;
+  white-space: nowrap;
   transform: rotate(-90deg);
 }
 
@@ -340,7 +342,7 @@ body[data-display-mode="remote"] #reading-mode-button {
             class="h-[29px] !text-base box-border bg-[#444] text-white border-0 rounded p-1 cursor-pointer flex items-center justify-center hover:bg-[#555]"
             type="button"
           >
-            置頂
+            <span class="remote-image-position-top-label">置頂</span>
           </button>
         </div>
       </div>

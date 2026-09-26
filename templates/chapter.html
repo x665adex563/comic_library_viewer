@@ -1114,7 +1114,7 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  if (!comicContent.contains(event.target)) {
+  if (event.target.closest("#remote-mode-ui")) {
     return;
   }
 
@@ -1125,10 +1125,15 @@ document.addEventListener("click", (event) => {
   event.preventDefault();
   event.stopPropagation();
 
-  if (event.clientY < window.innerHeight / 2) {
+  const topZone = window.innerHeight * 0.3;
+  const bottomZone = window.innerHeight * 0.7;
+
+  if (event.clientY < topZone) {
     showNextPage();
-  } else {
+  } else if (event.clientY > bottomZone) {
     showPreviousPage();
+  } else {
+    remoteModeUI.classList.toggle("hidden");
   }
 });
 

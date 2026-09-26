@@ -820,6 +820,9 @@ webModeButton.addEventListener("click", () => {
 
   webModeButton.textContent =
     nextMode === "remote" ? "網頁模式" : "手機模式";
+
+  updateSinglePagePosition();
+  updateRemoteImagePosition();
 });
 
 remoteWebModeButton.addEventListener("click", () => {

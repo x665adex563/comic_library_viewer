@@ -391,6 +391,8 @@ body[data-display-mode="remote"] #reading-mode-button {
 const READING_MODE_KEY = "readingMode";
 const WHEEL_PAGE_KEY = "wheelPage";
 const SINGLE_PAGE_POSITION_KEY = "singlePagePosition";
+const REMOTE_IMAGE_SIZE_KEY = "remoteImageSize";
+const REMOTE_IMAGE_POSITION_KEY = "remoteImagePosition";
 
 const images = document.querySelectorAll("img");
 const PRELOAD_RANGE = 5;
@@ -446,6 +448,11 @@ if (displayMode === "remote") {
 const remoteImageSize = document.getElementById("remote-image-size");
 const remoteImageSizeValue = document.getElementById("remote-image-size-value");
 const remoteImageSizeFull = document.getElementById("remote-image-size-full");
+const remoteImageSizeSaved =
+  Number(localStorage.getItem(REMOTE_IMAGE_SIZE_KEY)) || 100;
+
+const remoteImagePositionSaved =
+  Number(localStorage.getItem(REMOTE_IMAGE_POSITION_KEY)) || 100;
 const comicContent = document.getElementById("comic-content");
 const remoteImagePosition = document.getElementById("remote-image-position");
 const remoteImagePositionValue = document.getElementById("remote-image-position-value");
@@ -480,6 +487,11 @@ function updateRemoteImagePosition() {
 remoteImagePosition.addEventListener("input", () => {
   remoteImagePositionValue.value = remoteImagePosition.value;
   updateRemoteImagePosition();
+
+  localStorage.setItem(
+    REMOTE_IMAGE_POSITION_KEY,
+    remoteImagePosition.value
+  );
 });
 
 remoteImagePositionValue.addEventListener("input", () => {
@@ -510,6 +522,20 @@ function getRemoteImageFullSize() {
 
 let remoteImageFullSize = getRemoteImageFullSize();
 
+remoteImageSize.value = remoteImageSizeSaved;
+remoteImageSizeValue.value = remoteImageSizeSaved;
+
+const savedSize =
+  (remoteImageSizeSaved / 100) * remoteImageFullSize;
+
+comicContent.style.setProperty(
+  "--remote-image-size",
+  `${savedSize}%`
+);
+
+remoteImagePosition.value = remoteImagePositionSaved;
+remoteImagePositionValue.value = remoteImagePositionSaved;
+
 remoteImageSize.addEventListener("input", () => {
   remoteImageSizeValue.value = remoteImageSize.value;
 
@@ -519,6 +545,8 @@ remoteImageSize.addEventListener("input", () => {
     "--remote-image-size",
     `${size}%`
   );
+
+  localStorage.setItem(REMOTE_IMAGE_SIZE_KEY, remoteImageSize.value);
 });
 
 remoteImageSizeValue.addEventListener("input", () => {
@@ -1024,12 +1052,21 @@ images.forEach((image) => {
   });
 
   image.addEventListener("click", () => {
+    if (document.body.dataset.displayMode === "remote") {
+      return;
+    }
+
     if (readingMode === "single") {
       showNextPage();
     }
   });
 
   image.addEventListener("contextmenu", (event) => {
+    if (document.body.dataset.displayMode === "remote") {
+      event.preventDefault();
+      return;
+    }
+
     if (readingMode === "single") {
       event.preventDefault();
       showPreviousPage();
@@ -1077,7 +1114,11 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  if (remoteModeUI.contains(event.target)) {
+  if (!comicContent.contains(event.target)) {
+    return;
+  }
+
+  if (event.target.closest("#back")) {
     return;
   }
 
@@ -1089,7 +1130,7 @@ document.addEventListener("click", (event) => {
   } else {
     showPreviousPage();
   }
-}, true);
+});
 
 document.addEventListener("click", (event) => {
   if (event.target === document.body) {
@@ -1223,6 +1264,7 @@ function showPreviousPage() {
 updatePageSelect();
 updateReadingMode();
 updateSinglePagePosition();
+updateRemoteImagePosition();
 
 const params = new URLSearchParams(location.search);
 const page = Number(params.get("page"));

@@ -27,6 +27,69 @@ body.single-page img.current-page {
   opacity: 0;
   pointer-events: none;
 }
+
+body[data-display-mode="remote"] #page-navigation {
+  display: none;
+}
+
+body[data-display-mode="remote"] #comic-content {
+  position: fixed;
+  top: 50%;
+  left: var(--remote-image-position);
+  width: var(--remote-image-size);
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: center center;
+  --remote-image-size: 100%;
+}
+
+body[data-display-mode="remote"]:not(.single-page) #comic-content {
+  position: absolute;
+}
+
+body[data-display-mode="remote"] #comic-content img {
+  width: 100%;
+  max-width: none;
+}
+
+body[data-display-mode="remote"] #back {
+  display: none;
+}
+
+body[data-display-mode="remote"] #web-mode-ui {
+  display: none;
+}
+
+body[data-display-mode="remote"] #reading-history-button,
+body[data-display-mode="remote"] #settings-button {
+  display: none;
+}
+
+body[data-display-mode="remote"] #reading-history-panel {
+  display: none !important;
+}
+
+body[data-display-mode="remote"] #settings-panel {
+  display: none !important;
+}
+
+body[data-display-mode="normal"] #remote-mode-ui {
+  display: none;
+}
+
+body[data-display-mode="remote"] #reading-mode-button {
+  display: none;
+}
+
+body[data-display-mode="remote"]:not(.single-page) {
+  overflow-x: auto;
+}
+
+/* 直立閱讀模式：禁止圖片原生拖曳 */
+body:not(.single-page) #comic-content img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
 </style>
 </head>
 
@@ -42,6 +105,7 @@ body.single-page img.current-page {
   const comicTitle = {{COMIC_TITLE}};
   const isSeries = {{IS_SERIES}};
   const READING_HISTORY_KEY = `readingHistory:${viewerPath}`;
+  const DISPLAY_MODE_KEY = "displayMode";
 </script>
 
 <div
@@ -65,8 +129,17 @@ body.single-page img.current-page {
 
 <div id="reading-mode" class="flex flex-col gap-2 fixed top-5 right-5 z-[1000] [&_button]:py-2.5 [&_button]:px-3.5 [&_button]:bg-[#222] [&_button]:text-white [&_button]:border-0 [&_button]:rounded-lg [&_button]:cursor-pointer [&_button]:opacity-40 [&_button]:text-lg [&_button]:text-left [&_button:hover]:opacity-100 ui-fade">
   <button id="reading-mode-button"></button>
-  <button id="reading-history-button">閱讀紀錄</button>
 
+  <div id="web-mode-ui" class="w-full">
+    <button
+      id="web-mode-button"
+      class="w-full py-6 px-3.5 bg-[#222] text-white border-0 rounded-lg cursor-pointer opacity-40 text-lg text-left hover:opacity-100"
+    >
+      Mobile Mode
+    </button>
+  </div>
+
+  <button id="reading-history-button">閱讀紀錄</button>
   <button id="settings-button">設定</button>
 
   <div id="settings-panel" class="hidden absolute top-[calc(100%+8px)] right-0 w-full p-4 box-border bg-[#222] text-white rounded-lg opacity-40 hover:opacity-100">
@@ -137,12 +210,196 @@ body.single-page img.current-page {
   <button id="chapter-prompt-button" class="py-2 px-3.5 bg-[#444] text-white border-0 rounded-md cursor-pointer hover:opacity-80"></button>
 </div>
 
-{{IMAGES}}
+<!-- Remote Mode 專用 UI -->
+<!-- 遠端模式 UI 外層 -->
+<div
+  id="remote-mode-ui"
+  class="fixed inset-0 z-[1002] pointer-events-none"
+>
+  <!-- 直立手機畫布，之後整組旋轉 -->
+  <div
+    id="remote-controls-canvas"
+    class="absolute top-0 left-0 w-[100vh] h-[100vw] origin-top-left pointer-events-none [transform:translateY(100vh)_rotate(-90deg)]"
+  >
+    <button
+      id="remote-exit-button"
+      class="absolute top-4 left-4 z-[1003] w-[200px] h-[200px] p-0 flex items-center justify-center bg-[#1b1b1b] rounded-[20px] text-white text-[32px] text-center pointer-events-auto"
+      type="button"
+    >
+      ←
+    </button>
+
+    <div
+      id="remote-settings-panel"
+      class="absolute top-4 right-4 w-[300px] min-h-[700px] p-[10px] box-border bg-[#222] rounded-[20px] text-white text-[20px] flex flex-col items-center gap-6 pointer-events-auto"
+    >
+      <button
+        id="remote-reading-mode-button"
+        class="w-full py-2.5 px-3.5 bg-[#222] text-white
+          border-0 rounded-lg cursor-pointer text-[40px]
+          text-center whitespace-pre-line hover:opacity-100 pointer-events-auto"
+        type="button"
+      >
+        切換閱讀模式
+      </button>
+
+      <div class="w-full border-t-4 border-[#555] my-2"></div>
+
+      <button
+        id="remote-web-mode-button"
+        class="w-full py-2.5 px-3.5 bg-[#222] text-white
+          border-x-0 border-t-0 border-0
+          rounded-lg cursor-pointer text-[40px]
+          text-center hover:opacity-100 pointer-events-auto"
+      >
+      遠端手機模式
+      </button>
+
+      <div class="w-full border-t-4 border-[#555] my-2"></div>
+
+      <button
+        id="remote-fullscreen-button"
+        class="w-full py-2.5 px-3.5 bg-[#222] text-white
+          border-0 rounded-lg cursor-pointer text-[40px]
+          text-center hover:opacity-100 pointer-events-auto"
+        type="button"
+      >
+        全螢幕
+      </button>
+
+      <div class="w-full border-t-4 border-[#555] my-2"></div>
+
+      <div
+        id="remote-image-position-control"
+        class="hidden flex flex-col items-center gap-1 border-t-0 pt-0 mt-0 min-h-[120px] text-[40px]"
+      >
+        <label for="remote-image-position">
+          圖片垂直位置
+        </label>
+
+        <div class="flex flex-row items-center justify-center gap-15">
+          <!-- 數字與置頂按鈕 -->
+          <div class="flex flex-col items-center gap-10">
+            <input
+              id="remote-image-position-value"
+              class="w-[100px] text-[40px] text-white text-center box-border bg-[#444] border-0 rounded p-1"
+              type="number"
+              min="0"
+              max="100"
+              value="100"
+            >
+
+            <button
+              id="remote-image-position-top"
+              class="w-[100px] h-[70px] text-[40px] text-white box-border bg-[#444] border-0 rounded p-1 cursor-pointer flex items-center justify-center hover:bg-[#555]"
+              type="button"
+            >
+              <span class="whitespace-nowrap">置頂</span>
+            </button>
+          </div>
+
+          <!-- 垂直滑桿 -->
+          <div class="w-[50px] h-[280px] flex items-center justify-center">
+            <input
+              id="remote-image-position"
+              class="w-[280px] shrink-0 h-[80px] -rotate-90 appearance-none
+                [&::-webkit-slider-runnable-track]:h-8
+                [&::-webkit-slider-runnable-track]:rounded-full
+                [&::-webkit-slider-runnable-track]:bg-[#666]
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:w-12
+                [&::-webkit-slider-thumb]:h-12
+                [&::-webkit-slider-thumb]:rounded-full
+                [&::-webkit-slider-thumb]:bg-white
+                [&::-webkit-slider-thumb]:border-2
+                [&::-webkit-slider-thumb]:border-[#444]
+                [&::-webkit-slider-thumb]:-mt-2
+                [&::-moz-range-track]:h-8
+                [&::-moz-range-track]:rounded-full
+                [&::-moz-range-track]:bg-[#666]
+                [&::-moz-range-thumb]:w-12
+                [&::-moz-range-thumb]:h-12
+                [&::-moz-range-thumb]:rounded-full
+                [&::-moz-range-thumb]:bg-white
+                [&::-moz-range-thumb]:border-2
+                [&::-moz-range-thumb]:border-[#444]"
+              type="range"
+              min="0"
+              max="100"
+              value="100"
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full border-t-4 border-[#555] my-2"></div>
+
+      <div id="remote-image-size-control" class="hidden flex flex-col items-center gap-5 border-t-0 pt-0 mt-0 min-h-[120px] text-[40px]">
+        <label for="remote-image-size">圖片最大寬度</label>
+
+        <div id="remote-image-size-value-control" class="flex items-center gap-10">
+          <input
+            id="remote-image-size-value"
+            class="w-[100px] text-[40px] text-white text-center box-border bg-[#444] border-0 rounded p-1"
+            type="number"
+            min="0"
+            max="100"
+            value="100"
+          >
+
+          <button
+            id="remote-image-size-full"
+            class="w-[100px] h-[70px] text-[40px] text-white box-border bg-[#444] border-0 rounded p-1 cursor-pointer flex items-center justify-center hover:bg-[#555]"
+            type="button"
+          >
+            滿版
+          </button>
+        </div>
+
+        <input
+          id="remote-image-size"
+          class="w-full h-[64px] shrink-0 appearance-none accent-[#444]
+            [&::-webkit-slider-runnable-track]:h-6
+            [&::-webkit-slider-runnable-track]:rounded-full
+            [&::-webkit-slider-runnable-track]:bg-[#666]
+            [&::-webkit-slider-thumb]:appearance-none
+            [&::-webkit-slider-thumb]:w-12
+            [&::-webkit-slider-thumb]:h-12
+            [&::-webkit-slider-thumb]:rounded-full
+            [&::-webkit-slider-thumb]:bg-white
+            [&::-webkit-slider-thumb]:border-2
+            [&::-webkit-slider-thumb]:border-[#444]
+            [&::-webkit-slider-thumb]:-mt-3
+            [&::-moz-range-track]:h-6
+            [&::-moz-range-track]:rounded-full
+            [&::-moz-range-track]:bg-[#666]
+            [&::-moz-range-thumb]:w-12
+            [&::-moz-range-thumb]:h-12
+            [&::-moz-range-thumb]:rounded-full
+            [&::-moz-range-thumb]:bg-white
+            [&::-moz-range-thumb]:border-2
+            [&::-moz-range-thumb]:border-[#444]"
+          type="range"
+          min="0"
+          max="100"
+          value="100"
+        >
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="comic-content">
+  {{IMAGES}}
+</div>
 
 <script>
 const READING_MODE_KEY = "readingMode";
 const WHEEL_PAGE_KEY = "wheelPage";
 const SINGLE_PAGE_POSITION_KEY = "singlePagePosition";
+const REMOTE_IMAGE_SIZE_KEY = "remoteImageSize";
+const REMOTE_IMAGE_POSITION_KEY = "remoteImagePosition";
 
 const images = document.querySelectorAll("img");
 const PRELOAD_RANGE = 5;
@@ -153,6 +410,15 @@ const readingHistoryButton = document.getElementById("reading-history-button");
 const readingHistoryPanel = document.getElementById("reading-history-panel");
 const settingsButton = document.getElementById("settings-button");
 const settingsPanel = document.getElementById("settings-panel");
+const webModeButton = document.getElementById("web-mode-button");
+const remoteWebModeButton = document.getElementById("remote-web-mode-button");
+const remoteReadingModeButton = document.getElementById(
+  "remote-reading-mode-button"
+);
+const remoteExitButton = document.getElementById("remote-exit-button");
+const remoteFullscreenButton = document.getElementById(
+  "remote-fullscreen-button"
+);
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
@@ -180,6 +446,163 @@ const singlePageMaxWidthFull =
   document.getElementById("single-page-max-width-full");
 
 const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
+
+const displayMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
+document.body.dataset.displayMode = displayMode;
+
+const remoteImageSizeControl = document.getElementById("remote-image-size-control");
+const remoteImagePositionControl = document.getElementById("remote-image-position-control");
+
+if (displayMode === "remote") {
+  remoteImageSizeControl.classList.remove("hidden");
+  remoteImagePositionControl.classList.remove("hidden");
+}
+
+const remoteImageSize = document.getElementById("remote-image-size");
+const remoteImageSizeValue = document.getElementById("remote-image-size-value");
+const remoteImageSizeFull = document.getElementById("remote-image-size-full");
+const remoteImageSizeSaved =
+  Number(localStorage.getItem(REMOTE_IMAGE_SIZE_KEY)) || 100;
+
+const remoteImagePositionSaved =
+  Number(localStorage.getItem(REMOTE_IMAGE_POSITION_KEY)) || 100;
+const comicContent = document.getElementById("comic-content");
+const remoteImagePosition = document.getElementById("remote-image-position");
+const remoteImagePositionValue = document.getElementById("remote-image-position-value");
+const remoteImagePositionTop = document.getElementById("remote-image-position-top");
+const remoteSettingsPanel = document.getElementById("remote-settings-panel");
+const remoteModeUI = document.getElementById("remote-mode-ui");
+const remoteSettingsObserver = new ResizeObserver(() => {
+  updateRemoteWebModeButtonSize();
+});
+
+remoteSettingsObserver.observe(remoteSettingsPanel);
+
+function updateRemoteImagePosition() {
+  const value = Number(remoteImagePosition.value);
+  const image = comicContent.querySelector("img.current-page");
+
+  comicContent.style.left = "0px";
+
+  if (!image) {
+    return;
+  }
+
+  const rect = image.getBoundingClientRect();
+
+  const leftPosition = -rect.left;
+  const rightPosition = window.innerWidth - rect.width;
+
+  const progress = (100 - value) / 100;
+
+  const position =
+    leftPosition + progress * (rightPosition - leftPosition);
+
+  comicContent.style.left = `${position}px`;
+}
+
+remoteImagePosition.addEventListener("input", () => {
+  remoteImagePositionValue.value = remoteImagePosition.value;
+  updateRemoteImagePosition();
+
+  localStorage.setItem(
+    REMOTE_IMAGE_POSITION_KEY,
+    remoteImagePosition.value
+  );
+});
+
+remoteImagePositionValue.addEventListener("input", () => {
+  const value = Math.min(100, Math.max(0, Number(remoteImagePositionValue.value)));
+
+  remoteImagePosition.value = value;
+  remoteImagePositionValue.value = value;
+
+  updateRemoteImagePosition();
+});
+
+remoteImagePositionTop.addEventListener("click", () => {
+  remoteImagePosition.value = 100;
+  remoteImagePositionValue.value = 100;
+
+  updateRemoteImagePosition();
+});
+
+function updateRemoteWebModeButtonSize() {
+  const height = remoteSettingsPanel.getBoundingClientRect().height;
+
+  remoteWebModeButton.style.width = `${height}px`;
+}
+
+function getRemoteImageFullSize() {
+  return (window.innerHeight / window.innerWidth) * 100;
+}
+
+let remoteImageFullSize = getRemoteImageFullSize();
+
+remoteImageSize.value = remoteImageSizeSaved;
+remoteImageSizeValue.value = remoteImageSizeSaved;
+
+const savedSize =
+  (remoteImageSizeSaved / 100) * remoteImageFullSize;
+
+comicContent.style.setProperty(
+  "--remote-image-size",
+  `${savedSize}%`
+);
+
+remoteImagePosition.value = remoteImagePositionSaved;
+remoteImagePositionValue.value = remoteImagePositionSaved;
+
+remoteImageSize.addEventListener("input", () => {
+  remoteImageSizeValue.value = remoteImageSize.value;
+
+  const size = (Number(remoteImageSize.value) / 100) * remoteImageFullSize;
+
+  comicContent.style.setProperty(
+    "--remote-image-size",
+    `${size}%`
+  );
+
+  localStorage.setItem(REMOTE_IMAGE_SIZE_KEY, remoteImageSize.value);
+});
+
+remoteImageSizeValue.addEventListener("input", () => {
+  const value = Math.min(100, Math.max(0, Number(remoteImageSizeValue.value)));
+
+  remoteImageSize.value = value;
+
+  const size = (value / 100) * remoteImageFullSize;
+
+  comicContent.style.setProperty(
+    "--remote-image-size",
+    `${size}%`
+  );
+});
+
+remoteImageSizeFull.addEventListener("click", () => {
+  remoteImageSize.value = 100;
+  remoteImageSizeValue.value = 100;
+
+  comicContent.style.setProperty(
+    "--remote-image-size",
+    `${remoteImageFullSize}%`
+  );
+});
+
+window.addEventListener("resize", () => {
+  remoteImageFullSize = getRemoteImageFullSize();
+
+  const value = Number(remoteImageSize.value);
+  const size = (value / 100) * remoteImageFullSize;
+
+  comicContent.style.setProperty(
+    "--remote-image-size",
+    `${size}%`
+  );
+});
+
+webModeButton.textContent =
+  displayMode === "remote" ? "網頁模式" : "手機模式";
 
 let singlePageMaxWidth =
   Number(localStorage.getItem(SINGLE_PAGE_MAX_WIDTH_KEY)) || 100;
@@ -425,6 +848,57 @@ readingHistoryButton.addEventListener("click", () => {
   readingHistoryPanel.style.display = "block";
 });
 
+webModeButton.addEventListener("click", () => {
+  const currentMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
+  const nextMode = currentMode === "remote" ? "normal" : "remote";
+
+  localStorage.setItem(DISPLAY_MODE_KEY, nextMode);
+  document.body.dataset.displayMode = nextMode;
+
+  if (nextMode === "remote") {
+    remoteImageSizeControl.classList.remove("hidden");
+    remoteImagePositionControl.classList.remove("hidden");
+  } else {
+    remoteImageSizeControl.classList.add("hidden");
+    remoteImagePositionControl.classList.add("hidden");
+  }
+
+  webModeButton.textContent =
+    nextMode === "remote" ? "網頁模式" : "手機模式";
+
+  updateSinglePagePosition();
+  updateRemoteImagePosition();
+});
+
+remoteWebModeButton.addEventListener("click", () => {
+  localStorage.setItem(DISPLAY_MODE_KEY, "normal");
+  document.body.dataset.displayMode = "normal";
+
+  remoteImageSizeControl.classList.add("hidden");
+});
+
+remoteFullscreenButton.addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else {
+      await document.documentElement.requestFullscreen();
+    }
+  } catch (error) {
+    console.error("全螢幕切換失敗：", error);
+  }
+});
+
+document.addEventListener("fullscreenchange", () => {
+  remoteFullscreenButton.textContent = document.fullscreenElement
+    ? "退出全螢幕"
+    : "全螢幕";
+});
+
+remoteExitButton.addEventListener("click", () => {
+  document.querySelector("#back a").click();
+});
+
 settingsButton.addEventListener("click", () => {
   const isVisible = settingsPanel.style.display === "block";
 
@@ -568,7 +1042,8 @@ function updateReadingMode() {
       singlePagePosition
     );
 
-    button.textContent = "閱覽模式：單頁";
+    button.textContent = "閱覽模式\n單頁";
+    remoteReadingModeButton.textContent = button.textContent;
   } else {
     document.body.classList.remove("single-page");
 
@@ -576,19 +1051,23 @@ function updateReadingMode() {
       image.classList.remove("current-page");
     });
 
-    button.textContent = "閱覽模式：直立";
+    button.textContent = "閱覽模式\n直立";
+    remoteReadingModeButton.textContent = button.textContent;
   }
   document.getElementById("wheel-page-status").textContent =
     wheelPageEnabled ? "開" : "關";
 }
 
-button.addEventListener("click", () => {
+function toggleReadingMode() {
   readingMode = readingMode === "vertical" ? "single" : "vertical";
 
   localStorage.setItem(READING_MODE_KEY, readingMode);
 
   updateReadingMode();
-});
+}
+
+button.addEventListener("click", toggleReadingMode);
+remoteReadingModeButton.addEventListener("click", toggleReadingMode);
 
 pageSelect.addEventListener("change", () => {
   const pageIndex = Number(pageSelect.value);
@@ -608,16 +1087,26 @@ images.forEach((image) => {
   image.addEventListener("load", () => {
     if (image.classList.contains("current-page")) {
       updateSinglePagePosition();
+      updateRemoteImagePosition();
     }
   });
 
   image.addEventListener("click", () => {
+    if (document.body.dataset.displayMode === "remote") {
+      return;
+    }
+
     if (readingMode === "single") {
       showNextPage();
     }
   });
 
   image.addEventListener("contextmenu", (event) => {
+    if (document.body.dataset.displayMode === "remote") {
+      event.preventDefault();
+      return;
+    }
+
     if (readingMode === "single") {
       event.preventDefault();
       showPreviousPage();
@@ -660,6 +1149,46 @@ document.addEventListener("mousemove", (event) => {
   }
 });
 
+document.addEventListener("wheel", (event) => {
+  if (
+    document.body.dataset.displayMode !== "remote" ||
+    document.body.classList.contains("single-page")
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+  document.documentElement.scrollLeft += event.deltaY;
+}, { passive: false });
+
+document.addEventListener("click", (event) => {
+  if (document.body.dataset.displayMode !== "remote") {
+    return;
+  }
+
+  if (event.target.closest("#remote-mode-ui")) {
+    return;
+  }
+
+  if (event.target.closest("#back")) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const topZone = window.innerHeight * 0.3;
+  const bottomZone = window.innerHeight * 0.7;
+
+  if (event.clientY < topZone) {
+    showNextPage();
+  } else if (event.clientY > bottomZone) {
+    showPreviousPage();
+  } else {
+    remoteModeUI.classList.toggle("hidden");
+  }
+});
+
 document.addEventListener("click", (event) => {
   if (event.target === document.body) {
     showUI();
@@ -688,6 +1217,18 @@ document.addEventListener("wheel", (event) => {
   }
 });
 
+document.addEventListener("dragstart", (event) => {
+  if (
+    document.body.classList.contains("single-page")
+  ) {
+    return;
+  }
+
+  if (event.target.closest("#comic-content img")) {
+    event.preventDefault();
+  }
+});
+
 function showChapterPrompt(message, buttonText, link) {
   const prompt = document.getElementById("chapter-prompt");
   const messageElement = document.getElementById("chapter-prompt-message");
@@ -701,6 +1242,13 @@ function showChapterPrompt(message, buttonText, link) {
   button.onclick = () => {
     window.location.href = link;
   };
+}
+
+const currentPageImage = comicContent.querySelector("img.current-page");
+
+if (currentPageImage && currentPageImage.complete) {
+  updateSinglePagePosition();
+  updateRemoteImagePosition();
 }
 
 document.addEventListener("keydown", (event) => {
@@ -785,6 +1333,7 @@ function showPreviousPage() {
 updatePageSelect();
 updateReadingMode();
 updateSinglePagePosition();
+updateRemoteImagePosition();
 
 const params = new URLSearchParams(location.search);
 const page = Number(params.get("page"));

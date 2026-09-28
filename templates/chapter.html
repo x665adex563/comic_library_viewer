@@ -188,7 +188,7 @@ body:not(.single-page) #comic-content img {
           value="100"
         >
 
-        <button id="single-page-max-width-full" class="h-[29px] !text-base box-border bg-[#444] text-white border-0 rounded p-1 cursor-pointer flex items-center justify-center hover:bg-[#555]">滿版</button>
+        <button id="single-page-max-width-full" class="h-[29px] !text-base box-border bg-[#444] text-white border-0 rounded p-1 cursor-pointer flex items-center justify-center whitespace-nowrap hover:bg-[#555]">滿版</button>
       </div>
 
       <input
@@ -395,14 +395,20 @@ body:not(.single-page) #comic-content img {
 </div>
 
 <script>
+// ==========================================
+// Local Storage Keys
+// ==========================================
 const READING_MODE_KEY = "readingMode";
 const WHEEL_PAGE_KEY = "wheelPage";
 const SINGLE_PAGE_POSITION_KEY = "singlePagePosition";
 const REMOTE_IMAGE_SIZE_KEY = "remoteImageSize";
 const REMOTE_IMAGE_POSITION_KEY = "remoteImagePosition";
-
-const images = document.querySelectorAll("img");
 const PRELOAD_RANGE = 5;
+
+// ==========================================
+// DOM Elements
+// ==========================================
+const images = document.querySelectorAll("img");
 const button = document.getElementById("reading-mode-button");
 const wheelPageButton = document.getElementById("wheel-page-button");
 const pageSelect = document.getElementById("page-select");
@@ -420,6 +426,9 @@ const remoteFullscreenButton = document.getElementById(
   "remote-fullscreen-button"
 );
 
+// ==========================================
+// Reading State
+// ==========================================
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
 let uiHideTimer;
@@ -427,6 +436,9 @@ let currentReadingPage = 0;
 let singlePagePosition =
   Number(localStorage.getItem(SINGLE_PAGE_POSITION_KEY)) || 50;
 
+// ==========================================
+// Single Page Settings
+// ==========================================
 const singlePagePositionControl =
   document.getElementById("single-page-position");
 
@@ -447,6 +459,9 @@ const singlePageMaxWidthFull =
 
 const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
 
+// ==========================================
+// Display Mode & Remote Settings
+// ==========================================
 const displayMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
 document.body.dataset.displayMode = displayMode;
 
@@ -472,6 +487,10 @@ const remoteImagePositionValue = document.getElementById("remote-image-position-
 const remoteImagePositionTop = document.getElementById("remote-image-position-top");
 const remoteSettingsPanel = document.getElementById("remote-settings-panel");
 const remoteModeUI = document.getElementById("remote-mode-ui");
+
+// ==========================================
+// Remote Settings Observer
+// ==========================================
 const remoteSettingsObserver = new ResizeObserver(() => {
   updateRemoteWebModeButtonSize();
 });
@@ -799,7 +818,7 @@ readingHistoryButton.addEventListener("click", () => {
     ? history.map((item, index) => `
           <div class="reading-history-item flex justify-between items-center p-2.5 border border-[#555] rounded-md mb-2" data-index="${index}">
             <div>
-              <span class="reading-history-title hover:underline hover:opacity-70">${item.comicTitle}</span>
+              <span class="reading-history-title cursor-pointer hover:underline hover:opacity-70">${item.comicTitle}</span>
               ${item.isSeries
                 ? `<span class="reading-history-chapter inline-block ml-2 py-[3px] px-2 bg-[#444] rounded-[5px] cursor-pointer hover:underline hover:opacity-70">第 ${item.title} 話</span>`
                 : ""}

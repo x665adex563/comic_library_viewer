@@ -118,7 +118,7 @@ body[data-display-mode="remote"] #reading-mode-button {
   <div id="web-mode-ui" class="w-full">
     <button
       id="web-mode-button"
-      class="w-full py-2.5 px-3.5 bg-[#222] text-white border-0 rounded-lg cursor-pointer opacity-40 text-lg text-left hover:opacity-100"
+      class="w-full py-6 px-3.5 bg-[#222] text-white border-0 rounded-lg cursor-pointer opacity-40 text-lg text-left hover:opacity-100"
     >
       Mobile Mode
     </button>
@@ -230,6 +230,17 @@ body[data-display-mode="remote"] #reading-mode-button {
 
       <div class="w-full border-t-4 border-[#555] my-2"></div>
 
+      <button
+        id="remote-fullscreen-button"
+        class="w-full py-2.5 px-3.5 bg-[#222] text-white
+          border-0 rounded-lg cursor-pointer text-[40px]
+          text-center hover:opacity-100 pointer-events-auto"
+        type="button"
+      >
+        全螢幕
+      </button>
+
+      <div class="w-full border-t-4 border-[#555] my-2"></div>
       <div
         id="remote-image-position-control"
         class="hidden flex flex-col items-center gap-1 border-t-0 pt-0 mt-0 min-h-[120px] text-[40px]"
@@ -374,6 +385,9 @@ const settingsPanel = document.getElementById("settings-panel");
 const webModeButton = document.getElementById("web-mode-button");
 const remoteWebModeButton = document.getElementById("remote-web-mode-button");
 const remoteExitButton = document.getElementById("remote-exit-button");
+const remoteFullscreenButton = document.getElementById(
+  "remote-fullscreen-button"
+);
 
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
@@ -826,6 +840,24 @@ remoteWebModeButton.addEventListener("click", () => {
   document.body.dataset.displayMode = "normal";
 
   remoteImageSizeControl.classList.add("hidden");
+});
+
+remoteFullscreenButton.addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else {
+      await document.documentElement.requestFullscreen();
+    }
+  } catch (error) {
+    console.error("全螢幕切換失敗：", error);
+  }
+});
+
+document.addEventListener("fullscreenchange", () => {
+  remoteFullscreenButton.textContent = document.fullscreenElement
+    ? "退出全螢幕"
+    : "全螢幕";
 });
 
 remoteExitButton.addEventListener("click", () => {

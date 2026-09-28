@@ -42,6 +42,10 @@ body[data-display-mode="remote"] #comic-content {
   --remote-image-size: 100%;
 }
 
+body[data-display-mode="remote"]:not(.single-page) #comic-content {
+  position: absolute;
+}
+
 body[data-display-mode="remote"] #comic-content img {
   width: 100%;
   max-width: none;
@@ -74,6 +78,17 @@ body[data-display-mode="normal"] #remote-mode-ui {
 
 body[data-display-mode="remote"] #reading-mode-button {
   display: none;
+}
+
+body[data-display-mode="remote"]:not(.single-page) {
+  overflow-x: auto;
+}
+
+/* 直立閱讀模式：禁止圖片原生拖曳 */
+body:not(.single-page) #comic-content img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 </style>
 </head>
@@ -219,6 +234,18 @@ body[data-display-mode="remote"] #reading-mode-button {
       class="absolute top-4 right-4 w-[300px] min-h-[700px] p-[10px] box-border bg-[#222] rounded-[20px] text-white text-[20px] flex flex-col items-center gap-6 pointer-events-auto"
     >
       <button
+        id="remote-reading-mode-button"
+        class="w-full py-2.5 px-3.5 bg-[#222] text-white
+          border-0 rounded-lg cursor-pointer text-[40px]
+          text-center whitespace-pre-line hover:opacity-100 pointer-events-auto"
+        type="button"
+      >
+        切換閱讀模式
+      </button>
+
+      <div class="w-full border-t-4 border-[#555] my-2"></div>
+
+      <button
         id="remote-web-mode-button"
         class="w-full py-2.5 px-3.5 bg-[#222] text-white
           border-x-0 border-t-0 border-0
@@ -241,6 +268,7 @@ body[data-display-mode="remote"] #reading-mode-button {
       </button>
 
       <div class="w-full border-t-4 border-[#555] my-2"></div>
+
       <div
         id="remote-image-position-control"
         class="hidden flex flex-col items-center gap-1 border-t-0 pt-0 mt-0 min-h-[120px] text-[40px]"
@@ -384,6 +412,9 @@ const settingsButton = document.getElementById("settings-button");
 const settingsPanel = document.getElementById("settings-panel");
 const webModeButton = document.getElementById("web-mode-button");
 const remoteWebModeButton = document.getElementById("remote-web-mode-button");
+const remoteReadingModeButton = document.getElementById(
+  "remote-reading-mode-button"
+);
 const remoteExitButton = document.getElementById("remote-exit-button");
 const remoteFullscreenButton = document.getElementById(
   "remote-fullscreen-button"
@@ -452,6 +483,10 @@ function updateRemoteImagePosition() {
   const image = comicContent.querySelector("img.current-page");
 
   comicContent.style.left = "0px";
+
+  if (!image) {
+    return;
+  }
 
   const rect = image.getBoundingClientRect();
 
@@ -1007,7 +1042,8 @@ function updateReadingMode() {
       singlePagePosition
     );
 
-    button.textContent = "閱覽模式：單頁";
+    button.textContent = "閱覽模式\n單頁";
+    remoteReadingModeButton.textContent = button.textContent;
   } else {
     document.body.classList.remove("single-page");
 
@@ -1015,19 +1051,23 @@ function updateReadingMode() {
       image.classList.remove("current-page");
     });
 
-    button.textContent = "閱覽模式：直立";
+    button.textContent = "閱覽模式\n直立";
+    remoteReadingModeButton.textContent = button.textContent;
   }
   document.getElementById("wheel-page-status").textContent =
     wheelPageEnabled ? "開" : "關";
 }
 
-button.addEventListener("click", () => {
+function toggleReadingMode() {
   readingMode = readingMode === "vertical" ? "single" : "vertical";
 
   localStorage.setItem(READING_MODE_KEY, readingMode);
 
   updateReadingMode();
-});
+}
+
+button.addEventListener("click", toggleReadingMode);
+remoteReadingModeButton.addEventListener("click", toggleReadingMode);
 
 pageSelect.addEventListener("change", () => {
   const pageIndex = Number(pageSelect.value);
@@ -1109,6 +1149,18 @@ document.addEventListener("mousemove", (event) => {
   }
 });
 
+document.addEventListener("wheel", (event) => {
+  if (
+    document.body.dataset.displayMode !== "remote" ||
+    document.body.classList.contains("single-page")
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+  document.documentElement.scrollLeft += event.deltaY;
+}, { passive: false });
+
 document.addEventListener("click", (event) => {
   if (document.body.dataset.displayMode !== "remote") {
     return;
@@ -1162,6 +1214,18 @@ document.addEventListener("wheel", (event) => {
     showUI();
   } else if (event.deltaY > 0) {
     hideUI();
+  }
+});
+
+document.addEventListener("dragstart", (event) => {
+  if (
+    document.body.classList.contains("single-page")
+  ) {
+    return;
+  }
+
+  if (event.target.closest("#comic-content img")) {
+    event.preventDefault();
   }
 });
 

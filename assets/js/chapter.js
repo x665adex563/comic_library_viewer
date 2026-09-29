@@ -365,24 +365,6 @@ images.forEach((image) => {
   });
 });
 
-document.addEventListener("keydown", (event) => {
-  if (readingMode !== "single") {
-    return;
-  }
-
-  if (event.key === "ArrowRight") {
-    showNextPage();
-  }
-
-  if (event.key === "ArrowLeft") {
-    showPreviousPage();
-  }
-
-  if (event.key === "ArrowUp") {
-    window.location.href = parentIndex;
-  }
-});
-
 wheelPageButton.addEventListener("click", () => {
   wheelPageEnabled = !wheelPageEnabled;
   localStorage.setItem(WHEEL_PAGE_KEY, wheelPageEnabled);
@@ -502,25 +484,6 @@ if (currentPageImage && currentPageImage.complete) {
   updateRemoteImagePosition();
 }
 
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    const prompt = document.getElementById("chapter-prompt");
-
-    if (prompt.style.display === "block") {
-      const button = document.getElementById("chapter-prompt-button");
-      button.click();
-    }
-  }
-
-  if (event.key === "Escape") {
-    const prompt = document.getElementById("chapter-prompt");
-
-    if (prompt.style.display === "block") {
-      prompt.style.display = "none";
-    }
-  }
-});
-
 function showNextPage() {
   const currentPage = document.querySelector("img.current-page");
 
@@ -580,6 +543,25 @@ function showPreviousPage() {
     );
   }
 }
+
+ChapterApp.initChapterEvents({
+  getReadingMode: () => readingMode,
+  getWheelPageEnabled: () => wheelPageEnabled,
+  setWheelPageEnabled: (value) => {
+    wheelPageEnabled = value;
+  },
+  updateReadingMode,
+  showUI,
+  hideUI,
+  showNextPage,
+  showPreviousPage,
+  parentIndex,
+  settingsPanel,
+  remoteModeUI,
+  readingHistoryPanel,
+  wheelPageButton,
+  images,
+});
 
 pageNavigation.updatePageSelect();
 updateReadingMode();

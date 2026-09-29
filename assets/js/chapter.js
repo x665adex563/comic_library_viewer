@@ -36,21 +36,10 @@ let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
 let uiHideTimer;
 let currentReadingPage = 0;
-let singlePagePosition =
-  Number(localStorage.getItem(SINGLE_PAGE_POSITION_KEY)) || 50;
 
 // ==========================================
 // Single Page Settings
 // ==========================================
-const singlePagePositionControl =
-  document.getElementById("single-page-position");
-
-const singlePagePositionValue =
-  document.getElementById("single-page-position-value");
-
-const singlePagePositionTop =
-  document.getElementById("single-page-position-top");
-
 const singlePageMaxWidthControl =
   document.getElementById("single-page-max-width");
 
@@ -110,6 +99,16 @@ const updateRemoteImagePosition =
     storageKey: REMOTE_IMAGE_POSITION_KEY,
   });
 
+const {
+  updateSinglePagePosition,
+  getSinglePagePosition,
+} = window.ChapterApp.initSinglePagePosition({
+  imagePositionControl: document.getElementById("single-page-position"),
+  imagePositionValue: document.getElementById("single-page-position-value"),
+  imagePositionTop: document.getElementById("single-page-position-top"),
+  storageKey: SINGLE_PAGE_POSITION_KEY,
+});
+
 // ==========================================
 // Remote Settings Observer
 // ==========================================
@@ -130,41 +129,6 @@ webModeButton.textContent =
 
 let singlePageMaxWidth =
   Number(localStorage.getItem(SINGLE_PAGE_MAX_WIDTH_KEY)) || 100;
-
-function updateSinglePagePosition() {
-  const currentPage = document.querySelector("img.current-page");
-
-  if (!currentPage) {
-    return;
-  }
-
-  const maxOffset =
-    currentPage.offsetHeight - window.innerHeight;
-
-  const offset =
-    maxOffset * (1 - singlePagePosition / 100);
-
-  currentPage.style.top = `${-offset}px`;
-}
-
-singlePagePositionTop.addEventListener("click", () => {
-  singlePagePosition = 100;
-
-  singlePagePositionValue.value = 100;
-  singlePagePositionControl.value = 100;
-
-  localStorage.setItem(
-    SINGLE_PAGE_POSITION_KEY,
-    singlePagePosition
-  );
-
-  document.body.style.setProperty(
-    "--single-page-position",
-    singlePagePosition
-  );
-
-  updateSinglePagePosition();
-});
 
 singlePageMaxWidthControl.value = singlePageMaxWidth;
 singlePageMaxWidthValue.value = singlePageMaxWidth;
@@ -231,55 +195,6 @@ singlePageMaxWidthValue.addEventListener("input", () => {
     "--single-page-max-width",
     `${singlePageMaxWidth}vw`
   );
-});
-
-singlePagePositionControl.value = singlePagePosition;
-singlePagePositionValue.value = singlePagePosition;
-
-singlePagePositionControl.addEventListener("input", () => {
-  singlePagePosition = Number(singlePagePositionControl.value);
-
-  singlePagePositionValue.value = singlePagePosition;
-
-  localStorage.setItem(
-    SINGLE_PAGE_POSITION_KEY,
-    singlePagePosition
-  );
-
-  document.body.style.setProperty(
-    "--single-page-position",
-    singlePagePosition
-  );
-
-  updateSinglePagePosition();
-});
-
-singlePagePositionValue.addEventListener("input", () => {
-  let value = Number(singlePagePositionValue.value);
-
-  if (value < 0) {
-    value = 0;
-  }
-
-  if (value > 100) {
-    value = 100;
-  }
-
-  singlePagePosition = value;
-  singlePagePositionValue.value = value;
-  singlePagePositionControl.value = value;
-
-  localStorage.setItem(
-    SINGLE_PAGE_POSITION_KEY,
-    singlePagePosition
-  );
-
-  document.body.style.setProperty(
-    "--single-page-position",
-    singlePagePosition
-  );
-
-  updateSinglePagePosition();
 });
 
 readingHistoryButton.addEventListener("click", () => {
@@ -538,7 +453,7 @@ function updateReadingMode() {
 
     document.body.style.setProperty(
       "--single-page-position",
-      singlePagePosition
+      getSinglePagePosition()
     );
 
     button.textContent = "閱覽模式\n單頁";

@@ -84,6 +84,7 @@ def render_chapter_template(
     chapter_app_js_path,
     preload_js_path,
     remote_mode_js_path,
+    single_page_mode_js_path,
 ):
     template = load_chapter_template()
 
@@ -118,6 +119,7 @@ def render_chapter_template(
         .replace("{{CHAPTER_APP_JS}}", chapter_app_js_path)
         .replace("{{PRELOAD_JS}}", preload_js_path)
         .replace("{{REMOTE_MODE_JS}}", remote_mode_js_path)
+        .replace("{{SINGLE_PAGE_MODE_JS}}", single_page_mode_js_path)
         .replace("{{CHAPTER_JS}}", chapter_js_path)
     )
 
@@ -306,6 +308,11 @@ def generate_chapter_html(
         html_file,
     )
 
+    single_page_mode_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "single-page-mode.js"),
+        html_file,
+    )
+
     template = render_chapter_template(
         folder_name,
         back_button_html,
@@ -321,6 +328,7 @@ def generate_chapter_html(
         chapter_app_js_path,
         preload_js_path,
         remote_mode_js_path,
+        single_page_mode_js_path,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

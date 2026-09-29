@@ -203,6 +203,23 @@ window.ChapterApp.initReadingHistoryPanel({
   storageKey: READING_HISTORY_KEY,
 });
 
+const pageNavigation = window.ChapterApp.initPageNavigation({
+  pageSelect,
+  images,
+  getReadingMode: () => readingMode,
+  onPageChange: (page) => {
+    currentReadingPage = page;
+  },
+  updateSinglePagePosition,
+  updateReadingHistoryPage: (page) => {
+    window.ChapterApp.updateReadingHistoryPage({
+      storageKey: READING_HISTORY_KEY,
+      comicTitle,
+      page,
+    });
+  },
+});
+
 webModeButton.addEventListener("click", () => {
   const currentMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
   const nextMode = currentMode === "remote" ? "normal" : "remote";
@@ -259,44 +276,6 @@ settingsButton.addEventListener("click", () => {
 
   settingsPanel.style.display = isVisible ? "none" : "block";
 });
-
-function updatePageSelect() {
-  pageSelect.innerHTML = "";
-
-  images.forEach((image, index) => {
-    const option = document.createElement("option");
-
-    option.value = index;
-    option.textContent = `${index + 1}/${images.length}`;
-
-    pageSelect.appendChild(option);
-  });
-}
-
-function updateCurrentPageSelect() {
-  const currentPage = document.querySelector("img.current-page");
-
-  if (!currentPage) {
-    return;
-  }
-
-  const currentIndex = Array.from(images).indexOf(currentPage);
-
-  pageSelect.value = currentIndex;
-  currentReadingPage = currentIndex;
-
-  window.history.replaceState(
-    null,
-    "",
-    `?page=${currentIndex}`
-  );
-
-ChapterApp.updateReadingHistoryPage({
-  storageKey: READING_HISTORY_KEY,
-  comicTitle,
-  page: currentIndex,
-});
-}
 
 function saveReadingHistory() {
   ChapterApp.saveReadingHistory({
@@ -389,20 +368,6 @@ function toggleReadingMode() {
 
 button.addEventListener("click", toggleReadingMode);
 remoteReadingModeButton.addEventListener("click", toggleReadingMode);
-
-pageSelect.addEventListener("change", () => {
-  const pageIndex = Number(pageSelect.value);
-
-  if (readingMode === "single") {
-    images.forEach((image) => {
-      image.classList.remove("current-page");
-    });
-
-    images[pageIndex].classList.add("current-page");
-  } else {
-    images[pageIndex].scrollIntoView();
-  }
-});
 
 images.forEach((image) => {
   image.addEventListener("load", () => {
@@ -604,7 +569,7 @@ function showNextPage() {
     currentPage.classList.remove("current-page");
     images[currentIndex + 1].classList.add("current-page");
     updateSinglePagePosition();
-    updateCurrentPageSelect();
+    pageNavigation.updateCurrentPageSelect();
     ChapterApp.preloadNearbyPages(images, currentIndex + 1);
     return;
   }
@@ -637,7 +602,7 @@ function showPreviousPage() {
     currentPage.classList.remove("current-page");
     images[currentIndex - 1].classList.add("current-page");
     updateSinglePagePosition();
-    updateCurrentPageSelect();
+    pageNavigation.updateCurrentPageSelect();
     ChapterApp.preloadNearbyPages(images, currentIndex - 1);
     return;
   }
@@ -651,7 +616,7 @@ function showPreviousPage() {
   }
 }
 
-updatePageSelect();
+pageNavigation.updatePageSelect();
 updateReadingMode();
 updateSinglePagePosition();
 updateRemoteImagePosition();

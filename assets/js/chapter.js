@@ -91,6 +91,15 @@ const remoteImagePositionTop = document.getElementById("remote-image-position-to
 const remoteSettingsPanel = document.getElementById("remote-settings-panel");
 const remoteModeUI = document.getElementById("remote-mode-ui");
 
+window.ChapterApp.initRemoteImageSize({
+  comicContent,
+  imageSize: remoteImageSize,
+  imageSizeValue: remoteImageSizeValue,
+  imageSizeFull: remoteImageSizeFull,
+  imageSizeSaved: remoteImageSizeSaved,
+  storageKey: REMOTE_IMAGE_SIZE_KEY,
+});
+
 // ==========================================
 // Remote Settings Observer
 // ==========================================
@@ -155,74 +164,8 @@ function updateRemoteWebModeButtonSize() {
   remoteWebModeButton.style.width = `${height}px`;
 }
 
-function getRemoteImageFullSize() {
-  return (window.innerHeight / window.innerWidth) * 100;
-}
-
-let remoteImageFullSize = getRemoteImageFullSize();
-
-remoteImageSize.value = remoteImageSizeSaved;
-remoteImageSizeValue.value = remoteImageSizeSaved;
-
-const savedSize =
-  (remoteImageSizeSaved / 100) * remoteImageFullSize;
-
-comicContent.style.setProperty(
-  "--remote-image-size",
-  `${savedSize}%`
-);
-
 remoteImagePosition.value = remoteImagePositionSaved;
 remoteImagePositionValue.value = remoteImagePositionSaved;
-
-remoteImageSize.addEventListener("input", () => {
-  remoteImageSizeValue.value = remoteImageSize.value;
-
-  const size = (Number(remoteImageSize.value) / 100) * remoteImageFullSize;
-
-  comicContent.style.setProperty(
-    "--remote-image-size",
-    `${size}%`
-  );
-
-  localStorage.setItem(REMOTE_IMAGE_SIZE_KEY, remoteImageSize.value);
-});
-
-remoteImageSizeValue.addEventListener("input", () => {
-  const value = Math.min(100, Math.max(0, Number(remoteImageSizeValue.value)));
-
-  remoteImageSize.value = value;
-
-  const size = (value / 100) * remoteImageFullSize;
-
-  comicContent.style.setProperty(
-    "--remote-image-size",
-    `${size}%`
-  );
-});
-
-remoteImageSizeFull.addEventListener("click", () => {
-  remoteImageSize.value = 100;
-  remoteImageSizeValue.value = 100;
-
-  comicContent.style.setProperty(
-    "--remote-image-size",
-    `${remoteImageFullSize}%`
-  );
-});
-
-window.addEventListener("resize", () => {
-  remoteImageFullSize = getRemoteImageFullSize();
-
-  const value = Number(remoteImageSize.value);
-  const size = (value / 100) * remoteImageFullSize;
-
-  comicContent.style.setProperty(
-    "--remote-image-size",
-    `${size}%`
-  );
-});
-
 webModeButton.textContent =
   displayMode === "remote" ? "網頁模式" : "手機模式";
 

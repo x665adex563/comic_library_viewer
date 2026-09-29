@@ -229,31 +229,6 @@ webModeButton.textContent =
 let singlePageMaxWidth =
   Number(localStorage.getItem(SINGLE_PAGE_MAX_WIDTH_KEY)) || 100;
 
-function preloadImage(image) {
-  if (!image || image.complete) {
-    return;
-  }
-
-  const preload = new Image();
-
-  preload.src = image.src;
-
-  if (preload.decode) {
-    preload.decode().catch(() => {});
-  }
-}
-
-function preloadNearbyPages(currentIndex) {
-  const start = Math.max(0, currentIndex - 5);
-  const end = Math.min(images.length - 1, currentIndex + 20);
-
-  for (let i = start; i <= end; i++) {
-    if (i !== currentIndex) {
-      preloadImage(images[i]);
-    }
-  }
-}
-
 function updateSinglePagePosition() {
   const currentPage = document.querySelector("img.current-page");
 
@@ -652,7 +627,7 @@ function updateReadingMode() {
 
     if (currentPage) {
       const currentIndex = Array.from(images).indexOf(currentPage);
-      preloadNearbyPages(currentIndex);
+      ChapterApp.preloadNearbyPages(images, currentIndex);
     }
 
     if (!document.querySelector("img.current-page") && images.length > 0) {
@@ -906,7 +881,7 @@ function showNextPage() {
     images[currentIndex + 1].classList.add("current-page");
     updateSinglePagePosition();
     updateCurrentPageSelect();
-    preloadNearbyPages(currentIndex + 1);
+    ChapterApp.preloadNearbyPages(images, currentIndex + 1);
     return;
   }
 
@@ -939,7 +914,7 @@ function showPreviousPage() {
     images[currentIndex - 1].classList.add("current-page");
     updateSinglePagePosition();
     updateCurrentPageSelect();
-    preloadNearbyPages(currentIndex - 1);
+    ChapterApp.preloadNearbyPages(images, currentIndex - 1);
     return;
   }
 

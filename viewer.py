@@ -80,6 +80,7 @@ def render_chapter_template(
     comic_title,
     is_series,
     tailwind_css_path,
+    chapter_js_path,
 ):
     template = load_chapter_template()
 
@@ -111,6 +112,7 @@ def render_chapter_template(
         .replace("{{COMIC_TITLE}}", json.dumps(comic_title))
         .replace("{{IS_SERIES}}", json.dumps(is_series))
         .replace("{{TAILWIND_CSS}}", tailwind_css_path)
+        .replace("{{CHAPTER_JS}}", chapter_js_path)
     )
 
 # --------------------
@@ -278,6 +280,11 @@ def generate_chapter_html(
         html_file,
     )
 
+    chapter_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "chapter.js"),
+        html_file,
+    )
+
     template = render_chapter_template(
         folder_name,
         back_button_html,
@@ -289,6 +296,7 @@ def generate_chapter_html(
         comic_title,
         is_series,
         tailwind_css_path,
+        chapter_js_path,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

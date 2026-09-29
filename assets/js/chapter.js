@@ -100,6 +100,16 @@ window.ChapterApp.initRemoteImageSize({
   storageKey: REMOTE_IMAGE_SIZE_KEY,
 });
 
+const updateRemoteImagePosition =
+  window.ChapterApp.initRemoteImagePosition({
+    comicContent,
+    imagePosition: remoteImagePosition,
+    imagePositionValue: remoteImagePositionValue,
+    imagePositionTop: remoteImagePositionTop,
+    imagePositionSaved: remoteImagePositionSaved,
+    storageKey: REMOTE_IMAGE_POSITION_KEY,
+  });
+
 // ==========================================
 // Remote Settings Observer
 // ==========================================
@@ -109,63 +119,12 @@ const remoteSettingsObserver = new ResizeObserver(() => {
 
 remoteSettingsObserver.observe(remoteSettingsPanel);
 
-function updateRemoteImagePosition() {
-  const value = Number(remoteImagePosition.value);
-  const image = comicContent.querySelector("img.current-page");
-
-  comicContent.style.left = "0px";
-
-  if (!image) {
-    return;
-  }
-
-  const rect = image.getBoundingClientRect();
-
-  const leftPosition = -rect.left;
-  const rightPosition = window.innerWidth - rect.width;
-
-  const progress = (100 - value) / 100;
-
-  const position =
-    leftPosition + progress * (rightPosition - leftPosition);
-
-  comicContent.style.left = `${position}px`;
-}
-
-remoteImagePosition.addEventListener("input", () => {
-  remoteImagePositionValue.value = remoteImagePosition.value;
-  updateRemoteImagePosition();
-
-  localStorage.setItem(
-    REMOTE_IMAGE_POSITION_KEY,
-    remoteImagePosition.value
-  );
-});
-
-remoteImagePositionValue.addEventListener("input", () => {
-  const value = Math.min(100, Math.max(0, Number(remoteImagePositionValue.value)));
-
-  remoteImagePosition.value = value;
-  remoteImagePositionValue.value = value;
-
-  updateRemoteImagePosition();
-});
-
-remoteImagePositionTop.addEventListener("click", () => {
-  remoteImagePosition.value = 100;
-  remoteImagePositionValue.value = 100;
-
-  updateRemoteImagePosition();
-});
-
 function updateRemoteWebModeButtonSize() {
   const height = remoteSettingsPanel.getBoundingClientRect().height;
 
   remoteWebModeButton.style.width = `${height}px`;
 }
 
-remoteImagePosition.value = remoteImagePositionSaved;
-remoteImagePositionValue.value = remoteImagePositionSaved;
 webModeButton.textContent =
   displayMode === "remote" ? "網頁模式" : "手機模式";
 

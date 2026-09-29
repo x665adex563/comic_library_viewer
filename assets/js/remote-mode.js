@@ -80,3 +80,65 @@ window.ChapterApp.initRemoteImageSize = function ({
   });
 };
 
+// 初始化遠端圖片位置控制
+window.ChapterApp.initRemoteImagePosition = function ({
+  comicContent,
+  imagePosition,
+  imagePositionValue,
+  imagePositionTop,
+  imagePositionSaved,
+  storageKey,
+}) {
+  function updateRemoteImagePosition() {
+    const value = Number(imagePosition.value);
+    const image = comicContent.querySelector("img.current-page");
+
+    comicContent.style.left = "0px";
+
+    if (!image) {
+      return;
+    }
+
+    const rect = image.getBoundingClientRect();
+
+    const leftPosition = -rect.left;
+    const rightPosition = window.innerWidth - rect.width;
+    const progress = (100 - value) / 100;
+
+    const position =
+      leftPosition + progress * (rightPosition - leftPosition);
+
+    comicContent.style.left = `${position}px`;
+  }
+
+  imagePosition.value = imagePositionSaved;
+  imagePositionValue.value = imagePositionSaved;
+
+  imagePosition.addEventListener("input", () => {
+    imagePositionValue.value = imagePosition.value;
+    updateRemoteImagePosition();
+
+    localStorage.setItem(storageKey, imagePosition.value);
+  });
+
+  imagePositionValue.addEventListener("input", () => {
+    const value = Math.min(
+      100,
+      Math.max(0, Number(imagePositionValue.value))
+    );
+
+    imagePosition.value = value;
+    imagePositionValue.value = value;
+
+    updateRemoteImagePosition();
+  });
+
+  imagePositionTop.addEventListener("click", () => {
+    imagePosition.value = 100;
+    imagePositionValue.value = 100;
+
+    updateRemoteImagePosition();
+  });
+
+  return updateRemoteImagePosition;
+};

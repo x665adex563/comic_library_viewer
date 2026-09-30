@@ -198,18 +198,22 @@ ChapterApp.initChapterEvents({
   updateReadingMode,
 });
 
-pageNavigation.updatePageSelect();
-pageNavigation.initializePageFromUrl();
-updateReadingMode();
-updateSinglePagePosition();
-updateRemoteImagePosition();
+const initializeChapter = () => {
+  pageNavigation.updatePageSelect();
+  pageNavigation.initializePageFromUrl();
+  updateReadingMode();
+  updateSinglePagePosition();
+  updateRemoteImagePosition();
 
-hideUI();
+  hideUI();
 
-ChapterApp.saveReadingHistory({
-  storageKey: READING_HISTORY_KEY,
-  comicTitle,
-  parentIndex,
-  isSeries,
-  page: pageNavigation.getCurrentPage(),
-});
+  ChapterApp.saveReadingHistory({
+    storageKey: READING_HISTORY_KEY,
+    comicTitle,
+    parentIndex,
+    isSeries,
+    page: pageNavigation.getCurrentPage(),
+  });
+};
+
+initializeChapter();

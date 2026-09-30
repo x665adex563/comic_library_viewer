@@ -189,16 +189,6 @@ settingsButton.addEventListener("click", () => {
   settingsPanel.style.display = isVisible ? "none" : "block";
 });
 
-function saveReadingHistory() {
-  ChapterApp.saveReadingHistory({
-    storageKey: READING_HISTORY_KEY,
-    comicTitle,
-    parentIndex,
-    isSeries,
-    page: currentReadingPage,
-  });
-}
-
 wheelPageButton.addEventListener("click", () => {
   wheelPageEnabled = !wheelPageEnabled;
   localStorage.setItem(WHEEL_PAGE_KEY, wheelPageEnabled);
@@ -271,4 +261,11 @@ if (!Number.isNaN(page) && page >= 0 && page < images.length) {
 }
 
 hideUI();
-saveReadingHistory();
+
+ChapterApp.saveReadingHistory({
+  storageKey: READING_HISTORY_KEY,
+  comicTitle,
+  parentIndex,
+  isSeries,
+  page: currentReadingPage,
+});

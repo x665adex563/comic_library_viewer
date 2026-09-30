@@ -217,24 +217,6 @@ document.addEventListener("wheel", (event) => {
   document.documentElement.scrollLeft += event.deltaY;
 }, { passive: false });
 
-document.addEventListener("click", (event) => {
-  if (event.target === document.body) {
-    showUI();
-  }
-});
-
-document.addEventListener("dragstart", (event) => {
-  if (
-    document.body.classList.contains("single-page")
-  ) {
-    return;
-  }
-
-  if (event.target.closest("#comic-content img")) {
-    event.preventDefault();
-  }
-});
-
 function showChapterPrompt(message, buttonText, link) {
   const prompt = document.getElementById("chapter-prompt");
   const messageElement = document.getElementById("chapter-prompt-message");

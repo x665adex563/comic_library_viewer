@@ -131,4 +131,20 @@ window.ChapterApp.initChapterEvents = function ({
       remoteModeUI.classList.toggle("hidden");
     }
   });
+
+  document.addEventListener("click", (event) => {
+    if (event.target === document.body) {
+      showUI();
+    }
+  });
+
+  document.addEventListener("dragstart", (event) => {
+    if (document.body.classList.contains("single-page")) {
+      return;
+    }
+
+    if (event.target.closest("#comic-content img")) {
+      event.preventDefault();
+    }
+  });
 };

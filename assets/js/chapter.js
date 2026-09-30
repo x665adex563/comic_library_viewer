@@ -127,74 +127,11 @@ function updateRemoteWebModeButtonSize() {
 webModeButton.textContent =
   displayMode === "remote" ? "網頁模式" : "手機模式";
 
-let singlePageMaxWidth =
-  Number(localStorage.getItem(SINGLE_PAGE_MAX_WIDTH_KEY)) || 100;
-
-singlePageMaxWidthControl.value = singlePageMaxWidth;
-singlePageMaxWidthValue.value = singlePageMaxWidth;
-
-document.body.style.setProperty(
-  "--single-page-max-width",
-  `${singlePageMaxWidth}vw`
-);
-
-singlePageMaxWidthControl.addEventListener("input", () => {
-  singlePageMaxWidth = Number(singlePageMaxWidthControl.value);
-
-  singlePageMaxWidthValue.value = singlePageMaxWidth;
-
-  localStorage.setItem(
-    SINGLE_PAGE_MAX_WIDTH_KEY,
-    singlePageMaxWidth
-  );
-
-  document.body.style.setProperty(
-    "--single-page-max-width",
-    `${singlePageMaxWidth}vw`
-  );
-});
-
-singlePageMaxWidthFull.addEventListener("click", () => {
-  singlePageMaxWidth = 100;
-
-  singlePageMaxWidthValue.value = 100;
-  singlePageMaxWidthControl.value = 100;
-
-  localStorage.setItem(
-    SINGLE_PAGE_MAX_WIDTH_KEY,
-    singlePageMaxWidth
-  );
-
-  document.body.style.setProperty(
-    "--single-page-max-width",
-    "100vw"
-  );
-});
-
-singlePageMaxWidthValue.addEventListener("input", () => {
-  let value = Number(singlePageMaxWidthValue.value);
-
-  if (value < 0) {
-    value = 0;
-  }
-
-  if (value > 100) {
-    value = 100;
-  }
-
-  singlePageMaxWidth = value;
-  singlePageMaxWidthValue.value = value;
-  singlePageMaxWidthControl.value = value;
-
-  localStorage.setItem(
-    SINGLE_PAGE_MAX_WIDTH_KEY,
-    singlePageMaxWidth
-  );
-
-  document.body.style.setProperty(
-    "--single-page-max-width",
-    `${singlePageMaxWidth}vw`
-  );
+window.ChapterApp.initSinglePageSettings({
+  maxWidthControl: singlePageMaxWidthControl,
+  maxWidthValue: singlePageMaxWidthValue,
+  maxWidthFull: singlePageMaxWidthFull,
+  storageKey: SINGLE_PAGE_MAX_WIDTH_KEY,
 });
 
 window.ChapterApp.initReadingHistoryPanel({

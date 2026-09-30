@@ -85,6 +85,7 @@ def render_chapter_template(
     preload_js_path,
     remote_mode_js_path,
     single_page_mode_js_path,
+    single_page_settings_js_path,
     reading_history_js_path,
     page_navigation_js_path,
     ui_visibility_js_path,
@@ -124,6 +125,7 @@ def render_chapter_template(
         .replace("{{PRELOAD_JS}}", preload_js_path)
         .replace("{{REMOTE_MODE_JS}}", remote_mode_js_path)
         .replace("{{SINGLE_PAGE_MODE_JS}}", single_page_mode_js_path)
+        .replace("{{SINGLE_PAGE_SETTINGS_JS}}", single_page_settings_js_path)
         .replace("{{READING_HISTORY_JS}}", reading_history_js_path)
         .replace("{{PAGE_NAVIGATION_JS}}", page_navigation_js_path)
         .replace("{{UI_VISIBILITY_JS}}", ui_visibility_js_path)
@@ -321,6 +323,11 @@ def generate_chapter_html(
         html_file,
     )
 
+    single_page_settings_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "single-page-settings.js"),
+        html_file,
+    )
+
     reading_history_js_path = html_safe_path(
         os.path.join(SCRIPT_DIR, "assets", "js", "reading-history.js"),
         html_file,
@@ -357,6 +364,7 @@ def generate_chapter_html(
         preload_js_path,
         remote_mode_js_path,
         single_page_mode_js_path,
+        single_page_settings_js_path,
         reading_history_js_path,
         page_navigation_js_path,
         ui_visibility_js_path,

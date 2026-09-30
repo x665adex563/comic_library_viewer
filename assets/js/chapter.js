@@ -199,13 +199,6 @@ const {
   parentIndex,
 });
 
-const currentPageImage = comicContent.querySelector("img.current-page");
-
-if (currentPageImage && currentPageImage.complete) {
-  updateSinglePagePosition();
-  updateRemoteImagePosition();
-}
-
 ChapterApp.initChapterEvents({
   getReadingMode: () => readingMode,
   showNextPage,
@@ -230,10 +223,10 @@ ChapterApp.initChapterEvents({
 });
 
 pageNavigation.updatePageSelect();
+pageNavigation.initializePageFromUrl();
 updateReadingMode();
 updateSinglePagePosition();
 updateRemoteImagePosition();
-pageNavigation.initializePageFromUrl();
 
 hideUI();
 

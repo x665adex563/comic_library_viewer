@@ -162,18 +162,6 @@ const pageNavigation = window.ChapterApp.initPageNavigation({
   },
 });
 
-document.addEventListener("wheel", (event) => {
-  if (
-    document.body.dataset.displayMode !== "remote" ||
-    document.body.classList.contains("single-page")
-  ) {
-    return;
-  }
-
-  event.preventDefault();
-  document.documentElement.scrollLeft += event.deltaY;
-}, { passive: false });
-
 const {
   showNextPage,
   showPreviousPage,
@@ -194,6 +182,7 @@ ChapterApp.initChapterEvents({
   updateSinglePagePosition,
   updateRemoteImagePosition,
   images,
+  comicContent,
   showUI,
   hideUI,
   settingsPanel,

@@ -6,6 +6,7 @@ window.ChapterApp.initChapterEvents = function ({
   updateSinglePagePosition,
   updateRemoteImagePosition,
   images,
+  comicContent,
   showUI,
   hideUI,
   settingsPanel,
@@ -108,6 +109,21 @@ window.ChapterApp.initChapterEvents = function ({
     else if (event.deltaY > 0) hideUI();
   });
 
+  document.addEventListener(
+    "wheel",
+    (event) => {
+      if (
+        document.body.dataset.displayMode !== "remote" ||
+        document.body.classList.contains("single-page")
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      document.documentElement.scrollLeft += event.deltaY;
+    },
+    { passive: false }
+  );
 
   document.addEventListener("click", (event) => {
     if (document.body.dataset.displayMode !== "remote") {

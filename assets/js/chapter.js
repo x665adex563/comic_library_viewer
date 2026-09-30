@@ -6,7 +6,6 @@ const WHEEL_PAGE_KEY = "wheelPage";
 const SINGLE_PAGE_POSITION_KEY = "singlePagePosition";
 const REMOTE_IMAGE_SIZE_KEY = "remoteImageSize";
 const REMOTE_IMAGE_POSITION_KEY = "remoteImagePosition";
-const PRELOAD_RANGE = 5;
 
 // ==========================================
 // DOM Elements

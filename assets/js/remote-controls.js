@@ -11,24 +11,14 @@ window.ChapterApp.initRemoteControls = function ({
   updateSinglePagePosition,
   updateRemoteImagePosition,
   storageKey,
+  initialDisplayMode,
 }) {
   webModeButton.addEventListener("click", () => {
     const currentMode = localStorage.getItem(storageKey) || "normal";
     const nextMode = currentMode === "remote" ? "normal" : "remote";
 
     localStorage.setItem(storageKey, nextMode);
-    document.body.dataset.displayMode = nextMode;
-
-    if (nextMode === "remote") {
-      remoteImageSizeControl.classList.remove("hidden");
-      remoteImagePositionControl.classList.remove("hidden");
-    } else {
-      remoteImageSizeControl.classList.add("hidden");
-      remoteImagePositionControl.classList.add("hidden");
-    }
-
-    webModeButton.textContent =
-      nextMode === "remote" ? "網頁模式" : "手機模式";
+    updateDisplayModeUI(nextMode);
 
     updateSinglePagePosition();
     updateRemoteImagePosition();
@@ -36,9 +26,7 @@ window.ChapterApp.initRemoteControls = function ({
 
   remoteWebModeButton.addEventListener("click", () => {
     localStorage.setItem(storageKey, "normal");
-    document.body.dataset.displayMode = "normal";
-
-    remoteImageSizeControl.classList.add("hidden");
+    updateDisplayModeUI("normal");
   });
 
   remoteFullscreenButton.addEventListener("click", async () => {
@@ -62,6 +50,19 @@ window.ChapterApp.initRemoteControls = function ({
   remoteExitButton.addEventListener("click", () => {
     document.querySelector("#back a").click();
   });
+
+  function updateDisplayModeUI(mode) {
+    document.body.dataset.displayMode = mode;
+
+    const isRemote = mode === "remote";
+
+    remoteImageSizeControl.classList.toggle("hidden", !isRemote);
+    remoteImagePositionControl.classList.toggle("hidden", !isRemote);
+
+    webModeButton.textContent = isRemote ? "網頁模式" : "手機模式";
+  }
+
+  updateDisplayModeUI(initialDisplayMode);
 };
 
 window.ChapterApp.initRemoteSettingsObserver = function ({

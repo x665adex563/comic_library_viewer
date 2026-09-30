@@ -54,16 +54,9 @@ const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
 // Display Mode & Remote Settings
 // ==========================================
 const displayMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
-document.body.dataset.displayMode = displayMode;
 
 const remoteImageSizeControl = document.getElementById("remote-image-size-control");
 const remoteImagePositionControl = document.getElementById("remote-image-position-control");
-
-if (displayMode === "remote") {
-  remoteImageSizeControl.classList.remove("hidden");
-  remoteImagePositionControl.classList.remove("hidden");
-}
-
 const remoteImageSize = document.getElementById("remote-image-size");
 const remoteImageSizeValue = document.getElementById("remote-image-size-value");
 const remoteImageSizeFull = document.getElementById("remote-image-size-full");
@@ -132,6 +125,7 @@ window.ChapterApp.initRemoteControls({
   updateSinglePagePosition,
   updateRemoteImagePosition,
   storageKey: DISPLAY_MODE_KEY,
+  initialDisplayMode: displayMode,
 });
 
 // ==========================================
@@ -141,9 +135,6 @@ window.ChapterApp.initRemoteSettingsObserver({
   remoteSettingsPanel,
   remoteWebModeButton,
 });
-
-webModeButton.textContent =
-  displayMode === "remote" ? "網頁模式" : "手機模式";
 
 window.ChapterApp.initSinglePageSettings({
   maxWidthControl: singlePageMaxWidthControl,

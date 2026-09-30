@@ -178,18 +178,6 @@ const pageNavigation = window.ChapterApp.initPageNavigation({
   },
 });
 
-settingsButton.addEventListener("click", () => {
-  const isVisible = settingsPanel.style.display === "block";
-
-  settingsPanel.style.display = isVisible ? "none" : "block";
-});
-
-wheelPageButton.addEventListener("click", () => {
-  wheelPageEnabled = !wheelPageEnabled;
-  localStorage.setItem(WHEEL_PAGE_KEY, wheelPageEnabled);
-  updateReadingMode();
-});
-
 document.addEventListener("wheel", (event) => {
   if (
     document.body.dataset.displayMode !== "remote" ||
@@ -235,6 +223,13 @@ ChapterApp.initChapterEvents({
   readingHistoryPanel,
   getWheelPageEnabled: () => wheelPageEnabled,
   remoteModeUI,
+  settingsButton,
+  wheelPageButton,
+  setWheelPageEnabled: (value) => {
+    wheelPageEnabled = value;
+  },
+  wheelPageKey: WHEEL_PAGE_KEY,
+  updateReadingMode,
 });
 
 pageNavigation.updatePageSelect();

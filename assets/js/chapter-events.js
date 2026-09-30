@@ -12,6 +12,11 @@ window.ChapterApp.initChapterEvents = function ({
   readingHistoryPanel,
   getWheelPageEnabled,
   remoteModeUI,
+  settingsButton,
+  wheelPageButton,
+  setWheelPageEnabled,
+  wheelPageKey,
+  updateReadingMode,
 }) {
   document.addEventListener("keydown", (event) => {
     if (getReadingMode() !== "single") {
@@ -146,5 +151,19 @@ window.ChapterApp.initChapterEvents = function ({
     if (event.target.closest("#comic-content img")) {
       event.preventDefault();
     }
+  });
+
+  settingsButton.addEventListener("click", () => {
+    const isVisible = settingsPanel.style.display === "block";
+
+    settingsPanel.style.display = isVisible ? "none" : "block";
+  });
+
+  wheelPageButton.addEventListener("click", () => {
+    const enabled = !getWheelPageEnabled();
+
+    setWheelPageEnabled(enabled);
+    localStorage.setItem(wheelPageKey, enabled);
+    updateReadingMode();
   });
 };

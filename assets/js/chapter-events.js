@@ -6,6 +6,11 @@ window.ChapterApp.initChapterEvents = function ({
   updateSinglePagePosition,
   updateRemoteImagePosition,
   images,
+  showUI,
+  hideUI,
+  settingsPanel,
+  readingHistoryPanel,
+  getWheelPageEnabled,
 }) {
   document.addEventListener("keydown", (event) => {
     if (getReadingMode() !== "single") {
@@ -68,5 +73,32 @@ window.ChapterApp.initChapterEvents = function ({
         showPreviousPage();
       }
     });
+  });
+
+  document.addEventListener("mousemove", (event) => {
+    const upperAreaHeight = window.innerHeight * 0.3;
+
+    if (
+      event.clientY <= upperAreaHeight ||
+      settingsPanel.contains(event.target)
+    ) {
+      showUI();
+    }
+  });
+
+  document.addEventListener("wheel", (event) => {
+    if (readingHistoryPanel.contains(event.target)) return;
+
+    if (
+      getReadingMode() === "single" &&
+      getWheelPageEnabled()
+    ) {
+      if (event.deltaY > 0) showNextPage();
+      else if (event.deltaY < 0) showPreviousPage();
+      return;
+    }
+
+    if (event.deltaY < 0) showUI();
+    else if (event.deltaY > 0) hideUI();
   });
 };

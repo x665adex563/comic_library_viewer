@@ -3,10 +3,11 @@ window.ChapterApp.initPageNavigation = ({
   pageSelect,
   images,
   getReadingMode,
-  onPageChange,
   updateSinglePagePosition,
   updateReadingHistoryPage,
 }) => {
+  let currentPage = 0;
+
   const updatePageSelect = () => {
     pageSelect.innerHTML = "";
 
@@ -31,7 +32,7 @@ window.ChapterApp.initPageNavigation = ({
 
     pageSelect.value = currentIndex;
 
-    onPageChange(currentIndex);
+    currentPage = currentIndex;
 
     window.history.replaceState(
       null,
@@ -70,7 +71,7 @@ window.ChapterApp.initPageNavigation = ({
     });
 
     images[page].classList.add("current-page");
-    onPageChange(page);
+    currentPage = page;
     pageSelect.value = page;
   };
 
@@ -78,5 +79,6 @@ window.ChapterApp.initPageNavigation = ({
     updatePageSelect,
     updateCurrentPageSelect,
     initializePageFromUrl,
+    getCurrentPage: () => currentPage,
   };
 };

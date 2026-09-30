@@ -33,7 +33,6 @@ const remoteFullscreenButton = document.getElementById(
 // ==========================================
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
-let currentReadingPage = 0;
 const { showUI, hideUI } = ChapterApp.initUIVisibility();
 
 // ==========================================
@@ -153,9 +152,6 @@ const pageNavigation = window.ChapterApp.initPageNavigation({
   pageSelect,
   images,
   getReadingMode: () => readingMode,
-  onPageChange: (page) => {
-    currentReadingPage = page;
-  },
   updateSinglePagePosition,
   updateReadingHistoryPage: (page) => {
     window.ChapterApp.updateReadingHistoryPage({
@@ -226,5 +222,5 @@ ChapterApp.saveReadingHistory({
   comicTitle,
   parentIndex,
   isSeries,
-  page: currentReadingPage,
+  page: pageNavigation.getCurrentPage(),
 });

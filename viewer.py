@@ -90,6 +90,7 @@ def render_chapter_template(
     page_navigation_js_path,
     ui_visibility_js_path,
     chapter_events_js_path,
+    remote_controls_js_path,
 ):
     template = load_chapter_template()
 
@@ -130,6 +131,7 @@ def render_chapter_template(
         .replace("{{PAGE_NAVIGATION_JS}}", page_navigation_js_path)
         .replace("{{UI_VISIBILITY_JS}}", ui_visibility_js_path)
         .replace("{{CHAPTER_EVENTS_JS}}", chapter_events_js_path)
+        .replace("{{REMOTE_CONTROLS_JS}}", remote_controls_js_path)
         .replace("{{CHAPTER_JS}}", chapter_js_path)
     )
 
@@ -348,6 +350,11 @@ def generate_chapter_html(
         html_file,
     )
 
+    remote_controls_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "remote-controls.js"),
+        html_file,
+    )
+
     template = render_chapter_template(
         folder_name,
         back_button_html,
@@ -369,6 +376,7 @@ def generate_chapter_html(
         page_navigation_js_path,
         ui_visibility_js_path,
         chapter_events_js_path,
+        remote_controls_js_path,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

@@ -63,3 +63,18 @@ window.ChapterApp.initRemoteControls = function ({
     document.querySelector("#back a").click();
   });
 };
+
+window.ChapterApp.initRemoteSettingsObserver = function ({
+  remoteSettingsPanel,
+  remoteWebModeButton,
+}) {
+  const observer = new ResizeObserver(() => {
+    const height = remoteSettingsPanel.getBoundingClientRect().height;
+
+    remoteWebModeButton.style.width = `${height}px`;
+  });
+
+  observer.observe(remoteSettingsPanel);
+
+  return observer;
+};

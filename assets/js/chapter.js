@@ -137,13 +137,10 @@ window.ChapterApp.initRemoteControls({
 // ==========================================
 // Remote Settings Observer
 // ==========================================
-const remoteSettingsObserver = new ResizeObserver(() => {
-  const height = remoteSettingsPanel.getBoundingClientRect().height;
-
-  remoteWebModeButton.style.width = `${height}px`;
+window.ChapterApp.initRemoteSettingsObserver({
+  remoteSettingsPanel,
+  remoteWebModeButton,
 });
-
-remoteSettingsObserver.observe(remoteSettingsPanel);
 
 webModeButton.textContent =
   displayMode === "remote" ? "網頁模式" : "手機模式";

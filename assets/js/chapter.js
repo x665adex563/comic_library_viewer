@@ -233,19 +233,7 @@ pageNavigation.updatePageSelect();
 updateReadingMode();
 updateSinglePagePosition();
 updateRemoteImagePosition();
-
-const params = new URLSearchParams(location.search);
-const page = Number(params.get("page"));
-
-if (!Number.isNaN(page) && page >= 0 && page < images.length) {
-  images.forEach((image) => {
-    image.classList.remove("current-page");
-  });
-
-  images[page].classList.add("current-page");
-  currentReadingPage = page;
-  pageSelect.value = page;
-}
+pageNavigation.initializePageFromUrl();
 
 hideUI();
 

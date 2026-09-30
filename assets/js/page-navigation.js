@@ -57,8 +57,26 @@ window.ChapterApp.initPageNavigation = ({
     }
   });
 
+  const initializePageFromUrl = () => {
+    const params = new URLSearchParams(location.search);
+    const page = Number(params.get("page"));
+
+    if (Number.isNaN(page) || page < 0 || page >= images.length) {
+      return;
+    }
+
+    images.forEach((image) => {
+      image.classList.remove("current-page");
+    });
+
+    images[page].classList.add("current-page");
+    onPageChange(page);
+    pageSelect.value = page;
+  };
+
   return {
     updatePageSelect,
     updateCurrentPageSelect,
+    initializePageFromUrl,
   };
 };

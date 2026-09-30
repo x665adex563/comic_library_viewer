@@ -199,37 +199,6 @@ function saveReadingHistory() {
   });
 }
 
-images.forEach((image) => {
-  image.addEventListener("load", () => {
-    if (image.classList.contains("current-page")) {
-      updateSinglePagePosition();
-      updateRemoteImagePosition();
-    }
-  });
-
-  image.addEventListener("click", () => {
-    if (document.body.dataset.displayMode === "remote") {
-      return;
-    }
-
-    if (readingMode === "single") {
-      showNextPage();
-    }
-  });
-
-  image.addEventListener("contextmenu", (event) => {
-    if (document.body.dataset.displayMode === "remote") {
-      event.preventDefault();
-      return;
-    }
-
-    if (readingMode === "single") {
-      event.preventDefault();
-      showPreviousPage();
-    }
-  });
-});
-
 wheelPageButton.addEventListener("click", () => {
   wheelPageEnabled = !wheelPageEnabled;
   localStorage.setItem(WHEEL_PAGE_KEY, wheelPageEnabled);
@@ -411,20 +380,11 @@ function showPreviousPage() {
 
 ChapterApp.initChapterEvents({
   getReadingMode: () => readingMode,
-  getWheelPageEnabled: () => wheelPageEnabled,
-  setWheelPageEnabled: (value) => {
-    wheelPageEnabled = value;
-  },
-  updateReadingMode,
-  showUI,
-  hideUI,
   showNextPage,
   showPreviousPage,
   parentIndex,
-  settingsPanel,
-  remoteModeUI,
-  readingHistoryPanel,
-  wheelPageButton,
+  updateSinglePagePosition,
+  updateRemoteImagePosition,
   images,
 });
 

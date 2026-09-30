@@ -1,17 +1,10 @@
 window.ChapterApp.initChapterEvents = function ({
   getReadingMode,
-  getWheelPageEnabled,
-  setWheelPageEnabled,
-  updateReadingMode,
-  showUI,
-  hideUI,
   showNextPage,
   showPreviousPage,
   parentIndex,
-  settingsPanel,
-  remoteModeUI,
-  readingHistoryPanel,
-  wheelPageButton,
+  updateSinglePagePosition,
+  updateRemoteImagePosition,
   images,
 }) {
   document.addEventListener("keydown", (event) => {
@@ -49,5 +42,31 @@ window.ChapterApp.initChapterEvents = function ({
         prompt.style.display = "none";
       }
     }
+  });
+
+  images.forEach((image) => {
+    image.addEventListener("load", () => {
+      if (image.classList.contains("current-page")) {
+        updateSinglePagePosition();
+        updateRemoteImagePosition();
+      }
+    });
+
+    image.addEventListener("click", () => {
+      if (document.body.dataset.displayMode === "remote") return;
+      if (getReadingMode() === "single") showNextPage();
+    });
+
+    image.addEventListener("contextmenu", (event) => {
+      if (document.body.dataset.displayMode === "remote") {
+        event.preventDefault();
+        return;
+      }
+
+      if (getReadingMode() === "single") {
+        event.preventDefault();
+        showPreviousPage();
+      }
+    });
   });
 };

@@ -22,16 +22,15 @@ window.ChapterApp.initPageNavigation = ({
   };
 
   const updateCurrentPageSelect = () => {
-    const currentPage = document.querySelector("img.current-page");
+    const currentImage = document.querySelector("img.current-page");
 
-    if (!currentPage) {
+    if (!currentImage) {
       return;
     }
 
-    const currentIndex = Array.from(images).indexOf(currentPage);
+    const currentIndex = Array.from(images).indexOf(currentImage);
 
     pageSelect.value = currentIndex;
-
     currentPage = currentIndex;
 
     window.history.replaceState(
@@ -56,6 +55,8 @@ window.ChapterApp.initPageNavigation = ({
     } else {
       images[pageIndex].scrollIntoView();
     }
+
+    updateCurrentPageSelect();
   });
 
   const initializePageFromUrl = () => {

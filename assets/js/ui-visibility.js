@@ -1,11 +1,11 @@
 window.ChapterApp.initUIVisibility = function () {
   let uiHideTimer;
 
-  function showUI() {
-    const back = document.getElementById("back");
-    const readingMode = document.getElementById("reading-mode");
-    const pageNavigation = document.getElementById("page-navigation");
+  const back = document.getElementById("back");
+  const readingMode = document.getElementById("reading-mode");
+  const pageNavigation = document.getElementById("page-navigation");
 
+  function showUI() {
     back.classList.remove("ui-hidden");
     readingMode.classList.remove("ui-hidden");
     pageNavigation.classList.remove("ui-hidden");
@@ -26,17 +26,15 @@ window.ChapterApp.initUIVisibility = function () {
   }
 
   function hideUI() {
-    document.getElementById("back").classList.add("ui-hidden");
-    document.getElementById("reading-mode").classList.add("ui-hidden");
-    document.getElementById("page-navigation").classList.add("ui-hidden");
+    back.classList.add("ui-hidden");
+    readingMode.classList.add("ui-hidden");
+    pageNavigation.classList.add("ui-hidden");
 
     clearTimeout(uiHideTimer);
   }
 
-  document.getElementById("back").addEventListener("mouseleave", showUI);
-  document
-    .getElementById("reading-mode")
-    .addEventListener("mouseleave", showUI);
+  back.addEventListener("mouseleave", showUI);
+  readingMode.addEventListener("mouseleave", showUI);
 
   return {
     showUI,

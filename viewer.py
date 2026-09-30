@@ -88,6 +88,7 @@ def render_chapter_template(
     single_page_settings_js_path,
     reading_history_js_path,
     page_navigation_js_path,
+    page_turning_js_path,
     ui_visibility_js_path,
     chapter_events_js_path,
     remote_controls_js_path,
@@ -130,6 +131,7 @@ def render_chapter_template(
         .replace("{{SINGLE_PAGE_SETTINGS_JS}}", single_page_settings_js_path)
         .replace("{{READING_HISTORY_JS}}", reading_history_js_path)
         .replace("{{PAGE_NAVIGATION_JS}}", page_navigation_js_path)
+        .replace("{{PAGE_TURNING_JS}}", page_turning_js_path)
         .replace("{{UI_VISIBILITY_JS}}", ui_visibility_js_path)
         .replace("{{CHAPTER_EVENTS_JS}}", chapter_events_js_path)
         .replace("{{REMOTE_CONTROLS_JS}}", remote_controls_js_path)
@@ -342,6 +344,11 @@ def generate_chapter_html(
         html_file,
     )
 
+    page_turning_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "page-turning.js"),
+        html_file,
+    )
+
     ui_visibility_js_path = html_safe_path(
         os.path.join(SCRIPT_DIR, "assets", "js", "ui-visibility.js"),
         html_file,
@@ -381,6 +388,7 @@ def generate_chapter_html(
         single_page_settings_js_path,
         reading_history_js_path,
         page_navigation_js_path,
+        page_turning_js_path,
         ui_visibility_js_path,
         chapter_events_js_path,
         remote_controls_js_path,

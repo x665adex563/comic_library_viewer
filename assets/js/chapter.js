@@ -218,34 +218,6 @@ document.addEventListener("wheel", (event) => {
 }, { passive: false });
 
 document.addEventListener("click", (event) => {
-  if (document.body.dataset.displayMode !== "remote") {
-    return;
-  }
-
-  if (event.target.closest("#remote-mode-ui")) {
-    return;
-  }
-
-  if (event.target.closest("#back")) {
-    return;
-  }
-
-  event.preventDefault();
-  event.stopPropagation();
-
-  const topZone = window.innerHeight * 0.3;
-  const bottomZone = window.innerHeight * 0.7;
-
-  if (event.clientY < topZone) {
-    showNextPage();
-  } else if (event.clientY > bottomZone) {
-    showPreviousPage();
-  } else {
-    remoteModeUI.classList.toggle("hidden");
-  }
-});
-
-document.addEventListener("click", (event) => {
   if (event.target === document.body) {
     showUI();
   }
@@ -358,6 +330,7 @@ ChapterApp.initChapterEvents({
   settingsPanel,
   readingHistoryPanel,
   getWheelPageEnabled: () => wheelPageEnabled,
+  remoteModeUI,
 });
 
 pageNavigation.updatePageSelect();

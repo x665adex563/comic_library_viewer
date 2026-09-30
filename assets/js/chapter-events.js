@@ -11,6 +11,7 @@ window.ChapterApp.initChapterEvents = function ({
   settingsPanel,
   readingHistoryPanel,
   getWheelPageEnabled,
+  remoteModeUI,
 }) {
   document.addEventListener("keydown", (event) => {
     if (getReadingMode() !== "single") {
@@ -100,5 +101,34 @@ window.ChapterApp.initChapterEvents = function ({
 
     if (event.deltaY < 0) showUI();
     else if (event.deltaY > 0) hideUI();
+  });
+
+
+  document.addEventListener("click", (event) => {
+    if (document.body.dataset.displayMode !== "remote") {
+      return;
+    }
+
+    if (event.target.closest("#remote-mode-ui")) {
+      return;
+    }
+
+    if (event.target.closest("#back")) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const topZone = window.innerHeight * 0.3;
+    const bottomZone = window.innerHeight * 0.7;
+
+    if (event.clientY < topZone) {
+      showNextPage();
+    } else if (event.clientY > bottomZone) {
+      showPreviousPage();
+    } else {
+      remoteModeUI.classList.toggle("hidden");
+    }
   });
 };

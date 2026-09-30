@@ -109,6 +109,20 @@ const {
   storageKey: SINGLE_PAGE_POSITION_KEY,
 });
 
+const { updateReadingMode } = window.ChapterApp.initReadingMode({
+  button,
+  remoteReadingModeButton,
+  images,
+  getReadingMode: () => readingMode,
+  setReadingMode: (value) => {
+    readingMode = value;
+  },
+  getSinglePagePosition,
+  preloadNearbyPages: ChapterApp.preloadNearbyPages,
+  getWheelPageEnabled: () => wheelPageEnabled,
+  storageKey: READING_MODE_KEY,
+});
+
 window.ChapterApp.initRemoteControls({
   webModeButton,
   remoteWebModeButton,
@@ -184,53 +198,6 @@ function saveReadingHistory() {
     page: currentReadingPage,
   });
 }
-
-function updateReadingMode() {
-  if (readingMode === "single") {
-    document.body.classList.add("single-page");
-
-    const currentPage = document.querySelector("img.current-page");
-
-    if (currentPage) {
-      const currentIndex = Array.from(images).indexOf(currentPage);
-      ChapterApp.preloadNearbyPages(images, currentIndex);
-    }
-
-    if (!document.querySelector("img.current-page") && images.length > 0) {
-      images[0].classList.add("current-page");
-    }
-
-    document.body.style.setProperty(
-      "--single-page-position",
-      getSinglePagePosition()
-    );
-
-    button.textContent = "閱覽模式\n單頁";
-    remoteReadingModeButton.textContent = button.textContent;
-  } else {
-    document.body.classList.remove("single-page");
-
-    images.forEach((image) => {
-      image.classList.remove("current-page");
-    });
-
-    button.textContent = "閱覽模式\n直立";
-    remoteReadingModeButton.textContent = button.textContent;
-  }
-  document.getElementById("wheel-page-status").textContent =
-    wheelPageEnabled ? "開" : "關";
-}
-
-function toggleReadingMode() {
-  readingMode = readingMode === "vertical" ? "single" : "vertical";
-
-  localStorage.setItem(READING_MODE_KEY, readingMode);
-
-  updateReadingMode();
-}
-
-button.addEventListener("click", toggleReadingMode);
-remoteReadingModeButton.addEventListener("click", toggleReadingMode);
 
 images.forEach((image) => {
   image.addEventListener("load", () => {

@@ -27,6 +27,14 @@ const remoteExitButton = document.getElementById("remote-exit-button");
 const remoteFullscreenButton = document.getElementById(
   "remote-fullscreen-button"
 );
+const singlePageMaxWidthControl =
+  document.getElementById("single-page-max-width");
+
+const singlePageMaxWidthValue =
+  document.getElementById("single-page-max-width-value");
+
+const singlePageMaxWidthFull =
+  document.getElementById("single-page-max-width-full");
 
 // ==========================================
 // Reading State
@@ -38,15 +46,6 @@ const { showUI, hideUI } = ChapterApp.initUIVisibility();
 // ==========================================
 // Single Page Settings
 // ==========================================
-const singlePageMaxWidthControl =
-  document.getElementById("single-page-max-width");
-
-const singlePageMaxWidthValue =
-  document.getElementById("single-page-max-width-value");
-
-const singlePageMaxWidthFull =
-  document.getElementById("single-page-max-width-full");
-
 const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
 
 // ==========================================

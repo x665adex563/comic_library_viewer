@@ -23,6 +23,21 @@ window.ChapterApp.initPageTurning = function ({
     };
   }
 
+  function showPage(index) {
+    const currentPage = document.querySelector("img.current-page");
+
+    if (!currentPage) {
+      return;
+    }
+
+    currentPage.classList.remove("current-page");
+    images[index].classList.add("current-page");
+
+    updateSinglePagePosition();
+    pageNavigation.updateCurrentPageSelect();
+    ChapterApp.preloadNearbyPages(images, index);
+  }
+
   function showNextPage() {
     const currentPage = document.querySelector("img.current-page");
 
@@ -33,11 +48,7 @@ window.ChapterApp.initPageTurning = function ({
     const currentIndex = Array.from(images).indexOf(currentPage);
 
     if (currentIndex < images.length - 1) {
-      currentPage.classList.remove("current-page");
-      images[currentIndex + 1].classList.add("current-page");
-      updateSinglePagePosition();
-      pageNavigation.updateCurrentPageSelect();
-      ChapterApp.preloadNearbyPages(images, currentIndex + 1);
+      showPage(currentIndex + 1);
       return;
     }
 
@@ -66,11 +77,7 @@ window.ChapterApp.initPageTurning = function ({
     const currentIndex = Array.from(images).indexOf(currentPage);
 
     if (currentIndex > 0) {
-      currentPage.classList.remove("current-page");
-      images[currentIndex - 1].classList.add("current-page");
-      updateSinglePagePosition();
-      pageNavigation.updateCurrentPageSelect();
-      ChapterApp.preloadNearbyPages(images, currentIndex - 1);
+      showPage(currentIndex - 1);
       return;
     }
 

@@ -113,22 +113,6 @@ window.ChapterApp.initRemoteImagePosition = function ({
       comicContent.querySelector("img.current-page") ||
       images[getCurrentPage()];
 
-    console.log("[remote target]", {
-      currentPage: image
-        ? Array.from(comicContent.querySelectorAll("img")).indexOf(image) + 1
-        : null,
-      imageCount: comicContent.querySelectorAll("img").length,
-      imageLeft: image?.getBoundingClientRect().left,
-      contentLeft: comicContent.getBoundingClientRect().left,
-    });
-
-    console.log("[remote target]", {
-      currentPage: image
-        ? Array.from(comicContent.querySelectorAll("img")).indexOf(image) + 1
-        : null,
-      imageLeft: image?.getBoundingClientRect().left,
-    });
-
     comicContent.style.left = "0px";
 
     if (!image) {
@@ -144,34 +128,10 @@ window.ChapterApp.initRemoteImagePosition = function ({
     const position =
       leftPosition + progress * (rightPosition - leftPosition);
 
-    console.log("[remote position]", {
-      value,
-      leftPosition,
-      rightPosition,
-      progress,
-      position,
-      imageLeft: rect.left,
-      imageWidth: rect.width,
-      viewportWidth: window.innerWidth,
-    });
-
-    console.log("[remote position]", {
-      value,
-      imageLeft: rect.left,
-      imageWidth: rect.width,
-      leftPosition,
-      rightPosition,
-      progress,
-      position,
-      contentLeft: comicContent.getBoundingClientRect().left,
-    });
-
     comicContent.style.left = `${position}px`;
   }
 
   function setRemoteImagePosition(value) {
-    console.log("[slider input]", value);
-
     imagePosition.value = value;
     imagePositionValue.value = value;
     updateRemoteImagePosition();

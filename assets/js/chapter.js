@@ -146,23 +146,6 @@ window.ChapterApp.initRemoteControls({
 
       image.classList.add("current-page");
       updateRemoteImagePosition();
-
-      console.log("[remote geometry]", {
-        pageIndex,
-        scrollY: window.scrollY,
-        scrollX: window.scrollX,
-        scrollWidth: document.documentElement.scrollWidth,
-        clientWidth: document.documentElement.clientWidth,
-        contentScrollWidth: comicContent.scrollWidth,
-        scrollHeight: document.documentElement.scrollHeight,
-        clientHeight: document.documentElement.clientHeight,
-        content: comicContent.getBoundingClientRect().toJSON(),
-        firstImage: images[0]?.getBoundingClientRect().toJSON(),
-        currentImage: image.getBoundingClientRect().toJSON(),
-        lastImage: images[images.length - 1]
-          ?.getBoundingClientRect()
-          .toJSON(),
-      });
     } else {
       image.scrollIntoView({ block: "start" });
     }

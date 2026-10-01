@@ -98,12 +98,17 @@ window.ChapterApp.initRemoteImagePosition = function ({
     comicContent.style.left = `${position}px`;
   }
 
+  function setRemoteImagePosition(value) {
+    imagePosition.value = value;
+    imagePositionValue.value = value;
+    updateRemoteImagePosition();
+  }
+
   imagePosition.value = imagePositionSaved;
   imagePositionValue.value = imagePositionSaved;
 
   imagePosition.addEventListener("input", () => {
-    imagePositionValue.value = imagePosition.value;
-    updateRemoteImagePosition();
+    setRemoteImagePosition(imagePosition.value);
 
     localStorage.setItem(storageKey, imagePosition.value);
   });
@@ -114,17 +119,11 @@ window.ChapterApp.initRemoteImagePosition = function ({
       Math.max(0, Number(imagePositionValue.value))
     );
 
-    imagePosition.value = value;
-    imagePositionValue.value = value;
-
-    updateRemoteImagePosition();
+    setRemoteImagePosition(value);
   });
 
   imagePositionTop.addEventListener("click", () => {
-    imagePosition.value = 100;
-    imagePositionValue.value = 100;
-
-    updateRemoteImagePosition();
+    setRemoteImagePosition(100);
   });
 
   return updateRemoteImagePosition;

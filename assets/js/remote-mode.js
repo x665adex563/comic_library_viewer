@@ -17,26 +17,24 @@ window.ChapterApp.initRemoteImageSize = function ({
 
   let remoteImageFullSize = getRemoteImageFullSize();
 
-  imageSize.value = imageSizeSaved;
-  imageSizeValue.value = imageSizeSaved;
-
-  const savedSize = (imageSizeSaved / 100) * remoteImageFullSize;
-
-  comicContent.style.setProperty(
-    "--remote-image-size",
-    `${savedSize}%`
-  );
-
-  imageSize.addEventListener("input", () => {
-    imageSizeValue.value = imageSize.value;
-
-    const size =
-      (Number(imageSize.value) / 100) * remoteImageFullSize;
+  function updateRemoteImageSize(value) {
+    const size = (Number(value) / 100) * remoteImageFullSize;
 
     comicContent.style.setProperty(
       "--remote-image-size",
       `${size}%`
     );
+  }
+
+  imageSize.value = imageSizeSaved;
+  imageSizeValue.value = imageSizeSaved;
+
+  updateRemoteImageSize(imageSizeSaved);
+
+  imageSize.addEventListener("input", () => {
+    imageSizeValue.value = imageSize.value;
+
+    updateRemoteImageSize(imageSize.value);
 
     localStorage.setItem(storageKey, imageSize.value);
   });
@@ -49,12 +47,7 @@ window.ChapterApp.initRemoteImageSize = function ({
 
     imageSize.value = value;
 
-    const size = (value / 100) * remoteImageFullSize;
-
-    comicContent.style.setProperty(
-      "--remote-image-size",
-      `${size}%`
-    );
+    updateRemoteImageSize(value);
   });
 
   imageSizeFull.addEventListener("click", () => {
@@ -70,13 +63,7 @@ window.ChapterApp.initRemoteImageSize = function ({
   window.addEventListener("resize", () => {
     remoteImageFullSize = getRemoteImageFullSize();
 
-    const value = Number(imageSize.value);
-    const size = (value / 100) * remoteImageFullSize;
-
-    comicContent.style.setProperty(
-      "--remote-image-size",
-      `${size}%`
-    );
+    updateRemoteImageSize(imageSize.value);
   });
 };
 

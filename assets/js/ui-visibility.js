@@ -22,7 +22,7 @@ window.ChapterApp.initUIVisibility = function () {
 
     uiHideTimer = setTimeout(() => {
       hideUI();
-    }, 500);
+    }, 2500);
   }
 
   function hideUI() {

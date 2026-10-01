@@ -18,6 +18,8 @@ window.ChapterApp.initChapterEvents = function ({
   setWheelPageEnabled,
   wheelPageKey,
   updateReadingMode,
+  pageNavigation,
+  isSwitchingDisplayMode,
 }) {
   document.addEventListener("keydown", (event) => {
     if (getReadingMode() === "single") {
@@ -116,7 +118,7 @@ window.ChapterApp.initChapterEvents = function ({
       }
 
       event.preventDefault();
-      document.documentElement.scrollLeft += event.deltaY;
+      document.documentElement.scrollLeft += event.deltaY
     },
     { passive: false }
   );
@@ -177,5 +179,42 @@ window.ChapterApp.initChapterEvents = function ({
     setWheelPageEnabled(enabled);
     localStorage.setItem(wheelPageKey, enabled);
     updateReadingMode();
+  });
+
+  document.addEventListener("scroll", () => {
+    if (isSwitchingDisplayMode()) {
+      return;
+    }
+
+    if (getReadingMode() !== "vertical") {
+      return;
+    }
+
+    const isRemoteMode =
+      document.body.dataset.displayMode === "remote";
+
+    const viewportCenter = isRemoteMode
+      ? window.innerWidth / 2
+      : window.innerHeight / 2;
+
+    let currentIndex = 0;
+    let minDistance = Infinity;
+
+    images.forEach((image, index) => {
+      const rect = image.getBoundingClientRect();
+
+      const imageCenter = isRemoteMode
+        ? rect.left + rect.width / 2
+        : rect.top + rect.height / 2;
+
+      const distance = Math.abs(imageCenter - viewportCenter);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        currentIndex = index;
+      }
+    });
+
+    pageNavigation.updateCurrentPageSelect(currentIndex);
   });
 };

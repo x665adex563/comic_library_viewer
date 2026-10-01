@@ -24,6 +24,37 @@ window.ChapterApp.initRemoteImageSize = function ({
       "--remote-image-size",
       `${size}%`
     );
+
+    updateRemoteVerticalPosition();
+  }
+
+  function updateRemoteVerticalPosition() {
+    if (document.body.classList.contains("single-page")) {
+      return;
+    }
+
+    const image = comicContent.querySelector("img");
+
+    if (!image) {
+      return;
+    }
+
+    if (!image.complete) {
+      image.addEventListener("load", updateRemoteVerticalPosition, {
+        once: true,
+      });
+      return;
+    }
+
+    if (image.naturalHeight === 0) {
+      return;
+    }
+
+    const imageHeight = image.getBoundingClientRect().height;
+
+    comicContent.style.top = `${
+      (window.innerHeight - imageHeight) / 2
+    }px`;
   }
 
   imageSize.value = imageSizeSaved;
@@ -54,10 +85,7 @@ window.ChapterApp.initRemoteImageSize = function ({
     imageSize.value = 100;
     imageSizeValue.value = 100;
 
-    comicContent.style.setProperty(
-      "--remote-image-size",
-      `${remoteImageFullSize}%`
-    );
+    updateRemoteImageSize(100);
   });
 
   window.addEventListener("resize", () => {
@@ -75,10 +103,31 @@ window.ChapterApp.initRemoteImagePosition = function ({
   imagePositionTop,
   imagePositionSaved,
   storageKey,
+  getCurrentPage,
 }) {
   function updateRemoteImagePosition() {
     const value = Number(imagePosition.value);
-    const image = comicContent.querySelector("img.current-page");
+
+    const images = comicContent.querySelectorAll("img");
+    const image =
+      comicContent.querySelector("img.current-page") ||
+      images[getCurrentPage()];
+
+    console.log("[remote target]", {
+      currentPage: image
+        ? Array.from(comicContent.querySelectorAll("img")).indexOf(image) + 1
+        : null,
+      imageCount: comicContent.querySelectorAll("img").length,
+      imageLeft: image?.getBoundingClientRect().left,
+      contentLeft: comicContent.getBoundingClientRect().left,
+    });
+
+    console.log("[remote target]", {
+      currentPage: image
+        ? Array.from(comicContent.querySelectorAll("img")).indexOf(image) + 1
+        : null,
+      imageLeft: image?.getBoundingClientRect().left,
+    });
 
     comicContent.style.left = "0px";
 
@@ -95,10 +144,34 @@ window.ChapterApp.initRemoteImagePosition = function ({
     const position =
       leftPosition + progress * (rightPosition - leftPosition);
 
+    console.log("[remote position]", {
+      value,
+      leftPosition,
+      rightPosition,
+      progress,
+      position,
+      imageLeft: rect.left,
+      imageWidth: rect.width,
+      viewportWidth: window.innerWidth,
+    });
+
+    console.log("[remote position]", {
+      value,
+      imageLeft: rect.left,
+      imageWidth: rect.width,
+      leftPosition,
+      rightPosition,
+      progress,
+      position,
+      contentLeft: comicContent.getBoundingClientRect().left,
+    });
+
     comicContent.style.left = `${position}px`;
   }
 
   function setRemoteImagePosition(value) {
+    console.log("[slider input]", value);
+
     imagePosition.value = value;
     imagePositionValue.value = value;
     updateRemoteImagePosition();

@@ -21,14 +21,22 @@ window.ChapterApp.initPageNavigation = ({
     });
   };
 
-  const updateCurrentPageSelect = () => {
-    const currentImage = document.querySelector("img.current-page");
+  const updateCurrentPageSelect = (pageIndex = null) => {
+    let currentIndex = pageIndex;
 
-    if (!currentImage) {
-      return;
+    if (currentIndex === null) {
+      const currentImage = document.querySelector("img.current-page");
+
+      if (!currentImage) {
+        return;
+      }
+
+      currentIndex = Array.from(images).indexOf(currentImage);
     }
 
-    const currentIndex = Array.from(images).indexOf(currentImage);
+    if (currentIndex < 0 || currentIndex >= images.length) {
+      return;
+    }
 
     pageSelect.value = currentIndex;
     currentPage = currentIndex;

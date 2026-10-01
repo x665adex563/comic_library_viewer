@@ -11,6 +11,7 @@
     preloadNearbyPages,
     getWheelPageEnabled,
     storageKey,
+    getCurrentPage,
   }) {
     function updateReadingMode() {
       const readingMode = getReadingMode();
@@ -20,14 +21,15 @@
 
         let currentPage = document.querySelector("img.current-page");
 
+        if (!currentPage && images.length > 0) {
+          const currentIndex = getCurrentPage();
+          currentPage = images[currentIndex] || images[0];
+          currentPage.classList.add("current-page");
+        }
+
         if (currentPage) {
           const currentIndex = Array.from(images).indexOf(currentPage);
           preloadNearbyPages(images, currentIndex);
-        }
-
-        if (!currentPage && images.length > 0) {
-          currentPage = images[0];
-          currentPage.classList.add("current-page");
         }
 
         document.body.style.setProperty(
@@ -37,16 +39,24 @@
 
         button.textContent = "閱覽模式\n單頁";
         remoteReadingModeButton.textContent = button.textContent;
-      } else {
-        document.body.classList.remove("single-page");
+        } else {
+          document.body.classList.remove("single-page");
 
-        images.forEach((image) => {
-          image.classList.remove("current-page");
-        });
+          const currentIndex = getCurrentPage();
 
-        button.textContent = "閱覽模式\n直立";
-        remoteReadingModeButton.textContent = button.textContent;
-      }
+          images.forEach((image) => {
+            image.classList.remove("current-page");
+          });
+
+          const currentImage = images[currentIndex];
+
+          if (currentImage) {
+            currentImage.scrollIntoView({ block: "start" });
+          }
+
+          button.textContent = "閱覽模式\n直立";
+          remoteReadingModeButton.textContent = button.textContent;
+        }
 
       document.getElementById("wheel-page-status").textContent =
         getWheelPageEnabled() ? "開" : "關";

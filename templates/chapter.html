@@ -32,20 +32,33 @@ body[data-display-mode="remote"] #page-navigation {
   display: none;
 }
 
+/* 遠端模式共用設定 */
 body[data-display-mode="remote"] #comic-content {
   position: fixed;
   top: 50%;
   left: var(--remote-image-position);
   width: var(--remote-image-size);
-  transform: translateY(-50%) rotate(-90deg);
   transform-origin: center center;
   --remote-image-size: 100%;
 }
 
-body[data-display-mode="remote"]:not(.single-page) #comic-content {
-  position: absolute;
+/* 遠端單頁模式 */
+body[data-display-mode="remote"].single-page #comic-content {
+  top: 50% !important;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: center center;
 }
 
+/* 遠端直立模式 */
+body[data-display-mode="remote"]:not(.single-page) #comic-content {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: rotate(-90deg) translateX(-100%);
+  transform-origin: top left;
+}
+
+/* 遠端模式圖片 */
 body[data-display-mode="remote"] #comic-content img {
   width: 100%;
   max-width: none;

@@ -6,6 +6,7 @@ const WHEEL_PAGE_KEY = "wheelPage";
 const SINGLE_PAGE_POSITION_KEY = "singlePagePosition";
 const REMOTE_IMAGE_SIZE_KEY = "remoteImageSize";
 const REMOTE_IMAGE_POSITION_KEY = "remoteImagePosition";
+const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
 
 // ==========================================
 // DOM Elements
@@ -59,11 +60,6 @@ const remoteModeUI = document.getElementById("remote-mode-ui");
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
 const { showUI, hideUI } = ChapterApp.initUIVisibility();
-
-// ==========================================
-// Single Page Settings
-// ==========================================
-const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
 
 // ==========================================
 // Display Mode & Remote Settings

@@ -35,6 +35,12 @@ const singlePageMaxWidthValue =
 
 const singlePageMaxWidthFull =
   document.getElementById("single-page-max-width-full");
+const singlePagePositionControl =
+  document.getElementById("single-page-position");
+const singlePagePositionValue =
+  document.getElementById("single-page-position-value");
+const singlePagePositionTop =
+  document.getElementById("single-page-position-top");
 const remoteImageSizeControl = document.getElementById("remote-image-size-control");
 const remoteImagePositionControl = document.getElementById("remote-image-position-control");
 const remoteImageSize = document.getElementById("remote-image-size");
@@ -93,9 +99,9 @@ const {
   updateSinglePagePosition,
   getSinglePagePosition,
 } = window.ChapterApp.initSinglePagePosition({
-  imagePositionControl: document.getElementById("single-page-position"),
-  imagePositionValue: document.getElementById("single-page-position-value"),
-  imagePositionTop: document.getElementById("single-page-position-top"),
+  imagePositionControl: singlePagePositionControl,
+  imagePositionValue: singlePagePositionValue,
+  imagePositionTop: singlePagePositionTop,
   storageKey: SINGLE_PAGE_POSITION_KEY,
 });
 

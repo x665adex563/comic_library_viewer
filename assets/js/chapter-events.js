@@ -20,37 +20,33 @@ window.ChapterApp.initChapterEvents = function ({
   updateReadingMode,
 }) {
   document.addEventListener("keydown", (event) => {
-    if (getReadingMode() !== "single") {
-      return;
-    }
+    if (getReadingMode() === "single") {
+      if (event.key === "ArrowRight") {
+        showNextPage();
+      }
 
-    if (event.key === "ArrowRight") {
-      showNextPage();
-    }
+      if (event.key === "ArrowLeft") {
+        showPreviousPage();
+      }
 
-    if (event.key === "ArrowLeft") {
-      showPreviousPage();
-    }
-
-    if (event.key === "ArrowUp") {
-      window.location.href = parentIndex;
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      const prompt = document.getElementById("chapter-prompt");
-
-      if (prompt.style.display === "block") {
-        const button = document.getElementById("chapter-prompt-button");
-        button.click();
+      if (event.key === "ArrowUp") {
+        window.location.href = parentIndex;
       }
     }
 
-    if (event.key === "Escape") {
+    if (event.key === "Enter" || event.key === "Escape") {
       const prompt = document.getElementById("chapter-prompt");
 
-      if (prompt.style.display === "block") {
+      if (prompt.style.display !== "block") {
+        return;
+      }
+
+      if (event.key === "Enter") {
+        const button = document.getElementById("chapter-prompt-button");
+        button.click();
+      }
+
+      if (event.key === "Escape") {
         prompt.style.display = "none";
       }
     }

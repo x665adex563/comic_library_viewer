@@ -48,7 +48,7 @@ python main.py
 ```
 
 1. Select a local manga folder from the folder picker.
-2. The application scans the selected folder and generates the HTML viewer. This may take may take a few seconds for large collections.
+2. The application scans the selected folder and generates the HTML viewer. This may take a few seconds for large collections.
 3. The generated index page opens automatically in your default browser.
 4. Bookmark the generated page URL for future access. You only need to run `main.py` again when you add or modify manga content.
 

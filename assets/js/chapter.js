@@ -35,6 +35,17 @@ const singlePageMaxWidthValue =
 
 const singlePageMaxWidthFull =
   document.getElementById("single-page-max-width-full");
+const remoteImageSizeControl = document.getElementById("remote-image-size-control");
+const remoteImagePositionControl = document.getElementById("remote-image-position-control");
+const remoteImageSize = document.getElementById("remote-image-size");
+const remoteImageSizeValue = document.getElementById("remote-image-size-value");
+const remoteImageSizeFull = document.getElementById("remote-image-size-full");
+const comicContent = document.getElementById("comic-content");
+const remoteImagePosition = document.getElementById("remote-image-position");
+const remoteImagePositionValue = document.getElementById("remote-image-position-value");
+const remoteImagePositionTop = document.getElementById("remote-image-position-top");
+const remoteSettingsPanel = document.getElementById("remote-settings-panel");
+const remoteModeUI = document.getElementById("remote-mode-ui");
 
 // ==========================================
 // Reading State
@@ -53,22 +64,11 @@ const SINGLE_PAGE_MAX_WIDTH_KEY = "singlePageMaxWidth";
 // ==========================================
 const displayMode = localStorage.getItem(DISPLAY_MODE_KEY) || "normal";
 
-const remoteImageSizeControl = document.getElementById("remote-image-size-control");
-const remoteImagePositionControl = document.getElementById("remote-image-position-control");
-const remoteImageSize = document.getElementById("remote-image-size");
-const remoteImageSizeValue = document.getElementById("remote-image-size-value");
-const remoteImageSizeFull = document.getElementById("remote-image-size-full");
 const remoteImageSizeSaved =
   Number(localStorage.getItem(REMOTE_IMAGE_SIZE_KEY)) || 100;
 
 const remoteImagePositionSaved =
   Number(localStorage.getItem(REMOTE_IMAGE_POSITION_KEY)) || 100;
-const comicContent = document.getElementById("comic-content");
-const remoteImagePosition = document.getElementById("remote-image-position");
-const remoteImagePositionValue = document.getElementById("remote-image-position-value");
-const remoteImagePositionTop = document.getElementById("remote-image-position-top");
-const remoteSettingsPanel = document.getElementById("remote-settings-panel");
-const remoteModeUI = document.getElementById("remote-mode-ui");
 
 window.ChapterApp.initRemoteImageSize({
   comicContent,

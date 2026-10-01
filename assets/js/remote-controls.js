@@ -10,24 +10,46 @@ window.ChapterApp.initRemoteControls = function ({
   remoteImagePositionControl,
   updateSinglePagePosition,
   updateRemoteImagePosition,
+  updateCurrentPageSelect,
   storageKey,
   initialDisplayMode,
+  getCurrentPage,
+  restoreCurrentPage,
+  setSwitchingDisplayMode,
 }) {
-  webModeButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-    const currentMode = localStorage.getItem(storageKey) || "normal";
-    const nextMode = currentMode === "remote" ? "normal" : "remote";
+  function switchDisplayMode(nextMode) {
+    const currentPage = getCurrentPage();
+
+    setSwitchingDisplayMode(true);
 
     localStorage.setItem(storageKey, nextMode);
     updateDisplayModeUI(nextMode);
 
     updateSinglePagePosition();
     updateRemoteImagePosition();
+
+    requestAnimationFrame(() => {
+      restoreCurrentPage(nextMode, currentPage);
+
+      requestAnimationFrame(() => {
+        restoreCurrentPage(nextMode, currentPage);
+        updateCurrentPageSelect(currentPage);
+        setSwitchingDisplayMode(false);
+      });
+    });
+  }
+
+  webModeButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+
+    const currentMode = localStorage.getItem(storageKey) || "normal";
+    const nextMode = currentMode === "remote" ? "normal" : "remote";
+
+    switchDisplayMode(nextMode);
   });
 
   remoteWebModeButton.addEventListener("click", () => {
-    localStorage.setItem(storageKey, "normal");
-    updateDisplayModeUI("normal");
+    switchDisplayMode("normal");
   });
 
   remoteFullscreenButton.addEventListener("click", async () => {

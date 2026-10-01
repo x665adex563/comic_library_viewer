@@ -57,6 +57,7 @@ const remoteModeUI = document.getElementById("remote-mode-ui");
 // ==========================================
 // Reading State
 // ==========================================
+let switchingDisplayMode = false;
 let readingMode = localStorage.getItem(READING_MODE_KEY) || "vertical";
 let wheelPageEnabled = localStorage.getItem(WHEEL_PAGE_KEY) === "true";
 const { showUI, hideUI } = ChapterApp.initUIVisibility();
@@ -106,6 +107,7 @@ const { updateReadingMode } = window.ChapterApp.initReadingMode({
   remoteReadingModeButton,
   images,
   getReadingMode: () => readingMode,
+  getCurrentPage: () => pageNavigation.getCurrentPage(),
   setReadingMode: (value) => {
     readingMode = value;
   },
@@ -124,8 +126,33 @@ window.ChapterApp.initRemoteControls({
   remoteImagePositionControl,
   updateSinglePagePosition,
   updateRemoteImagePosition,
+  updateCurrentPageSelect: (pageIndex) => {
+    pageNavigation.updateCurrentPageSelect(pageIndex);
+  },
   storageKey: DISPLAY_MODE_KEY,
   initialDisplayMode: displayMode,
+  getCurrentPage: () => pageNavigation.getCurrentPage(),
+  restoreCurrentPage: (mode, pageIndex) => {
+    const image = images[pageIndex];
+
+    if (!image) {
+      return;
+    }
+
+    if (mode === "remote") {
+      images.forEach((item) => {
+        item.classList.remove("current-page");
+      });
+
+      image.classList.add("current-page");
+      updateRemoteImagePosition();
+    } else {
+      image.scrollIntoView({ block: "start" });
+    }
+  },
+  setSwitchingDisplayMode: (value) => {
+    switchingDisplayMode = value;
+  },
 });
 
 // ==========================================
@@ -197,6 +224,8 @@ ChapterApp.initChapterEvents({
   },
   wheelPageKey: WHEEL_PAGE_KEY,
   updateReadingMode,
+  pageNavigation,
+  isSwitchingDisplayMode: () => switchingDisplayMode,
 });
 
 const initializeChapter = () => {

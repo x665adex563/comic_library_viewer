@@ -24,6 +24,37 @@ window.ChapterApp.initRemoteImageSize = function ({
       "--remote-image-size",
       `${size}%`
     );
+
+    updateRemoteVerticalPosition();
+  }
+
+  function updateRemoteVerticalPosition() {
+    if (document.body.classList.contains("single-page")) {
+      return;
+    }
+
+    const image = comicContent.querySelector("img");
+
+    if (!image) {
+      return;
+    }
+
+    if (!image.complete) {
+      image.addEventListener("load", updateRemoteVerticalPosition, {
+        once: true,
+      });
+      return;
+    }
+
+    if (image.naturalHeight === 0) {
+      return;
+    }
+
+    const imageHeight = image.getBoundingClientRect().height;
+
+    comicContent.style.top = `${
+      (window.innerHeight - imageHeight) / 2
+    }px`;
   }
 
   imageSize.value = imageSizeSaved;
@@ -54,10 +85,7 @@ window.ChapterApp.initRemoteImageSize = function ({
     imageSize.value = 100;
     imageSizeValue.value = 100;
 
-    comicContent.style.setProperty(
-      "--remote-image-size",
-      `${remoteImageFullSize}%`
-    );
+    updateRemoteImageSize(100);
   });
 
   window.addEventListener("resize", () => {
@@ -75,10 +103,15 @@ window.ChapterApp.initRemoteImagePosition = function ({
   imagePositionTop,
   imagePositionSaved,
   storageKey,
+  getCurrentPage,
 }) {
   function updateRemoteImagePosition() {
     const value = Number(imagePosition.value);
-    const image = comicContent.querySelector("img.current-page");
+
+    const images = comicContent.querySelectorAll("img");
+    const image =
+      comicContent.querySelector("img.current-page") ||
+      images[getCurrentPage()];
 
     comicContent.style.left = "0px";
 

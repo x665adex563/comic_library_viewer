@@ -80,6 +80,19 @@ def render_chapter_template(
     comic_title,
     is_series,
     tailwind_css_path,
+    chapter_js_path,
+    chapter_app_js_path,
+    preload_js_path,
+    remote_mode_js_path,
+    single_page_mode_js_path,
+    single_page_settings_js_path,
+    reading_history_js_path,
+    page_navigation_js_path,
+    page_turning_js_path,
+    ui_visibility_js_path,
+    chapter_events_js_path,
+    remote_controls_js_path,
+    reading_mode_js_path,
 ):
     template = load_chapter_template()
 
@@ -111,6 +124,19 @@ def render_chapter_template(
         .replace("{{COMIC_TITLE}}", json.dumps(comic_title))
         .replace("{{IS_SERIES}}", json.dumps(is_series))
         .replace("{{TAILWIND_CSS}}", tailwind_css_path)
+        .replace("{{CHAPTER_APP_JS}}", chapter_app_js_path)
+        .replace("{{PRELOAD_JS}}", preload_js_path)
+        .replace("{{REMOTE_MODE_JS}}", remote_mode_js_path)
+        .replace("{{SINGLE_PAGE_MODE_JS}}", single_page_mode_js_path)
+        .replace("{{SINGLE_PAGE_SETTINGS_JS}}", single_page_settings_js_path)
+        .replace("{{READING_HISTORY_JS}}", reading_history_js_path)
+        .replace("{{PAGE_NAVIGATION_JS}}", page_navigation_js_path)
+        .replace("{{PAGE_TURNING_JS}}", page_turning_js_path)
+        .replace("{{UI_VISIBILITY_JS}}", ui_visibility_js_path)
+        .replace("{{CHAPTER_EVENTS_JS}}", chapter_events_js_path)
+        .replace("{{REMOTE_CONTROLS_JS}}", remote_controls_js_path)
+        .replace("{{READING_MODE_JS}}", reading_mode_js_path)
+        .replace("{{CHAPTER_JS}}", chapter_js_path)
     )
 
 # --------------------
@@ -278,6 +304,71 @@ def generate_chapter_html(
         html_file,
     )
 
+    chapter_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "chapter.js"),
+        html_file,
+    )
+
+    preload_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "preload.js"),
+        html_file,
+    )
+
+    chapter_app_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "chapter-app.js"),
+        html_file,
+    )
+
+    remote_mode_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "remote-mode.js"),
+        html_file,
+    )
+
+    single_page_mode_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "single-page-mode.js"),
+        html_file,
+    )
+
+    single_page_settings_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "single-page-settings.js"),
+        html_file,
+    )
+
+    reading_history_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "reading-history.js"),
+        html_file,
+    )
+
+    page_navigation_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "page-navigation.js"),
+        html_file,
+    )
+
+    page_turning_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "page-turning.js"),
+        html_file,
+    )
+
+    ui_visibility_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "ui-visibility.js"),
+        html_file,
+    )
+
+    chapter_events_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "chapter-events.js"),
+        html_file,
+    )
+
+    remote_controls_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "remote-controls.js"),
+        html_file,
+    )
+
+    reading_mode_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "reading-mode.js"),
+        html_file,
+    )
+
     template = render_chapter_template(
         folder_name,
         back_button_html,
@@ -289,6 +380,19 @@ def generate_chapter_html(
         comic_title,
         is_series,
         tailwind_css_path,
+        chapter_js_path,
+        chapter_app_js_path,
+        preload_js_path,
+        remote_mode_js_path,
+        single_page_mode_js_path,
+        single_page_settings_js_path,
+        reading_history_js_path,
+        page_navigation_js_path,
+        page_turning_js_path,
+        ui_visibility_js_path,
+        chapter_events_js_path,
+        remote_controls_js_path,
+        reading_mode_js_path,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

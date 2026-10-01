@@ -54,7 +54,7 @@
             currentImage.scrollIntoView({ block: "start" });
           }
 
-          button.textContent = "閱覽模式\n直立";
+          button.textContent = "閱覽模式\n下拉";
           remoteReadingModeButton.textContent = button.textContent;
         }
 

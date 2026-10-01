@@ -82,7 +82,7 @@ window.ChapterApp.initRemoteControls = function ({
     remoteImageSizeControl.classList.toggle("hidden", !isRemote);
     remoteImagePositionControl.classList.toggle("hidden", !isRemote);
 
-    webModeButton.textContent = isRemote ? "網頁模式" : "手機模式";
+    webModeButton.textContent = isRemote ? "手機遠端模式" : "網頁模式";
   }
 
   updateDisplayModeUI(initialDisplayMode);

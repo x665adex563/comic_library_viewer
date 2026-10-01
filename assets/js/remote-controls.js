@@ -13,7 +13,8 @@ window.ChapterApp.initRemoteControls = function ({
   storageKey,
   initialDisplayMode,
 }) {
-  webModeButton.addEventListener("click", () => {
+  webModeButton.addEventListener("click", (event) => {
+    event.stopPropagation();
     const currentMode = localStorage.getItem(storageKey) || "normal";
     const nextMode = currentMode === "remote" ? "normal" : "remote";
 

@@ -18,15 +18,16 @@
       if (readingMode === "single") {
         document.body.classList.add("single-page");
 
-        const currentPage = document.querySelector("img.current-page");
+        let currentPage = document.querySelector("img.current-page");
 
         if (currentPage) {
           const currentIndex = Array.from(images).indexOf(currentPage);
           preloadNearbyPages(images, currentIndex);
         }
 
-        if (!document.querySelector("img.current-page") && images.length > 0) {
-          images[0].classList.add("current-page");
+        if (!currentPage && images.length > 0) {
+          currentPage = images[0];
+          currentPage.classList.add("current-page");
         }
 
         document.body.style.setProperty(

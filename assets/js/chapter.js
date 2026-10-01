@@ -90,6 +90,7 @@ const updateRemoteImagePosition =
     imagePositionTop: remoteImagePositionTop,
     imagePositionSaved: remoteImagePositionSaved,
     storageKey: REMOTE_IMAGE_POSITION_KEY,
+    getCurrentPage: () => pageNavigation.getCurrentPage(),
   });
 
 const {

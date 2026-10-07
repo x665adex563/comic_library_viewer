@@ -2,7 +2,9 @@
 
 A local manga viewer built with Python, HTML, CSS, and JavaScript.
 
-It scans local manga folders, generates browser-based comic index and reading pages, and supports web viewing.
+It scans local manga folders and generates a static website for browsing and reading manga.
+
+Generated pages can be bookmarked for later access and do not need to be regenerated unless the files change.
 
 ## Features
 

@@ -1,35 +1,123 @@
-# 網頁一頁式漫畫瀏覽v3（搜尋欄）
+# 網頁一頁式漫畫瀏覽 v3（增量檢查）
+import json
 import os
 import webbrowser
+import time
 from tkinter import Tk, filedialog
 
 from viewer import OUTPUT_ROOT, generate_index_html
 
-# --------------------
-# 主程式
-# --------------------
+
+def scan_folder(folder):
+    """記錄所有資料夾與檔案的狀態。"""
+    snapshot = {}
+
+    for current_root, dirs, files in os.walk(folder):
+        dirs.sort()
+        files.sort()
+
+        relative_root = os.path.relpath(current_root, folder)
+        snapshot[relative_root] = {"type": "directory"}
+
+        for filename in files:
+            path = os.path.join(current_root, filename)
+            relative_path = os.path.relpath(path, folder)
+            stat = os.stat(path)
+
+            snapshot[relative_path] = {
+                "size": stat.st_size,
+                "mtime_ns": stat.st_mtime_ns,
+            }
+
+    return snapshot
+
+
+def scan_directory_times(folder):
+    """只記錄所有資料夾的修改時間。"""
+    snapshot = {}
+
+    for current_root, dirs, _ in os.walk(folder):
+        dirs.sort()
+
+        relative_path = os.path.relpath(current_root, folder)
+        snapshot[relative_path] = os.stat(current_root).st_mtime_ns
+
+    return snapshot
+
+
 def main():
     root = Tk()
     root.withdraw()
 
     folder = filedialog.askdirectory(title="選擇漫畫資料夾")
+    root.destroy()
+
     if not folder:
         return
+
+    start = time.perf_counter()
 
     comic_name = os.path.basename(folder)
     viewer = os.path.join(OUTPUT_ROOT, comic_name)
     os.makedirs(viewer, exist_ok=True)
 
     index_name = f"{comic_name}.html"
-    generate_index_html(
-        folder,
-        viewer,
-        index_name,
-        library_root=folder
+    index_path = os.path.join(viewer, index_name)
+    snapshot_path = os.path.join(viewer, ".snapshot.json")
+
+    start = time.perf_counter()
+
+
+    directory_snapshot_path = os.path.join(
+        viewer, ".directory_snapshot.json"
     )
 
-    webbrowser.open(os.path.join(viewer, index_name))
+    current_directories = scan_directory_times(folder)
 
+    previous_directories = None
+    if os.path.isfile(directory_snapshot_path):
+        with open(directory_snapshot_path, "r", encoding="utf-8") as f:
+            previous_directories = json.load(f)
+
+    if (
+        current_directories == previous_directories
+        and os.path.isfile(index_path)
+    ):
+        print("快速檢查完成，沒有偵測到變動")
+    else:
+        print("偵測到可能變動，執行完整掃描...")
+
+        current_snapshot = scan_folder(folder)
+
+        previous_snapshot = None
+        if os.path.isfile(snapshot_path):
+            with open(snapshot_path, "r", encoding="utf-8") as f:
+                previous_snapshot = json.load(f)
+
+        if (
+            current_snapshot != previous_snapshot
+            or not os.path.isfile(index_path)
+        ):
+            print("重新產生 HTML...")
+
+            generate_index_html(
+                folder,
+                viewer,
+                index_name,
+                library_root=folder
+            )
+
+            print("HTML 產生完成")
+
+        with open(snapshot_path, "w", encoding="utf-8") as f:
+            json.dump(current_snapshot, f, ensure_ascii=False)
+
+        with open(directory_snapshot_path, "w", encoding="utf-8") as f:
+            json.dump(current_directories, f, ensure_ascii=False)
+
+    webbrowser.open(index_path)
+
+    print(f"總執行時間：{time.perf_counter() - start:.2f} 秒")
 
 if __name__ == "__main__":
     main()

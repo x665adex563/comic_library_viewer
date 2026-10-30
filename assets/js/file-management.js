@@ -94,6 +94,7 @@ async function deleteComic(card) {
   await parent.removeEntry(name, { recursive: true });
 
   card.remove();
+  cardTemplates.delete(path);
 
   // 同步移除搜尋資料，避免搜尋到已刪除的漫畫
   const index = all.findIndex(item =>

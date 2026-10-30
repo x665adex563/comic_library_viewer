@@ -2,6 +2,7 @@ import json
 import os
 import re
 import sys
+import html
 from dataclasses import asdict, dataclass
 from urllib.parse import quote
 
@@ -236,9 +237,12 @@ def render_item_html(item, library_root):
         .replace("{{NAME}}", item.name)
         .replace(
             "{{ITEM_PATH}}",
-            json.dumps(
-                os.path.relpath(item.path, library_root).replace("\\", "/"),
-                ensure_ascii=False
+            html.escape(
+                json.dumps(
+                    os.path.relpath(item.path, library_root).replace("\\", "/"),
+                    ensure_ascii=False
+                ),
+                quote=True
             )
         )
         .replace("{{FILE_MANAGEMENT}}", file_management_html)

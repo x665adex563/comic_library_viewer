@@ -174,10 +174,23 @@ function updateSuggestions() {
     suggestionBox.style.display = matches.length ? 'block' : 'none';
 }
 
+const cardTemplates = new Map(
+  [...document.querySelectorAll('#list > li[data-item-path]')]
+    .map(card => [
+      JSON.parse(card.dataset.itemPath),
+      card.cloneNode(true)
+    ])
+);
+
 function search() {
     const v = searchInput.value.toLowerCase();
 
     sessionStorage.setItem('last_search', v);
+
+    const cardTemplates = new Map(
+      [...document.querySelectorAll('#list > li[data-item-path]')]
+        .map(card => [JSON.parse(card.dataset.itemPath), card.cloneNode(true)])
+    );
 
     const ul = document.getElementById('list');
 
@@ -193,22 +206,11 @@ function search() {
     }
 
     r.forEach(i => {
-        let thumb = '';
+      const card = cardTemplates.get(i.path);
 
-        if(i.type === 'image') {
-            thumb = '<img class="w-full aspect-[3/4] object-cover" src="' + i.thumb + '">';
-        } else {
-            thumb = '<div class="w-full h-[32px] aspect-[3/4] bg-[#111] flex items-center justify-center text-[24px]">📁</div>';
-        }
-
-        ul.innerHTML +=
-            '<li class="w-[200px] bg-[#111] p-[10px] text-center rounded-lg"><a class="text-white no-underline" href="' +
-            i.link +
-            '">' +
-            thumb +
-            '<div>' +
-            i.name +
-            '</div></a></li>';
+      if (card) {
+        ul.appendChild(card.cloneNode(true));
+      }
     });
 }
 

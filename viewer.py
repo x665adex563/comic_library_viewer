@@ -212,7 +212,7 @@ def scan_directory(folder):
 
     return folder_items + image_items
 
-def render_item_html(item):
+def render_item_html(item, library_root):
     template = load_item_template()
 
     thumb_html = (
@@ -226,6 +226,13 @@ def render_item_html(item):
         .replace("{{LINK}}", item.link)
         .replace("{{THUMB}}", thumb_html)
         .replace("{{NAME}}", item.name)
+        .replace(
+            "{{ITEM_PATH}}",
+            json.dumps(
+                os.path.relpath(item.path, library_root).replace("\\", "/"),
+                ensure_ascii=False
+            )
+        )
     )
 
 # --------------------
@@ -490,7 +497,7 @@ def generate_index_html(
 
         all_items.append(item)
 
-        items_html += render_item_html(item)
+        items_html += render_item_html(item, library_root)
 
     all_js = json.dumps(
         [

@@ -34,6 +34,9 @@ TEMPLATE_DIR = os.path.join(SCRIPT_DIR, "templates")
 INDEX_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "index.html")
 CHAPTER_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "chapter.html")
 ITEM_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "item.html")
+FILE_MANAGEMENT_TEMPLATE_PATH = os.path.join(
+    TEMPLATE_DIR, "file-management.html"
+)
 
 def load_index_template():
     with open(INDEX_TEMPLATE_PATH, "r", encoding="utf-8") as f:
@@ -215,6 +218,9 @@ def scan_directory(folder):
 def render_item_html(item, library_root):
     template = load_item_template()
 
+    with open(FILE_MANAGEMENT_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        file_management_html = f.read()
+
     thumb_html = (
         f'<img class="w-full aspect-[3/4] object-cover" src="{item.thumb}">'
         if item.type == "image"
@@ -233,6 +239,7 @@ def render_item_html(item, library_root):
                 ensure_ascii=False
             )
         )
+        .replace("{{FILE_MANAGEMENT}}", file_management_html)
     )
 
 # --------------------

@@ -58,6 +58,7 @@ def render_index_template(
     home_page,
     viewer_path,
     tailwind_css_path,
+    file_management_js_path,
 ):
     template = load_index_template()
 
@@ -70,6 +71,7 @@ def render_index_template(
         .replace("{{HOME_PAGE}}", home_page)
         .replace("{{VIEWER_PATH}}", json.dumps(viewer_path))
         .replace("{{TAILWIND_CSS}}", tailwind_css_path)
+        .replace("{{FILE_MANAGEMENT_JS}}", file_management_js_path)
     )
 
 def render_chapter_template(
@@ -513,6 +515,9 @@ def generate_index_html(
                 "type": item.type,
                 "link": item.link,
                 "thumb": item.thumb,
+                "path": os.path.relpath(
+                    item.path, library_root
+                ).replace("\\", "/"),
             }
             for item in all_items
         ],
@@ -524,6 +529,11 @@ def generate_index_html(
         html_file,
     )
 
+    file_management_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "file-management.js"),
+        html_file,
+    )
+
     template = render_index_template(
         folder_name,
         items_html,
@@ -532,6 +542,7 @@ def generate_index_html(
         index_name,
         library_root,
         tailwind_css_path,
+        file_management_js_path,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

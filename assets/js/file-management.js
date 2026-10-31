@@ -712,3 +712,14 @@ document.getElementById("authorize-output").addEventListener("click", async () =
     }
   }
 });
+
+document.getElementById("authorize-library").addEventListener("click", async () => {
+  try {
+    await getLibraryHandle();
+    alert("漫畫庫授權成功");
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      alert(`漫畫庫授權失敗：${error.message}`);
+    }
+  }
+});

@@ -661,6 +661,9 @@ async function moveComic(card) {
   // 完整驗證成功後才刪除來源
   await sourceParent.removeEntry(name, { recursive: true });
 
+  const sourceIndex = await regenerateIndex(sourceParent, sourcePath);
+  await writeIndexHtml(sourceIndex);
+
   console.timeEnd("7. 刪除來源");
 
   card.remove();
@@ -677,6 +680,11 @@ async function moveComic(card) {
 }
 
 async function deleteComic(card) {
+  if (!(await hasOutputPermission())) {
+    alert("HTML 輸出資料夾尚未授權，請先授權再刪除漫畫。");
+    return;
+  }
+
   const path = JSON.parse(card.dataset.itemPath);
   const parts = path.split("/");
 
@@ -705,6 +713,9 @@ async function deleteComic(card) {
   await parent.getDirectoryHandle(name);
 
   await parent.removeEntry(name, { recursive: true });
+
+  const sourceIndex = await regenerateIndex(parent, parts.slice(0, -1));
+  await writeIndexHtml(sourceIndex);
 
   card.remove();
   cardTemplates.delete(path);

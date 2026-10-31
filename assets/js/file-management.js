@@ -222,6 +222,247 @@ async function compareFolders(source, destination) {
   return true;
 }
 
+async function scanDirectory(folder) {
+  const folders = [];
+  const images = [];
+  const imageExts = /\.(jpg|jpeg|png|webp)$/i;
+
+  for await (const [name, entry] of folder.entries()) {
+    if (entry.kind !== "directory") continue;
+
+    const imageFiles = [];
+
+    for await (const [fileName, child] of entry.entries()) {
+      if (child.kind === "file" && imageExts.test(fileName)) {
+        imageFiles.push(fileName);
+      }
+    }
+
+    imageFiles.sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+    );
+
+    const item = {
+      name,
+      type: imageFiles.length ? "image" : "folder",
+      images: imageFiles
+    };
+
+    if (item.type === "image") {
+      images.push(item);
+    } else {
+      folders.push(item);
+    }
+  }
+
+  const sort = (a, b) =>
+    a.name.localeCompare(b.name, undefined, {
+      numeric: true,
+      sensitivity: "base"
+    });
+
+  return [...folders.sort(sort), ...images.sort(sort)];
+}
+
+function toFileUrl(path) {
+  const normalized = path.replace(/\\/g, "/");
+
+  return "file:///" + normalized
+    .split("/")
+    .map((part, index) =>
+      index === 0 ? part : encodeURIComponent(part)
+    )
+    .join("/");
+}
+
+async function regenerateIndex(folder, folderPath) {
+  const output = await getOutputFolderHandle();
+  const folderName = folderPath.at(-1);
+  const htmlName = `${folderName}.html`;
+
+  const file = await output.getFileHandle(htmlName);
+  const content = await (await file.getFile()).text();
+
+  const doc = new DOMParser().parseFromString(content, "text/html");
+  const images = [...doc.querySelectorAll("img[src]")];
+  const list = doc.querySelector("#list");
+
+  if (!list) {
+    throw new Error(`找不到 ${htmlName} 的漫畫列表`);
+  }
+
+  const items = await scanDirectory(folder);
+  const cards = [];
+  const searchItems = [];
+
+  for (const item of items) {
+    const path = [...folderPath, item.name].join("/");
+    const link = encodeURIComponent(item.name) + ".html";
+
+    const thumb = item.type === "image"
+      ? toFileUrl([
+          viewerPath,
+          ...folderPath,
+          item.name,
+          item.images[0]
+        ].join("/"))
+      : "";
+
+    const card = renderItem(item, path, link, thumb);
+
+    cards.push(card);
+
+    searchItems.push({
+      name: item.name,
+      type: item.type,
+      link,
+      thumb,
+      path
+    });
+  }
+
+  list.replaceChildren(...cards.map(card => doc.importNode(card, true)));
+
+  const scripts = [...doc.querySelectorAll("script")];
+
+  const searchScript = scripts.find(script =>
+    script.textContent.includes("const all = ")
+  );
+
+  if (!searchScript) {
+    throw new Error(`${htmlName} 找不到搜尋資料`);
+  }
+
+  searchScript.textContent = searchScript.textContent.replace(
+    /const all = \[[\s\S]*?\];/,
+    () => `const all = ${JSON.stringify(searchItems)};`
+  );
+
+  return {
+    doc,
+    htmlName,
+    searchItems
+  };
+}
+
+async function writeIndexHtml(result) {
+  const output = await getOutputFolderHandle();
+  const file = await output.getFileHandle(result.htmlName);
+
+  const writable = await file.createWritable();
+
+  try {
+    await writable.write(
+      "<!DOCTYPE html>\n" + result.doc.documentElement.outerHTML
+    );
+
+    await writable.close();
+  } catch (error) {
+    await writable.abort().catch(() => {});
+    throw error;
+  }
+}
+
+async function regenerateChapter(oldPath, newPath) {
+  const output = await getOutputFolderHandle();
+  const name = oldPath.split("/").at(-1);
+  const htmlName = `${name}.html`;
+
+  const file = await output.getFileHandle(htmlName);
+  const content = await (await file.getFile()).text();
+  const doc = new DOMParser().parseFromString(content, "text/html");
+  const images = [...doc.querySelectorAll("img[src]")];
+
+  const oldPrefix = toFileUrl(`${viewerPath}/${oldPath}/`);
+  const newPrefix = toFileUrl(`${viewerPath}/${newPath}/`);
+  const baseUrl = new URL(encodeURIComponent(htmlName), location.href);
+
+  let updated = 0;
+
+  for (const img of images) {
+    const src = img.getAttribute("src");
+    const absoluteUrl = new URL(src, baseUrl).href;
+
+    const oldPathDecoded = decodeURI(oldPrefix);
+    const absoluteDecoded = decodeURI(absoluteUrl);
+
+    if (!absoluteDecoded.startsWith(oldPathDecoded)) continue;
+
+    const relativePath = absoluteDecoded.slice(oldPathDecoded.length);
+
+    img.setAttribute("src", newPrefix + relativePath);
+    updated++;
+  }
+
+  const backLink = doc.querySelector("a[href]");
+
+  if (backLink) {
+    const destinationFolder = newPath.split("/").slice(0, -1).at(-1);
+    backLink.setAttribute(
+      "href",
+      encodeURIComponent(destinationFolder) + ".html"
+    );
+  }
+
+  return { doc, htmlName, updated };
+}
+
+async function writeChapterHtml(result) {
+  const output = await getOutputFolderHandle();
+  const file = await output.getFileHandle(result.htmlName);
+
+  const writable = await file.createWritable();
+
+  try {
+    await writable.write(
+      "<!DOCTYPE html>\n" + result.doc.documentElement.outerHTML
+    );
+
+    await writable.close();
+  } catch (error) {
+    await writable.abort().catch(() => {});
+    throw error;
+  }
+}
+
+function renderItem(item, path, link, thumb) {
+  const template = cardTemplates.values().next().value;
+
+  if (!template) {
+    throw new Error("找不到漫畫卡片樣板");
+  }
+
+  const card = template.cloneNode(true);
+
+  card.dataset.itemPath = JSON.stringify(path);
+
+  const anchor = card.querySelector("a");
+  anchor.href = link;
+
+  const title = anchor.querySelector("div:last-child");
+  title.textContent = item.name;
+
+  const cover = anchor.querySelector("img, .folder-thumb");
+
+  if (item.type === "image") {
+    const img = document.createElement("img");
+
+    img.className = "w-full aspect-[3/4] object-cover";
+    img.src = thumb;
+
+    cover.replaceWith(img);
+  } else {
+    const folder = document.createElement("div");
+
+    folder.className = "folder-thumb";
+    folder.textContent = "📁";
+
+    cover.replaceWith(folder);
+  }
+
+  return card;
+}
+
 async function moveComic(card) {
   const path = JSON.parse(card.dataset.itemPath);
   const parts = path.split("/");
@@ -303,6 +544,28 @@ async function moveComic(card) {
   if (!verified) {
     throw new Error("複製驗證失敗，來源資料夾已保留");
   }
+
+  const indexResult = await regenerateIndex(
+    destination,
+    destinationPath
+  );
+
+  const chapterResult = await regenerateChapter(
+    path,
+    targetPath
+  );
+
+  console.log("目的地目錄頁：", indexResult.htmlName);
+  console.log("目的地卡片數：", indexResult.searchItems.length);
+  console.log("漫畫閱讀頁：", chapterResult.htmlName);
+  console.log("更新圖片數：", chapterResult.updated);
+
+  if (chapterResult.updated === 0) {
+    throw new Error("沒有更新任何漫畫圖片，來源資料夾已保留");
+  }
+
+  await writeIndexHtml(indexResult);
+  await writeChapterHtml(chapterResult);
 
   // 完整驗證成功後才刪除來源
   await sourceParent.removeEntry(name, { recursive: true });

@@ -187,11 +187,6 @@ function search() {
 
     sessionStorage.setItem('last_search', v);
 
-    const cardTemplates = new Map(
-      [...document.querySelectorAll('#list > li[data-item-path]')]
-        .map(card => [JSON.parse(card.dataset.itemPath), card.cloneNode(true)])
-    );
-
     const ul = document.getElementById('list');
 
     ul.innerHTML = '';

@@ -205,6 +205,8 @@ function search() {
 
       if (card) {
         ul.appendChild(card.cloneNode(true));
+      } else {
+        ul.appendChild(renderItem(i, i.path, i.link, i.thumb));
       }
     });
 }

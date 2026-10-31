@@ -2,6 +2,7 @@ import json
 import os
 import re
 import sys
+import html
 from dataclasses import asdict, dataclass
 from urllib.parse import quote
 
@@ -34,6 +35,9 @@ TEMPLATE_DIR = os.path.join(SCRIPT_DIR, "templates")
 INDEX_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "index.html")
 CHAPTER_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "chapter.html")
 ITEM_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "item.html")
+FILE_MANAGEMENT_TEMPLATE_PATH = os.path.join(
+    TEMPLATE_DIR, "file-management.html"
+)
 
 def load_index_template():
     with open(INDEX_TEMPLATE_PATH, "r", encoding="utf-8") as f:
@@ -55,6 +59,7 @@ def render_index_template(
     home_page,
     viewer_path,
     tailwind_css_path,
+    file_management_js_path,
 ):
     template = load_index_template()
 
@@ -67,6 +72,7 @@ def render_index_template(
         .replace("{{HOME_PAGE}}", home_page)
         .replace("{{VIEWER_PATH}}", json.dumps(viewer_path))
         .replace("{{TAILWIND_CSS}}", tailwind_css_path)
+        .replace("{{FILE_MANAGEMENT_JS}}", file_management_js_path)
     )
 
 def render_chapter_template(
@@ -212,8 +218,11 @@ def scan_directory(folder):
 
     return folder_items + image_items
 
-def render_item_html(item):
+def render_item_html(item, library_root):
     template = load_item_template()
+
+    with open(FILE_MANAGEMENT_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        file_management_html = f.read()
 
     thumb_html = (
         f'<img class="w-full aspect-[3/4] object-cover" src="{item.thumb}">'
@@ -226,6 +235,17 @@ def render_item_html(item):
         .replace("{{LINK}}", item.link)
         .replace("{{THUMB}}", thumb_html)
         .replace("{{NAME}}", item.name)
+        .replace(
+            "{{ITEM_PATH}}",
+            html.escape(
+                json.dumps(
+                    os.path.relpath(item.path, library_root).replace("\\", "/"),
+                    ensure_ascii=False
+                ),
+                quote=True
+            )
+        )
+        .replace("{{FILE_MANAGEMENT}}", file_management_html)
     )
 
 # --------------------
@@ -490,7 +510,7 @@ def generate_index_html(
 
         all_items.append(item)
 
-        items_html += render_item_html(item)
+        items_html += render_item_html(item, library_root)
 
     all_js = json.dumps(
         [
@@ -499,6 +519,9 @@ def generate_index_html(
                 "type": item.type,
                 "link": item.link,
                 "thumb": item.thumb,
+                "path": os.path.relpath(
+                    item.path, library_root
+                ).replace("\\", "/"),
             }
             for item in all_items
         ],
@@ -510,6 +533,11 @@ def generate_index_html(
         html_file,
     )
 
+    file_management_js_path = html_safe_path(
+        os.path.join(SCRIPT_DIR, "assets", "js", "file-management.js"),
+        html_file,
+    )
+
     template = render_index_template(
         folder_name,
         items_html,
@@ -518,6 +546,7 @@ def generate_index_html(
         index_name,
         library_root,
         tailwind_css_path,
+        file_management_js_path,
     )
 
     with open(html_file, "w", encoding="utf-8") as f:

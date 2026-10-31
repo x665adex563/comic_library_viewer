@@ -145,29 +145,46 @@ async function getOutputFolderHandle() {
 }
 
 async function copyFolder(source, destination) {
+  const tasks = [];
+
   for await (const [name, entry] of source.entries()) {
     if (entry.kind === "directory") {
       const child = await destination.getDirectoryHandle(name, {
         create: true
       });
 
-      await copyFolder(entry, child);
+      tasks.push(() => copyFolder(entry, child));
     } else {
-      const file = await entry.getFile();
-      const target = await destination.getFileHandle(name, {
-        create: true
+      tasks.push(async () => {
+        const file = await entry.getFile();
+        const target = await destination.getFileHandle(name, {
+          create: true
+        });
+
+        const writable = await target.createWritable();
+
+        try {
+          await file.stream().pipeTo(writable);
+        } catch (error) {
+          await writable.abort().catch(() => {});
+          throw error;
+        }
       });
-
-      const writable = await target.createWritable();
-
-      try {
-        await file.stream().pipeTo(writable);
-      } catch (error) {
-        await writable.abort().catch(() => {});
-        throw error;
-      }
     }
   }
+
+  // 同時最多複製 8 個檔案
+  const workers = Array.from(
+    { length: Math.min(4, tasks.length) },
+    async () => {
+      while (tasks.length) {
+        const task = tasks.shift();
+        await task();
+      }
+    }
+  );
+
+  await Promise.all(workers);
 }
 
 async function compareFolders(source, destination) {
@@ -505,6 +522,8 @@ async function hasOutputPermission() {
 }
 
 async function moveComic(card) {
+  console.time("搬移總時間");
+
   if (!(await hasOutputPermission())) {
     alert("HTML 輸出資料夾尚未授權，請先授權再移動漫畫。");
     return;
@@ -582,24 +601,39 @@ async function moveComic(card) {
     create: true
   });
 
+  console.time("1. 複製檔案");
   // 複製失敗時保留來源
   await copyFolder(source, target);
 
+  console.timeEnd("1. 複製檔案");
+
+  console.time("2. SHA-256 驗證");
+
   const verified = await compareFolders(source, target);
+
+  console.timeEnd("2. SHA-256 驗證");
 
   if (!verified) {
     throw new Error("複製驗證失敗，來源資料夾已保留");
   }
+
+  console.time("3. 重建索引");
 
   const indexResult = await regenerateIndex(
     destination,
     destinationPath
   );
 
+  console.timeEnd("3. 重建索引");
+
+  console.time("4. 重建閱讀頁");
+
   const chapterResult = await regenerateChapter(
     path,
     targetPath
   );
+
+  console.timeEnd("4. 重建閱讀頁");
 
   console.log("目的地目錄頁：", indexResult.htmlName);
   console.log("目的地卡片數：", indexResult.searchItems.length);
@@ -610,11 +644,24 @@ async function moveComic(card) {
     throw new Error("沒有更新任何漫畫圖片，來源資料夾已保留");
   }
 
+  console.time("5. 寫入索引 HTML");
+
   await writeIndexHtml(indexResult);
+
+  console.timeEnd("5. 寫入索引 HTML");
+
+  console.time("6. 寫入閱讀頁 HTML");
+
   await writeChapterHtml(chapterResult);
+
+  console.timeEnd("6. 寫入閱讀頁 HTML");
+
+  console.time("7. 刪除來源");
 
   // 完整驗證成功後才刪除來源
   await sourceParent.removeEntry(name, { recursive: true });
+
+  console.timeEnd("7. 刪除來源");
 
   card.remove();
   cardTemplates.delete(path);
@@ -625,6 +672,7 @@ async function moveComic(card) {
     all.splice(index, 1);
   }
 
+  console.timeEnd("搬移總時間");
   alert(`移動成功：${targetPath}`);
 }
 

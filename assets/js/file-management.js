@@ -104,9 +104,15 @@ async function getOutputFolderHandle() {
   });
 
   if (savedHandle) {
-    const permission = await savedHandle.queryPermission({
+    let permission = await savedHandle.queryPermission({
       mode: "readwrite"
     });
+
+    if (permission !== "granted") {
+      permission = await savedHandle.requestPermission({
+        mode: "readwrite"
+      });
+    }
 
     if (permission === "granted") {
       await validateOutputFolder(savedHandle);
@@ -463,7 +469,47 @@ function renderItem(item, path, link, thumb) {
   return card;
 }
 
+async function hasOutputPermission() {
+  if (outputFolderHandle) {
+    return (await outputFolderHandle.queryPermission({
+      mode: "readwrite"
+    })) === "granted";
+  }
+
+  const db = await new Promise((resolve, reject) => {
+    const request = indexedDB.open("comic-viewer", 1);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  const savedHandle = await new Promise((resolve, reject) => {
+    const tx = db.transaction("settings", "readonly");
+    const request = tx.objectStore("settings").get(`output:${viewerPath}`);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  db.close();
+
+  if (!savedHandle) return false;
+
+  const permission = await savedHandle.queryPermission({
+    mode: "readwrite"
+  });
+
+  if (permission !== "granted") return false;
+
+  await validateOutputFolder(savedHandle);
+  outputFolderHandle = savedHandle;
+  return true;
+}
+
 async function moveComic(card) {
+  if (!(await hasOutputPermission())) {
+    alert("HTML 輸出資料夾尚未授權，請先授權再移動漫畫。");
+    return;
+  }
+
   const path = JSON.parse(card.dataset.itemPath);
   const parts = path.split("/");
 
@@ -653,5 +699,16 @@ document.getElementById("list").addEventListener("click", async event => {
     }
   } finally {
     button.disabled = false;
+  }
+});
+
+document.getElementById("authorize-output").addEventListener("click", async () => {
+  try {
+    await getOutputFolderHandle();
+    alert("HTML 輸出資料夾授權成功");
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      alert(`授權失敗：${error.message}`);
+    }
   }
 });

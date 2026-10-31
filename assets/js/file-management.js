@@ -63,6 +63,80 @@ async function getLibraryHandle() {
   return handle;
 }
 
+async function validateOutputFolder(handle) {
+  const name = viewerPath.replace(/[\\/]+$/, "").split(/[\\/]/).pop();
+
+  try {
+    await handle.getFileHandle(".snapshot.json");
+    await handle.getFileHandle(`${name}.html`);
+  } catch {
+    throw new Error(`請選擇正確的 HTML 輸出資料夾：${name}`);
+  }
+}
+
+let outputFolderHandle = null;
+
+async function getOutputFolderHandle() {
+  if (outputFolderHandle) {
+    const permission = await outputFolderHandle.queryPermission({
+      mode: "readwrite"
+    });
+
+    if (permission === "granted") {
+      await validateOutputFolder(outputFolderHandle);
+      return outputFolderHandle;
+    }
+  }
+
+  const db = await new Promise((resolve, reject) => {
+    const request = indexedDB.open("comic-viewer", 1);
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  const savedHandle = await new Promise((resolve, reject) => {
+    const tx = db.transaction("settings", "readonly");
+    const request = tx.objectStore("settings").get(`output:${viewerPath}`);
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  if (savedHandle) {
+    const permission = await savedHandle.queryPermission({
+      mode: "readwrite"
+    });
+
+    if (permission === "granted") {
+      await validateOutputFolder(savedHandle);
+
+      db.close();
+      outputFolderHandle = savedHandle;
+      return savedHandle;
+    }
+  }
+
+  const handle = await window.showDirectoryPicker({
+    id: "comic-viewer-output",
+    mode: "readwrite",
+    ...(savedHandle ? { startIn: savedHandle } : {})
+  });
+
+  await validateOutputFolder(handle);
+
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction("settings", "readwrite");
+    tx.objectStore("settings").put(handle, `output:${viewerPath}`);
+
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+
+  db.close();
+  outputFolderHandle = handle;
+  return handle;
+}
 
 async function copyFolder(source, destination) {
   for await (const [name, entry] of source.entries()) {

@@ -34,6 +34,50 @@ def scan_folder(folder):
 
     return snapshot
 
+def scan_folder_incremental(folder, previous_snapshot, previous_directories, current_directories):
+    """只重新掃描有變動的資料夾，其餘沿用舊紀錄。"""
+    previous_snapshot = previous_snapshot or {}
+    previous_directories = previous_directories or {}
+
+    changed = {
+        path for path, mtime in current_directories.items()
+        if previous_directories.get(path) != mtime
+    }
+
+    snapshot = {}
+
+    for path, data in previous_snapshot.items():
+        directory = path if data.get("type") == "directory" else os.path.dirname(path) or "."
+
+        if directory in current_directories and directory not in changed:
+            snapshot[path] = data
+
+    for relative_root in current_directories:
+        snapshot[relative_root] = {"type": "directory"}
+
+        if relative_root not in changed:
+            continue
+
+        current_root = os.path.join(folder, relative_root)
+
+        with os.scandir(current_root) as entries:
+            for entry in entries:
+                if not entry.is_file():
+                    continue
+
+                stat = entry.stat()
+                relative_path = (
+                    entry.name if relative_root == "."
+                    else os.path.join(relative_root, entry.name)
+                )
+
+                snapshot[relative_path] = {
+                    "size": stat.st_size,
+                    "mtime_ns": stat.st_mtime_ns,
+                }
+
+    return snapshot
+
 def compare_snapshots(previous, current):
     """比較兩次掃描結果，找出新增、修改、刪除的路徑。"""
     previous = previous or {}
@@ -128,7 +172,9 @@ def main():
         viewer, ".directory_snapshot.json"
     )
 
+    t = time.perf_counter()
     current_directories = scan_directory_times(folder)
+    print(f"[效能] 資料夾檢查：{time.perf_counter() - t:.2f} 秒")
 
     previous_directories = None
     if os.path.isfile(directory_snapshot_path):
@@ -141,14 +187,26 @@ def main():
     ):
         print("快速檢查完成，沒有偵測到變動")
     else:
-        print("偵測到可能變動，執行完整掃描...")
-
-        current_snapshot = scan_folder(folder)
+        print("偵測到可能變動，開始掃描...")
 
         previous_snapshot = None
         if os.path.isfile(snapshot_path):
             with open(snapshot_path, "r", encoding="utf-8") as f:
                 previous_snapshot = json.load(f)
+
+        t = time.perf_counter()
+
+        if previous_snapshot is None or previous_directories is None:
+            current_snapshot = scan_folder(folder)
+        else:
+            current_snapshot = scan_folder_incremental(
+                folder,
+                previous_snapshot,
+                previous_directories,
+                current_directories,
+            )
+
+        print(f"[效能] 檔案掃描：{time.perf_counter() - t:.2f} 秒")
 
         added, modified, deleted = compare_snapshots(
             previous_snapshot,
@@ -173,6 +231,8 @@ def main():
                 )
             }
 
+            t = time.perf_counter()
+
             generate_index_html(
                 folder,
                 viewer,
@@ -182,13 +242,19 @@ def main():
                 changed_directories=changed_directories,
             )
 
+            print(f"[效能] HTML 產生：{time.perf_counter() - t:.2f} 秒")
+
             print("HTML 產生完成")
+
+        t = time.perf_counter()
 
         with open(snapshot_path, "w", encoding="utf-8") as f:
             f.write(json.dumps(current_snapshot, ensure_ascii=False))
 
         with open(directory_snapshot_path, "w", encoding="utf-8") as f:
             f.write(json.dumps(current_directories, ensure_ascii=False))
+
+        print(f"[效能] Snapshot 儲存：{time.perf_counter() - t:.2f} 秒")
 
     webbrowser.open(index_path)
 

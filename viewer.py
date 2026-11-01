@@ -437,6 +437,7 @@ def generate_index_html(
     all_items=None,
     library_root=None,
     changed_chapters=None,
+    changed_directories=None,
 ):
     if all_items is None:
         all_items = []
@@ -463,6 +464,14 @@ def generate_index_html(
         if item.type == "image" and item.name.isdigit()
     ]
 
+    chapter_structure_changed = (
+        changed_directories is not None
+        and any(
+            os.path.dirname(path) == os.path.normpath(folder)
+            for path in changed_directories
+        )
+    )
+
     for item in items:
         d_path = item.path
 
@@ -481,28 +490,6 @@ def generate_index_html(
         if item.type == "image":
             is_series = len(chapter_items) > 1
 
-            chapter_index = (
-                chapter_items.index(item)
-                if item in chapter_items
-                else -1
-            )
-
-            neighbor_changed = False
-
-            if chapter_index >= 0 and changed_chapters is not None:
-                neighbors = []
-
-                if chapter_index > 0:
-                    neighbors.append(chapter_items[chapter_index - 1])
-
-                if chapter_index < len(chapter_items) - 1:
-                    neighbors.append(chapter_items[chapter_index + 1])
-
-                neighbor_changed = any(
-                    os.path.normpath(neighbor.path) in changed_chapters
-                    for neighbor in neighbors
-                )
-
             chapter_html = os.path.join(
                 viewer_folder, f"{item.name}.html"
             )
@@ -510,7 +497,7 @@ def generate_index_html(
             if (
                 changed_chapters is None
                 or os.path.normpath(item.path) in changed_chapters
-                or neighbor_changed
+                or chapter_structure_changed
                 or not os.path.isfile(chapter_html)
             ):
                 generate_chapter_html(
@@ -543,6 +530,7 @@ def generate_index_html(
                 all_items,
                 library_root,
                 changed_chapters,
+                changed_directories,
             )
 
             item.link = quote(sub_index)

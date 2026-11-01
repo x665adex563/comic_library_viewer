@@ -82,6 +82,22 @@ def get_changed_chapters(folder, previous, current):
 
     return chapters
 
+def get_changed_directories(previous, current):
+    """取得新增或刪除的資料夾。"""
+    changed = set()
+
+    for path in previous.keys() | current.keys():
+        old = previous.get(path)
+        new = current.get(path)
+
+        old_is_dir = old is not None and old.get("type") == "directory"
+        new_is_dir = new is not None and new.get("type") == "directory"
+
+        if old_is_dir != new_is_dir:
+            changed.add(path)
+
+    return changed
+
 def main():
     root = Tk()
     root.withdraw()
@@ -147,12 +163,20 @@ def main():
                 folder, previous_snapshot or {}, current_snapshot
             )
 
+            changed_directories = {
+                os.path.normpath(os.path.join(folder, path))
+                for path in get_changed_directories(
+                    previous_snapshot or {}, current_snapshot
+                )
+            }
+
             generate_index_html(
                 folder,
                 viewer,
                 index_name,
                 library_root=folder,
                 changed_chapters=changed_chapters,
+                changed_directories=changed_directories,
             )
 
             print("HTML 產生完成")

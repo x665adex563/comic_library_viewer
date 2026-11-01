@@ -266,7 +266,11 @@ def generate_chapter_html(
     )
 
     folder_name = os.path.basename(folder)
-    html_file = os.path.join(viewer_folder, f"{folder_name}.html")
+    relative_parent = os.path.relpath(os.path.dirname(folder), library_root)
+    output_dir = os.path.join(viewer_folder, relative_parent)
+    os.makedirs(output_dir, exist_ok=True)
+
+    html_file = os.path.join(output_dir, f"{folder_name}.html")
 
     comic_title = (
         os.path.splitext(os.path.basename(parent_index_html))[0]
@@ -278,17 +282,15 @@ def generate_chapter_html(
     next_link = ""
 
     if previous_item:
-        previous_link = quote(
-            os.path.basename(
-                os.path.join(viewer_folder, f"{previous_item.name}.html")
-            )
+        previous_link = html_safe_path(
+            os.path.join(output_dir, f"{previous_item.name}.html"),
+            html_file
         )
 
     if next_item:
-        next_link = quote(
-            os.path.basename(
-                os.path.join(viewer_folder, f"{next_item.name}.html")
-            )
+        next_link = html_safe_path(
+            os.path.join(output_dir, f"{next_item.name}.html"),
+            html_file
         )
 
     back_button_html = ""
@@ -442,7 +444,14 @@ def generate_index_html(
     if all_items is None:
         all_items = []
 
-    html_file = os.path.join(viewer_folder, index_name)
+    relative_folder = os.path.relpath(folder, library_root)
+    output_dir = os.path.join(viewer_folder, relative_folder)
+    os.makedirs(output_dir, exist_ok=True)
+
+    html_file = os.path.join(
+        output_dir,
+        index_name if relative_folder == "." else "index.html"
+    )
     folder_name = os.path.basename(folder)
 
     if parent_index_html:
@@ -491,7 +500,7 @@ def generate_index_html(
             is_series = len(chapter_items) > 1
 
             chapter_html = os.path.join(
-                viewer_folder, f"{item.name}.html"
+                output_dir, f"{item.name}.html"
             )
 
             if (
@@ -510,17 +519,17 @@ def generate_index_html(
                     is_series,
                 )
 
-            link = quote(os.path.basename(chapter_html))
+            link = html_safe_path(chapter_html, html_file)
             thumb = html_safe_path(
                 os.path.join(d_path, item.images[0]),
-                chapter_html
+                html_file
             )
 
             item.link = link
             item.thumb = thumb
 
         else:
-            sub_index = f"{item.name}.html"
+            sub_index = "index.html"
 
             generate_index_html(
                 d_path,
@@ -533,7 +542,10 @@ def generate_index_html(
                 changed_directories,
             )
 
-            item.link = quote(sub_index)
+            item.link = html_safe_path(
+                os.path.join(output_dir, item.name, sub_index),
+                html_file
+            )
             item.thumb = ""
 
         all_items.append(item)

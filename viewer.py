@@ -415,6 +415,11 @@ def generate_chapter_html(
         reading_mode_js_path,
     )
 
+    if os.path.isfile(html_file):
+        with open(html_file, "r", encoding="utf-8") as f:
+            if f.read() == template:
+                return html_file
+
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(template)
 
@@ -430,7 +435,8 @@ def generate_index_html(
     index_name,
     parent_index_html=None,
     all_items=None,
-    library_root=None
+    library_root=None,
+    changed_chapters=None,
 ):
     if all_items is None:
         all_items = []
@@ -474,15 +480,48 @@ def generate_index_html(
 
         if item.type == "image":
             is_series = len(chapter_items) > 1
-            chapter_html = generate_chapter_html(
-                d_path,
-                viewer_folder,
-                html_file,
-                previous_item,
-                next_item,
-                library_root,
-                is_series,
+
+            chapter_index = (
+                chapter_items.index(item)
+                if item in chapter_items
+                else -1
             )
+
+            neighbor_changed = False
+
+            if chapter_index >= 0 and changed_chapters is not None:
+                neighbors = []
+
+                if chapter_index > 0:
+                    neighbors.append(chapter_items[chapter_index - 1])
+
+                if chapter_index < len(chapter_items) - 1:
+                    neighbors.append(chapter_items[chapter_index + 1])
+
+                neighbor_changed = any(
+                    os.path.normpath(neighbor.path) in changed_chapters
+                    for neighbor in neighbors
+                )
+
+            chapter_html = os.path.join(
+                viewer_folder, f"{item.name}.html"
+            )
+
+            if (
+                changed_chapters is None
+                or os.path.normpath(item.path) in changed_chapters
+                or neighbor_changed
+                or not os.path.isfile(chapter_html)
+            ):
+                generate_chapter_html(
+                    d_path,
+                    viewer_folder,
+                    html_file,
+                    previous_item,
+                    next_item,
+                    library_root,
+                    is_series,
+                )
 
             link = quote(os.path.basename(chapter_html))
             thumb = html_safe_path(
@@ -503,6 +542,7 @@ def generate_index_html(
                 html_file,
                 all_items,
                 library_root,
+                changed_chapters,
             )
 
             item.link = quote(sub_index)
@@ -548,6 +588,11 @@ def generate_index_html(
         tailwind_css_path,
         file_management_js_path,
     )
+
+    if os.path.isfile(html_file):
+        with open(html_file, "r", encoding="utf-8") as f:
+            if f.read() == template:
+                return html_file
 
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(template)

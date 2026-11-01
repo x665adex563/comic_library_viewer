@@ -266,7 +266,11 @@ def generate_chapter_html(
     )
 
     folder_name = os.path.basename(folder)
-    html_file = os.path.join(viewer_folder, f"{folder_name}.html")
+    relative_parent = os.path.relpath(os.path.dirname(folder), library_root)
+    output_dir = os.path.join(viewer_folder, relative_parent)
+    os.makedirs(output_dir, exist_ok=True)
+
+    html_file = os.path.join(output_dir, f"{folder_name}.html")
 
     comic_title = (
         os.path.splitext(os.path.basename(parent_index_html))[0]
@@ -278,17 +282,15 @@ def generate_chapter_html(
     next_link = ""
 
     if previous_item:
-        previous_link = quote(
-            os.path.basename(
-                os.path.join(viewer_folder, f"{previous_item.name}.html")
-            )
+        previous_link = html_safe_path(
+            os.path.join(output_dir, f"{previous_item.name}.html"),
+            html_file
         )
 
     if next_item:
-        next_link = quote(
-            os.path.basename(
-                os.path.join(viewer_folder, f"{next_item.name}.html")
-            )
+        next_link = html_safe_path(
+            os.path.join(output_dir, f"{next_item.name}.html"),
+            html_file
         )
 
     back_button_html = ""
@@ -415,6 +417,11 @@ def generate_chapter_html(
         reading_mode_js_path,
     )
 
+    if os.path.isfile(html_file):
+        with open(html_file, "r", encoding="utf-8") as f:
+            if f.read() == template:
+                return html_file
+
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(template)
 
@@ -430,12 +437,21 @@ def generate_index_html(
     index_name,
     parent_index_html=None,
     all_items=None,
-    library_root=None
+    library_root=None,
+    changed_chapters=None,
+    changed_directories=None,
 ):
     if all_items is None:
         all_items = []
 
-    html_file = os.path.join(viewer_folder, index_name)
+    relative_folder = os.path.relpath(folder, library_root)
+    output_dir = os.path.join(viewer_folder, relative_folder)
+    os.makedirs(output_dir, exist_ok=True)
+
+    html_file = os.path.join(
+        output_dir,
+        index_name if relative_folder == "." else "index.html"
+    )
     folder_name = os.path.basename(folder)
 
     if parent_index_html:
@@ -457,6 +473,14 @@ def generate_index_html(
         if item.type == "image" and item.name.isdigit()
     ]
 
+    chapter_structure_changed = (
+        changed_directories is not None
+        and any(
+            os.path.dirname(path) == os.path.normpath(folder)
+            for path in changed_directories
+        )
+    )
+
     for item in items:
         d_path = item.path
 
@@ -474,27 +498,38 @@ def generate_index_html(
 
         if item.type == "image":
             is_series = len(chapter_items) > 1
-            chapter_html = generate_chapter_html(
-                d_path,
-                viewer_folder,
-                html_file,
-                previous_item,
-                next_item,
-                library_root,
-                is_series,
+
+            chapter_html = os.path.join(
+                output_dir, f"{item.name}.html"
             )
 
-            link = quote(os.path.basename(chapter_html))
+            if (
+                changed_chapters is None
+                or os.path.normpath(item.path) in changed_chapters
+                or chapter_structure_changed
+                or not os.path.isfile(chapter_html)
+            ):
+                generate_chapter_html(
+                    d_path,
+                    viewer_folder,
+                    html_file,
+                    previous_item,
+                    next_item,
+                    library_root,
+                    is_series,
+                )
+
+            link = html_safe_path(chapter_html, html_file)
             thumb = html_safe_path(
                 os.path.join(d_path, item.images[0]),
-                chapter_html
+                html_file
             )
 
             item.link = link
             item.thumb = thumb
 
         else:
-            sub_index = f"{item.name}.html"
+            sub_index = "index.html"
 
             generate_index_html(
                 d_path,
@@ -503,9 +538,14 @@ def generate_index_html(
                 html_file,
                 all_items,
                 library_root,
+                changed_chapters,
+                changed_directories,
             )
 
-            item.link = quote(sub_index)
+            item.link = html_safe_path(
+                os.path.join(output_dir, item.name, sub_index),
+                html_file
+            )
             item.thumb = ""
 
         all_items.append(item)
@@ -548,6 +588,11 @@ def generate_index_html(
         tailwind_css_path,
         file_management_js_path,
     )
+
+    if os.path.isfile(html_file):
+        with open(html_file, "r", encoding="utf-8") as f:
+            if f.read() == template:
+                return html_file
 
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(template)

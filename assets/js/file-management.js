@@ -300,10 +300,18 @@ function toFileUrl(path) {
 
 async function regenerateIndex(folder, folderPath) {
   const output = await getOutputFolderHandle();
-  const folderName = folderPath.at(-1);
-  const htmlName = `${folderName}.html`;
 
-  const file = await output.getFileHandle(htmlName);
+  let directory = output;
+
+  for (const part of folderPath) {
+    directory = await directory.getDirectoryHandle(part);
+  }
+
+  const htmlName = folderPath.length === 0
+    ? `${output.name}.html`
+    : "index.html";
+
+  const file = await directory.getFileHandle(htmlName);
   const content = await (await file.getFile()).text();
 
   const doc = new DOMParser().parseFromString(content, "text/html");
@@ -320,7 +328,9 @@ async function regenerateIndex(folder, folderPath) {
 
   for (const item of items) {
     const path = [...folderPath, item.name].join("/");
-    const link = encodeURIComponent(item.name) + ".html";
+    const link = item.type === "folder"
+    ? `${encodeURIComponent(item.name)}/index.html`
+    : `${encodeURIComponent(item.name)}.html`;
 
     const thumb = item.type === "image"
       ? toFileUrl([
@@ -364,13 +374,21 @@ async function regenerateIndex(folder, folderPath) {
   return {
     doc,
     htmlName,
+    folderPath,
     searchItems
   };
 }
 
 async function writeIndexHtml(result) {
   const output = await getOutputFolderHandle();
-  const file = await output.getFileHandle(result.htmlName);
+
+  let directory = output;
+
+  for (const part of result.folderPath) {
+    directory = await directory.getDirectoryHandle(part);
+  }
+
+  const file = await directory.getFileHandle(result.htmlName);
 
   const writable = await file.createWritable();
 
@@ -388,17 +406,44 @@ async function writeIndexHtml(result) {
 
 async function regenerateChapter(oldPath, newPath) {
   const output = await getOutputFolderHandle();
-  const name = oldPath.split("/").at(-1);
+  const parts = oldPath.split("/");
+  const name = parts.at(-1);
   const htmlName = `${name}.html`;
 
-  const file = await output.getFileHandle(htmlName);
+  let directory = output;
+
+  for (const part of parts.slice(0, -1)) {
+    directory = await directory.getDirectoryHandle(part);
+  }
+
+  const file = await directory.getFileHandle(htmlName);
   const content = await (await file.getFile()).text();
   const doc = new DOMParser().parseFromString(content, "text/html");
   const images = [...doc.querySelectorAll("img[src]")];
 
   const oldPrefix = toFileUrl(`${viewerPath}/${oldPath}/`);
   const newPrefix = toFileUrl(`${viewerPath}/${newPath}/`);
-  const baseUrl = new URL(encodeURIComponent(htmlName), location.href);
+  const url = new URL(location.href);
+  const segments = url.pathname.split("/");
+
+  const outputIndex = segments.findIndex(
+    segment => decodeURIComponent(segment) === output.name
+  );
+
+  if (outputIndex === -1) {
+    throw new Error("無法定位 HTML 輸出根目錄");
+  }
+
+  const outputRootUrl = new URL(url.href);
+  outputRootUrl.pathname =
+    segments.slice(0, outputIndex + 1).join("/") + "/";
+
+  const baseUrl = new URL(
+    [...parts.slice(0, -1), htmlName]
+      .map(encodeURIComponent)
+      .join("/"),
+    outputRootUrl
+  );
 
   let updated = 0;
 
@@ -417,22 +462,60 @@ async function regenerateChapter(oldPath, newPath) {
     updated++;
   }
 
-  const backLink = doc.querySelector("a[href]");
+  for (const element of doc.querySelectorAll('link[href], script[src]')) {
+    const attribute = element.hasAttribute("href") ? "href" : "src";
+    const value = element.getAttribute(attribute);
 
-  if (backLink) {
-    const destinationFolder = newPath.split("/").slice(0, -1).at(-1);
-    backLink.setAttribute(
-      "href",
-      encodeURIComponent(destinationFolder) + ".html"
+    if (!value) continue;
+
+    element.setAttribute(
+      attribute,
+      new URL(value, baseUrl).href
     );
   }
 
-  return { doc, htmlName, updated };
+  const destinationParent = newPath.split("/").slice(0, -1);
+
+  const indexName = destinationParent.length === 0
+    ? `${output.name}.html`
+    : "index.html";
+
+  const parentIndexUrl = encodeURIComponent(indexName);
+
+  for (const script of doc.querySelectorAll("script:not([src])")) {
+    if (!script.textContent.includes("const parentIndex =")) continue;
+
+    script.textContent = script.textContent.replace(
+      /const parentIndex = "[^"]*";/,
+      `const parentIndex = ${JSON.stringify(parentIndexUrl)};`
+    );
+
+    break;
+  }
+
+  const backLink = doc.querySelector("#back a[href]");
+
+  if (backLink) {
+    backLink.setAttribute("href", parentIndexUrl);
+  }
+
+  return { doc, htmlName, newPath, updated };
 }
 
 async function writeChapterHtml(result) {
   const output = await getOutputFolderHandle();
-  const file = await output.getFileHandle(result.htmlName);
+
+  let directory = output;
+
+  for (const part of result.newPath.split("/").slice(0, -1)) {
+    directory = await directory.getDirectoryHandle(part, {
+      create: true
+    });
+  }
+
+  const file = await directory.getFileHandle(result.htmlName, {
+    create: true
+  });
 
   const writable = await file.createWritable();
 
@@ -519,6 +602,125 @@ async function hasOutputPermission() {
   await validateOutputFolder(savedHandle);
   outputFolderHandle = savedHandle;
   return true;
+}
+
+
+async function relocateComicHtml(source, oldPath, newPath) {
+  const output = await getOutputFolderHandle();
+  const items = await scanDirectory(source);
+
+  let containsImages = false;
+
+  for await (const [name, entry] of source.entries()) {
+    if (entry.kind === "file" && /\.(jpg|jpeg|png|webp)$/i.test(name)) {
+      containsImages = true;
+      break;
+    }
+  }
+
+  if (containsImages) {
+    const chapter = await regenerateChapter(oldPath, newPath);
+
+    if (chapter.updated === 0) {
+      throw new Error(`閱讀頁未更新圖片：${oldPath}`);
+    }
+
+    await writeChapterHtml(chapter);
+    return;
+  }
+
+  let oldDir = output;
+
+  for (const part of oldPath.split("/")) {
+    oldDir = await oldDir.getDirectoryHandle(part);
+  }
+
+  const oldFile = await oldDir.getFileHandle("index.html");
+  const content = await (await oldFile.getFile()).text();
+  const doc = new DOMParser().parseFromString(content, "text/html");
+
+  const url = new URL(location.href);
+  const segments = url.pathname.split("/");
+
+  const outputIndex = segments.findIndex(
+    segment => decodeURIComponent(segment) === output.name
+  );
+
+  if (outputIndex === -1) {
+    throw new Error("無法定位 HTML 輸出根目錄");
+  }
+
+  const outputRootUrl = new URL(url.href);
+
+  outputRootUrl.pathname =
+    segments.slice(0, outputIndex + 1).join("/") + "/";
+
+  const oldBase = new URL(
+    [...oldPath.split("/"), "index.html"]
+      .map(encodeURIComponent)
+      .join("/"),
+    outputRootUrl
+  );
+
+  for (const element of doc.querySelectorAll('link[href], script[src]')) {
+    const attribute = element.hasAttribute("href") ? "href" : "src";
+    const value = element.getAttribute(attribute);
+
+    if (value) {
+      element.setAttribute(attribute, new URL(value, oldBase).href);
+    }
+  }
+
+  const parent = newPath.split("/").slice(0, -1);
+
+  const parentIndex = parent.length === 0
+    ? `../${encodeURIComponent(output.name)}.html`
+    : "../index.html";
+
+  const back = doc.querySelector("#back a[href]");
+
+  if (back) {
+    back.setAttribute("href", parentIndex);
+  }
+
+  let newDir = output;
+
+  for (const part of newPath.split("/")) {
+    newDir = await newDir.getDirectoryHandle(part, { create: true });
+  }
+
+  const newFile = await newDir.getFileHandle("index.html", {
+    create: true
+  });
+
+  const writable = await newFile.createWritable();
+
+  try {
+    await writable.write(
+      "<!DOCTYPE html>\n" + doc.documentElement.outerHTML
+    );
+    await writable.close();
+  } catch (error) {
+    await writable.abort().catch(() => {});
+    throw error;
+  }
+
+  for (const item of items) {
+    const child = await source.getDirectoryHandle(item.name);
+
+    await relocateComicHtml(
+      child,
+      `${oldPath}/${item.name}`,
+      `${newPath}/${item.name}`
+    );
+  }
+
+  const indexResult = await regenerateIndex(
+    source,
+    newPath.split("/")
+  );
+
+  await writeIndexHtml(indexResult);
 }
 
 async function moveComic(card) {
@@ -617,44 +819,18 @@ async function moveComic(card) {
     throw new Error("複製驗證失敗，來源資料夾已保留");
   }
 
-  console.time("3. 重建索引");
+  console.time("3. 更新搬移後的 HTML");
+
+  await relocateComicHtml(source, path, targetPath);
 
   const indexResult = await regenerateIndex(
     destination,
     destinationPath
   );
 
-  console.timeEnd("3. 重建索引");
-
-  console.time("4. 重建閱讀頁");
-
-  const chapterResult = await regenerateChapter(
-    path,
-    targetPath
-  );
-
-  console.timeEnd("4. 重建閱讀頁");
-
-  console.log("目的地目錄頁：", indexResult.htmlName);
-  console.log("目的地卡片數：", indexResult.searchItems.length);
-  console.log("漫畫閱讀頁：", chapterResult.htmlName);
-  console.log("更新圖片數：", chapterResult.updated);
-
-  if (chapterResult.updated === 0) {
-    throw new Error("沒有更新任何漫畫圖片，來源資料夾已保留");
-  }
-
-  console.time("5. 寫入索引 HTML");
-
   await writeIndexHtml(indexResult);
 
-  console.timeEnd("5. 寫入索引 HTML");
-
-  console.time("6. 寫入閱讀頁 HTML");
-
-  await writeChapterHtml(chapterResult);
-
-  console.timeEnd("6. 寫入閱讀頁 HTML");
+  console.timeEnd("3. 更新搬移後的 HTML");
 
   console.time("7. 刪除來源");
 

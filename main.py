@@ -31,6 +31,19 @@ def scan_folder(folder):
 
     return snapshot
 
+def compare_snapshots(previous, current):
+    """比較兩次掃描結果，找出新增、修改、刪除的路徑。"""
+    previous = previous or {}
+
+    added = current.keys() - previous.keys()
+    deleted = previous.keys() - current.keys()
+    modified = {
+        path
+        for path in current.keys() & previous.keys()
+        if current[path] != previous[path]
+    }
+
+    return added, modified, deleted
 
 def scan_directory_times(folder):
     """只記錄所有資料夾的修改時間。"""
@@ -44,6 +57,46 @@ def scan_directory_times(folder):
 
     return snapshot
 
+def get_changed_chapters(folder, previous, current):
+    chapters = set()
+
+    for path in previous.keys() | current.keys():
+        old = previous.get(path)
+        new = current.get(path)
+
+        if old == new or path == ".":
+            continue
+
+        # 資料夾本身發生新增或刪除
+        if (old and old.get("type") == "directory") or (
+            new and new.get("type") == "directory"
+        ):
+            chapter_path = path
+        else:
+            # 檔案變動，取得所屬資料夾
+            chapter_path = os.path.dirname(path)
+
+        chapters.add(
+            os.path.normpath(os.path.join(folder, chapter_path))
+        )
+
+    return chapters
+
+def get_changed_directories(previous, current):
+    """取得新增或刪除的資料夾。"""
+    changed = set()
+
+    for path in previous.keys() | current.keys():
+        old = previous.get(path)
+        new = current.get(path)
+
+        old_is_dir = old is not None and old.get("type") == "directory"
+        new_is_dir = new is not None and new.get("type") == "directory"
+
+        if old_is_dir != new_is_dir:
+            changed.add(path)
+
+    return changed
 
 def main():
     root = Tk()
@@ -94,17 +147,36 @@ def main():
             with open(snapshot_path, "r", encoding="utf-8") as f:
                 previous_snapshot = json.load(f)
 
-        if (
-            current_snapshot != previous_snapshot
-            or not os.path.isfile(index_path)
-        ):
+        added, modified, deleted = compare_snapshots(
+            previous_snapshot,
+            current_snapshot
+        )
+
+        if added or modified or deleted or not os.path.isfile(index_path):
+            print(f"新增：{len(added)} 個")
+            print(f"修改：{len(modified)} 個")
+            print(f"刪除：{len(deleted)} 個")
+
             print("重新產生 HTML...")
+
+            changed_chapters = get_changed_chapters(
+                folder, previous_snapshot or {}, current_snapshot
+            )
+
+            changed_directories = {
+                os.path.normpath(os.path.join(folder, path))
+                for path in get_changed_directories(
+                    previous_snapshot or {}, current_snapshot
+                )
+            }
 
             generate_index_html(
                 folder,
                 viewer,
                 index_name,
-                library_root=folder
+                library_root=folder,
+                changed_chapters=changed_chapters,
+                changed_directories=changed_directories,
             )
 
             print("HTML 產生完成")

@@ -115,11 +115,15 @@ async function getOutputFolderHandle() {
     }
 
     if (permission === "granted") {
-      await validateOutputFolder(savedHandle);
+      try {
+        await validateOutputFolder(savedHandle);
 
-      db.close();
-      outputFolderHandle = savedHandle;
-      return savedHandle;
+        db.close();
+        outputFolderHandle = savedHandle;
+        return savedHandle;
+      } catch {
+        // 已儲存的資料夾無效，改由使用者重新選擇
+      }
     }
   }
 

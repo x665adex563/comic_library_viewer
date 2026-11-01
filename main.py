@@ -21,7 +21,10 @@ def scan_folder(folder):
 
         for filename in files:
             path = os.path.join(current_root, filename)
-            relative_path = os.path.relpath(path, folder)
+            relative_path = (
+                filename if relative_root == "."
+                else os.path.join(relative_root, filename)
+            )
             stat = os.stat(path)
 
             snapshot[relative_path] = {
@@ -182,10 +185,10 @@ def main():
             print("HTML 產生完成")
 
         with open(snapshot_path, "w", encoding="utf-8") as f:
-            json.dump(current_snapshot, f, ensure_ascii=False)
+            f.write(json.dumps(current_snapshot, ensure_ascii=False))
 
         with open(directory_snapshot_path, "w", encoding="utf-8") as f:
-            json.dump(current_directories, f, ensure_ascii=False)
+            f.write(json.dumps(current_directories, ensure_ascii=False))
 
     webbrowser.open(index_path)
 

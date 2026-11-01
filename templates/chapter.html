@@ -111,6 +111,25 @@ body:not(.single-page) #comic-content img {
 {{BACK_BUTTON}}
 
 <script>
+  document.addEventListener('click', event => {
+      const link = event.target.closest('a[href]');
+      if (link && !link.closest('#back')) {
+          sessionStorage.setItem('comic_previous_page', location.href);
+      }
+  });
+
+  document.addEventListener('click', event => {
+      const back = event.target.closest('#back a');
+      if (!back) return;
+
+      const previous = sessionStorage.getItem('comic_previous_page');
+
+      if (previous === back.href) {
+          event.preventDefault();
+          history.back();
+      }
+  });
+
   const previousChapter = "{{PREVIOUS_CHAPTER_URL}}";
   const nextChapter = "{{NEXT_CHAPTER_URL}}";
   const parentIndex = "{{PARENT_INDEX_URL}}";

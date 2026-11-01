@@ -67,6 +67,25 @@
 >↑</button>
 
 <script>
+document.addEventListener('click', event => {
+    const link = event.target.closest('a[href]');
+    if (link && !link.closest('#back')) {
+        sessionStorage.setItem('comic_previous_page', location.href);
+    }
+});
+
+document.addEventListener('click', event => {
+    const back = event.target.closest('#back a');
+    if (!back) return;
+
+    const previous = sessionStorage.getItem('comic_previous_page');
+
+    if (previous === back.href) {
+        event.preventDefault();
+        history.back();
+    }
+});
+
 const all = "{{ALL_ITEMS}}";
 const HOME_PAGE = "{{HOME_PAGE}}";
 const viewerPath = {{VIEWER_PATH}};

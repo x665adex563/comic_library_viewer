@@ -1,9 +1,23 @@
 window.ChapterApp.initUIVisibility = function () {
   let uiHideTimer;
+  let cursorHideTimer;
 
   const back = document.getElementById("back");
   const readingMode = document.getElementById("reading-mode");
   const pageNavigation = document.getElementById("page-navigation");
+
+  function showCursor() {
+    document.body.style.cursor = "";
+
+    clearTimeout(cursorHideTimer);
+
+    cursorHideTimer = setTimeout(() => {
+      document.body.style.cursor = "none";
+    }, 2500);
+  }
+
+  document.addEventListener("mousemove", showCursor);
+  showCursor();
 
   function showUI() {
     back.classList.remove("ui-hidden");

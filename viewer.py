@@ -1,11 +1,9 @@
 import json
 import os
 import re
-import sys
 import html
 from dataclasses import asdict, dataclass
-from urllib.parse import quote
-
+from core.paths import SCRIPT_DIR, OUTPUT_ROOT, html_safe_path
 
 IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp")
 
@@ -23,14 +21,6 @@ class ViewerItem:
 # --------------------
 # 執行檔位置 & 統一輸出資料夾
 # --------------------
-if getattr(sys, 'frozen', False):
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(sys.executable))
-else:
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-OUTPUT_ROOT = os.path.join(SCRIPT_DIR, "_comic_viewer_output")
-os.makedirs(OUTPUT_ROOT, exist_ok=True)
-
 TEMPLATE_DIR = os.path.join(SCRIPT_DIR, "templates")
 INDEX_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "index.html")
 CHAPTER_TEMPLATE_PATH = os.path.join(TEMPLATE_DIR, "chapter.html")
@@ -150,26 +140,6 @@ def render_chapter_template(
 # --------------------
 def natural_sort_key(s):
     return [int(t) if t.isdigit() else t.lower() for t in re.split(r'([0-9]+)', s)]
-
-# --------------------
-# 相對路徑 + URL 編碼
-# --------------------
-def html_safe_path(target_path, html_file):
-    """計算 HTML 中引用 target_path 的安全路徑，支援跨磁碟槽"""
-    target_abs = os.path.abspath(target_path)
-    html_abs = os.path.abspath(html_file)
-    
-    from_drive = os.path.splitdrive(html_abs)[0]
-    to_drive = os.path.splitdrive(target_abs)[0]
-
-    if from_drive.lower() == to_drive.lower():
-        # 同磁碟槽 → 相對路徑
-        rel = os.path.relpath(target_abs, start=os.path.dirname(html_abs)).replace("\\", "/")
-        return quote(rel)
-    else:
-        # 不同磁碟槽 → file:/// 絕對路徑
-        return "file:///" + quote(target_abs.replace("\\", "/"))
-
 
 # --------------------
 # 掃描漫畫目錄

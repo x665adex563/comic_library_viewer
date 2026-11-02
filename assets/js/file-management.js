@@ -727,6 +727,36 @@ async function relocateComicHtml(source, oldPath, newPath) {
   await writeIndexHtml(indexResult);
 }
 
+function showMoveStatus(message) {
+  let status = document.getElementById("move-status");
+
+  if (!status) {
+    status = document.createElement("div");
+    status.id = "move-status";
+
+    Object.assign(status.style, {
+      position: "fixed",
+      right: "24px",
+      bottom: "24px",
+      zIndex: "9999",
+      padding: "12px 20px",
+      background: "#333",
+      color: "#fff",
+      borderRadius: "8px",
+      boxShadow: "0 4px 12px #0003"
+    });
+
+    document.body.appendChild(status);
+  }
+
+  status.textContent = message;
+  status.hidden = false;
+}
+
+function hideMoveStatus() {
+  document.getElementById("move-status")?.remove();
+}
+
 async function moveComic(card) {
   console.time("搬移總時間");
 
@@ -803,6 +833,8 @@ async function moveComic(card) {
     return;
   }
 
+  showMoveStatus("搬移中…");
+
   const target = await destination.getDirectoryHandle(name, {
     create: true
   });
@@ -856,7 +888,8 @@ async function moveComic(card) {
   }
 
   console.timeEnd("搬移總時間");
-  alert(`移動成功：${targetPath}`);
+  showMoveStatus(`搬移成功：${name}`);
+  setTimeout(hideMoveStatus, 3000);
 }
 
 async function deleteComic(card) {
@@ -932,9 +965,13 @@ document.getElementById("list").addEventListener("click", async event => {
       await deleteComic(card);
     }
   } catch (error) {
-    if (error.name !== "AbortError") {
-      const action = button.dataset.action === "move" ? "移動" : "刪除";
-      alert(`${action}失敗：${error.message}`);
+    if (button.dataset.action === "move") {
+      if (error.name !== "AbortError") {
+        showMoveStatus(`搬移失敗：${error.message}`);
+        setTimeout(hideMoveStatus, 3000);
+      }
+    } else if (error.name !== "AbortError") {
+      alert(`刪除失敗：${error.message}`);
     }
   } finally {
     button.disabled = false;

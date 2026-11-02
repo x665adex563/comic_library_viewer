@@ -5,7 +5,8 @@ import webbrowser
 import time
 from tkinter import Tk, filedialog
 
-from viewer import OUTPUT_ROOT, generate_index_html
+from viewer import generate_index_html
+from core.paths import OUTPUT_ROOT
 from core.scanner import (
     scan_folder,
     scan_folder_incremental,

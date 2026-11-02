@@ -1,79 +1,18 @@
 import json
 import os
-import re
 import html
-from dataclasses import asdict, dataclass
-from core.paths import SCRIPT_DIR, OUTPUT_ROOT, html_safe_path
+from core.paths import SCRIPT_DIR, html_safe_path
 from core.templates import (
     FILE_MANAGEMENT_TEMPLATE_PATH,
     load_item_template,
     render_index_template,
     render_chapter_template,
 )
-
-IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp")
-
-@dataclass
-class ViewerItem:
-    name: str
-    path: str
-    images: list[str]
-    type: str
-    link: str = ""
-    thumb: str = ""
-
-# --------------------
-# 自然排序
-# --------------------
-def natural_sort_key(s):
-    return [int(t) if t.isdigit() else t.lower() for t in re.split(r'([0-9]+)', s)]
-
-# --------------------
-# 掃描漫畫目錄
-# --------------------
-def scan_directory(folder):
-    subdirs = [
-        d
-        for d in os.listdir(folder)
-        if os.path.isdir(os.path.join(folder, d))
-    ]
-
-    folder_items = []
-    image_items = []
-
-    for d in subdirs:
-        d_path = os.path.join(folder, d)
-
-        images = sorted(
-            [
-                f
-                for f in os.listdir(d_path)
-                if f.lower().endswith(IMAGE_EXTS)
-            ],
-            key=natural_sort_key
-        )
-
-        if images:
-            item = ViewerItem(
-                name=d,
-                path=d_path,
-                images=images,
-                type="image"
-            )
-            image_items.append(item)
-        else:
-            item = ViewerItem(
-                name=d,
-                path=d_path,
-                images=[],
-                type="folder"
-            )
-            folder_items.append(item)
-
-    folder_items.sort(key=lambda item: natural_sort_key(item.name))
-    image_items.sort(key=lambda item: natural_sort_key(item.name))
-
-    return folder_items + image_items
+from core.scanner import (
+    IMAGE_EXTS,
+    natural_sort_key,
+    scan_directory,
+)
 
 def render_item_html(item, library_root):
     template = load_item_template()

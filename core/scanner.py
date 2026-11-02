@@ -1,4 +1,17 @@
 import os
+import re
+from dataclasses import dataclass
+
+IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp")
+
+@dataclass
+class ViewerItem:
+    name: str
+    path: str
+    images: list[str]
+    type: str
+    link: str = ""
+    thumb: str = ""
 
 def scan_folder(folder):
     """記錄所有資料夾與檔案的狀態。"""
@@ -136,3 +149,50 @@ def get_changed_directories(previous, current):
             changed.add(path)
 
     return changed
+
+def natural_sort_key(s):
+    return [int(t) if t.isdigit() else t.lower() for t in re.split(r'([0-9]+)', s)]
+
+def scan_directory(folder):
+    subdirs = [
+        d
+        for d in os.listdir(folder)
+        if os.path.isdir(os.path.join(folder, d))
+    ]
+
+    folder_items = []
+    image_items = []
+
+    for d in subdirs:
+        d_path = os.path.join(folder, d)
+
+        images = sorted(
+            [
+                f
+                for f in os.listdir(d_path)
+                if f.lower().endswith(IMAGE_EXTS)
+            ],
+            key=natural_sort_key
+        )
+
+        if images:
+            item = ViewerItem(
+                name=d,
+                path=d_path,
+                images=images,
+                type="image"
+            )
+            image_items.append(item)
+        else:
+            item = ViewerItem(
+                name=d,
+                path=d_path,
+                images=[],
+                type="folder"
+            )
+            folder_items.append(item)
+
+    folder_items.sort(key=lambda item: natural_sort_key(item.name))
+    image_items.sort(key=lambda item: natural_sort_key(item.name))
+
+    return folder_items + image_items

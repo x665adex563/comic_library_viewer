@@ -11,6 +11,10 @@
 
     {{BACK_BUTTON}}
 
+<h1 class="mx-auto mt-1 mb-1 max-w-[60%] bg-black px-6 py-2 text-center text-[28px] font-semibold text-white break-words">
+  {{TITLE}}
+</h1>
+
 <div id="home" class="hidden fixed top-5 left-5 z-[200]">
   <a
     href="#"
@@ -19,34 +23,37 @@
   >🏠</a>
 </div>
 
-<input
-  id="search"
-  class="block mx-auto mt-[100px] mb-[12px] w-[280px] h-[34px] box-border px-3 py-2 bg-white text-black rounded-md border border-[#444] text-[14px]"
-  placeholder="搜尋資料夾"
->
+<div class="relative mx-auto mb-5 flex h-[34px] w-full items-center justify-center">
 
-<button
-  id="reading-history-button"
-  class="absolute top-[100px] left-[calc(50%+165px)] h-[34px] box-border px-3 py-2 bg-[#222] text-white border border-[#444] rounded-md cursor-pointer leading-4 text-[14px]"
->閱讀紀錄</button>
+  <input
+    id="search"
+    class="h-[34px] w-[280px] box-border rounded-md border border-[#444] bg-white px-3 py-2 text-[14px] text-black"
+    placeholder="搜尋資料夾"
+  >
 
-<button
-  id="authorize-output"
-  class="absolute top-[100px] left-[calc(50%+275px)] h-[34px] box-border px-3 py-2 bg-[#222] text-white border border-[#444] rounded-md cursor-pointer leading-4 text-[14px]"
->
-  授權 HTML
-</button>
+  <div class="absolute left-[calc(50%+165px)] flex items-center" style="gap: 8px;">
 
-<button
-  id="authorize-library"
-  class="absolute top-[100px] left-[calc(50%+390px)] h-[34px] box-border px-3 py-2 bg-[#222] text-white border border-[#444] rounded-md cursor-pointer leading-4 text-[14px]"
->
-  授權漫畫庫
-</button>
+    <button
+      id="reading-history-button"
+      class="h-[34px] box-border rounded-md border border-[#444] bg-[#222] px-3 py-2 text-[14px] leading-4 text-white cursor-pointer"
+    >閱讀紀錄</button>
+
+    <button
+      id="authorize-output"
+      class="h-[34px] box-border rounded-md border border-[#444] bg-[#222] px-3 py-2 text-[14px] leading-4 text-white cursor-pointer"
+    >授權 HTML</button>
+
+    <button
+      id="authorize-library"
+      class="h-[34px] box-border rounded-md border border-[#444] bg-[#222] px-3 py-2 text-[14px] leading-4 text-white cursor-pointer"
+    >授權漫畫庫</button>
+
+  </div>
+</div>
 
 <div
   id="reading-history-panel"
-  class="absolute top-[145px] left-[calc(50%+165px)] w-[300px] h-[523px] p-3 bg-[#222] text-white rounded-lg z-[1001] opacity-100 transition-opacity duration-200 overflow-y-auto"
+  class="absolute top-[150px] left-[calc(50%+165px)] w-[300px] h-[523px] p-3 bg-[#222] text-white rounded-lg z-[1001] opacity-100 transition-opacity duration-200 overflow-y-auto"
   style="display: none;"
 ></div>
 
@@ -62,7 +69,7 @@
 
 <button
   id="toTop"
-  class="fixed bottom-5 right-5 w-20 h-20 bg-[#111] text-[#524d5e] border-none rounded-[12px] text-[28px] hover:bg-[rgba(255,255,255,0.3)] hover:text-[rgba(0,0,0,0.35)] hover:cursor-pointer"
+  class="fixed bottom-5 right-5 w-30 h-30 bg-[#111] text-[#524d5e] border-none rounded-[12px] text-[28px] hover:bg-[rgba(255,255,255,0.3)] hover:text-[rgba(0,0,0,0.35)] hover:cursor-pointer"
   onclick="window.scrollTo({top:0,behavior:'smooth'})"
 >↑</button>
 

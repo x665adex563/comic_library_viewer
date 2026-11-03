@@ -945,6 +945,31 @@ async function deleteComic(card) {
   alert(`已刪除：${name}`);
 }
 
+// 點擊其他區域時，關閉已開啟的卡片選單
+document.addEventListener("click", event => {
+  const clickedMenu = event.target.closest("#list details");
+
+  document.querySelectorAll("#list details").forEach(menu => {
+    if (menu !== clickedMenu) {
+      menu.open = false;
+    }
+
+    const card = menu.closest("#list > li");
+    if (card) {
+      card.style.zIndex = menu.open ? "100" : "";
+    }
+  });
+
+  if (clickedMenu) {
+    requestAnimationFrame(() => {
+      const card = clickedMenu.closest("#list > li");
+      if (card) {
+        card.style.zIndex = clickedMenu.open ? "100" : "";
+      }
+    });
+  }
+});
+
 document.getElementById("list").addEventListener("click", async event => {
   const button = event.target.closest('[data-action="delete"], [data-action="move"]');
 

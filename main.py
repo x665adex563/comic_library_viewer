@@ -3,6 +3,7 @@ import json
 import os
 import webbrowser
 import time
+import sys
 from tkinter import Tk, filedialog
 
 from viewer import generate_index_html
@@ -17,6 +18,7 @@ from core.scanner import (
 )
 
 def main():
+    force = "--force" in sys.argv
     root = Tk()
     root.withdraw()
 
@@ -53,7 +55,8 @@ def main():
             previous_directories = json.load(f)
 
     if (
-        current_directories == previous_directories
+        not force
+        and current_directories == previous_directories
         and os.path.isfile(index_path)
     ):
         print("快速檢查完成，沒有偵測到變動")
@@ -84,7 +87,7 @@ def main():
             current_snapshot
         )
 
-        if added or modified or deleted or not os.path.isfile(index_path):
+        if force or added or modified or deleted or not os.path.isfile(index_path):
             print(f"新增：{len(added)} 個")
             print(f"修改：{len(modified)} 個")
             print(f"刪除：{len(deleted)} 個")

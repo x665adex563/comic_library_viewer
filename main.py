@@ -94,7 +94,7 @@ def main():
 
             print("重新產生 HTML...")
 
-            changed_chapters = get_changed_chapters(
+            changed_chapters = None if force else get_changed_chapters(
                 folder, previous_snapshot or {}, current_snapshot
             )
 

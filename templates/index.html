@@ -11,7 +11,7 @@
 
     {{BACK_BUTTON}}
 
-<h1 class="mx-auto mt-1 mb-1 max-w-[60%] bg-black px-6 py-2 text-center text-[28px] font-semibold text-white break-words">
+<h1 id="page-title" class="mx-auto mt-1 mb-1 max-w-[60%] bg-black px-6 py-2 text-center text-[28px] font-semibold text-white break-words">
   {{TITLE}}
 </h1>
 
@@ -37,17 +37,6 @@
       id="reading-history-button"
       class="h-[34px] box-border rounded-md border border-[#444] bg-[#222] px-3 py-2 text-[14px] leading-4 text-white cursor-pointer"
     >閱讀紀錄</button>
-
-    <button
-      id="authorize-output"
-      class="h-[34px] box-border rounded-md border border-[#444] bg-[#222] px-3 py-2 text-[14px] leading-4 text-white cursor-pointer"
-    >授權 HTML</button>
-
-    <button
-      id="authorize-library"
-      class="h-[34px] box-border rounded-md border border-[#444] bg-[#222] px-3 py-2 text-[14px] leading-4 text-white cursor-pointer"
-    >授權漫畫庫</button>
-
   </div>
 </div>
 
@@ -224,6 +213,8 @@ const cardTemplates = new Map(
 
 function search() {
     const v = searchInput.value.toLowerCase();
+
+    document.getElementById('page-title').textContent = `搜尋：${searchInput.value}`;
 
     sessionStorage.setItem('last_search', v);
 

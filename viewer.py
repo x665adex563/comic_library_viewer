@@ -13,6 +13,7 @@ from core.scanner import (
     natural_sort_key,
     scan_directory,
 )
+from natsort import os_sorted
 
 def render_item_html(item, library_root):
     template = load_item_template()
@@ -56,9 +57,8 @@ def generate_chapter_html(
     library_root,
     is_series,
 ):
-    images = sorted(
-        [f for f in os.listdir(folder) if f.lower().endswith(IMAGE_EXTS)],
-        key=natural_sort_key
+    images = os_sorted(
+        [f for f in os.listdir(folder) if f.lower().endswith(IMAGE_EXTS)]
     )
 
     folder_name = os.path.basename(folder)
@@ -357,7 +357,17 @@ def generate_index_html(
             {
                 "name": item.name,
                 "type": item.type,
-                "link": item.link,
+                "link": html_safe_path(
+                    os.path.join(
+                        viewer_folder,
+                        os.path.relpath(item.path, library_root) + ".html"
+                    ) if item.type == "image" else os.path.join(
+                        viewer_folder,
+                        os.path.relpath(item.path, library_root),
+                        "index.html"
+                    ),
+                    html_file
+                ),
                 "thumb": item.thumb,
                 "path": os.path.relpath(
                     item.path, library_root

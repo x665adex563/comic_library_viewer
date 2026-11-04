@@ -148,6 +148,12 @@ async function getOutputFolderHandle() {
   return handle;
 }
 
+async function ensureFolderPermissions() {
+  const root = await getLibraryHandle();
+  await getOutputFolderHandle();
+  return root;
+}
+
 async function copyFolder(source, destination) {
   const tasks = [];
 
@@ -573,42 +579,6 @@ function renderItem(item, path, link, thumb) {
   return card;
 }
 
-async function hasOutputPermission() {
-  if (outputFolderHandle) {
-    return (await outputFolderHandle.queryPermission({
-      mode: "readwrite"
-    })) === "granted";
-  }
-
-  const db = await new Promise((resolve, reject) => {
-    const request = indexedDB.open("comic-viewer", 1);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-
-  const savedHandle = await new Promise((resolve, reject) => {
-    const tx = db.transaction("settings", "readonly");
-    const request = tx.objectStore("settings").get(`output:${viewerPath}`);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-
-  db.close();
-
-  if (!savedHandle) return false;
-
-  const permission = await savedHandle.queryPermission({
-    mode: "readwrite"
-  });
-
-  if (permission !== "granted") return false;
-
-  await validateOutputFolder(savedHandle);
-  outputFolderHandle = savedHandle;
-  return true;
-}
-
-
 async function relocateComicHtml(source, oldPath, newPath) {
   const output = await getOutputFolderHandle();
   const items = await scanDirectory(source);
@@ -736,8 +706,9 @@ function showMoveStatus(message) {
 
     Object.assign(status.style, {
       position: "fixed",
-      right: "24px",
-      bottom: "24px",
+      top: "24px",
+      left: "50%",
+      transform: "translateX(-50%)",
       zIndex: "9999",
       padding: "12px 20px",
       background: "#333",
@@ -760,10 +731,7 @@ function hideMoveStatus() {
 async function moveComic(card) {
   console.time("搬移總時間");
 
-  if (!(await hasOutputPermission())) {
-    alert("HTML 輸出資料夾尚未授權，請先授權再移動漫畫。");
-    return;
-  }
+  const root = await ensureFolderPermissions();
 
   const path = JSON.parse(card.dataset.itemPath);
   const parts = path.split("/");
@@ -771,8 +739,6 @@ async function moveComic(card) {
   if (parts.some(part => !part || part === "." || part === "..")) {
     throw new Error("無效的漫畫資料夾路徑");
   }
-
-  const root = await getLibraryHandle();
 
   const destination = await window.showDirectoryPicker({
     id: "comic-move-destination",
@@ -893,10 +859,7 @@ async function moveComic(card) {
 }
 
 async function deleteComic(card) {
-  if (!(await hasOutputPermission())) {
-    alert("HTML 輸出資料夾尚未授權，請先授權再刪除漫畫。");
-    return;
-  }
+  const root = await ensureFolderPermissions();
 
   const path = JSON.parse(card.dataset.itemPath);
   const parts = path.split("/");
@@ -913,8 +876,6 @@ async function deleteComic(card) {
   if (!confirm(`確定永久刪除「${name}」嗎？\n\n此操作無法復原。`)) {
     return;
   }
-
-  const root = await getLibraryHandle();
 
   let parent = root;
 
@@ -1000,27 +961,5 @@ document.getElementById("list").addEventListener("click", async event => {
     }
   } finally {
     button.disabled = false;
-  }
-});
-
-document.getElementById("authorize-output").addEventListener("click", async () => {
-  try {
-    await getOutputFolderHandle();
-    alert("HTML 輸出資料夾授權成功");
-  } catch (error) {
-    if (error.name !== "AbortError") {
-      alert(`授權失敗：${error.message}`);
-    }
-  }
-});
-
-document.getElementById("authorize-library").addEventListener("click", async () => {
-  try {
-    await getLibraryHandle();
-    alert("漫畫庫授權成功");
-  } catch (error) {
-    if (error.name !== "AbortError") {
-      alert(`漫畫庫授權失敗：${error.message}`);
-    }
   }
 });

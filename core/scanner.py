@@ -1,6 +1,7 @@
 import os
 import re
 from dataclasses import dataclass
+from natsort import os_sorted
 
 IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp")
 
@@ -166,13 +167,12 @@ def scan_directory(folder):
     for d in subdirs:
         d_path = os.path.join(folder, d)
 
-        images = sorted(
+        images = os_sorted(
             [
                 f
                 for f in os.listdir(d_path)
                 if f.lower().endswith(IMAGE_EXTS)
-            ],
-            key=natural_sort_key
+            ]
         )
 
         if images:
@@ -192,7 +192,7 @@ def scan_directory(folder):
             )
             folder_items.append(item)
 
-    folder_items.sort(key=lambda item: natural_sort_key(item.name))
-    image_items.sort(key=lambda item: natural_sort_key(item.name))
+    folder_items = os_sorted(folder_items, key=lambda item: item.name)
+    image_items = os_sorted(image_items, key=lambda item: item.name)
 
     return folder_items + image_items

@@ -357,7 +357,17 @@ def generate_index_html(
             {
                 "name": item.name,
                 "type": item.type,
-                "link": item.link,
+                "link": html_safe_path(
+                    os.path.join(
+                        viewer_folder,
+                        os.path.relpath(item.path, library_root) + ".html"
+                    ) if item.type == "image" else os.path.join(
+                        viewer_folder,
+                        os.path.relpath(item.path, library_root),
+                        "index.html"
+                    ),
+                    html_file
+                ),
                 "thumb": item.thumb,
                 "path": os.path.relpath(
                     item.path, library_root

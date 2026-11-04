@@ -124,9 +124,9 @@ body:not(.single-page) #comic-content img {
 
       const previous = sessionStorage.getItem('comic_previous_page');
 
-      if (previous === back.href) {
+      if (previous && previous !== location.href) {
           event.preventDefault();
-          history.back();
+          location.href = previous;
       }
   });
 

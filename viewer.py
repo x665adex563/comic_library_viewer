@@ -63,6 +63,11 @@ def generate_chapter_html(
 
     folder_name = os.path.basename(folder)
     relative_parent = os.path.relpath(os.path.dirname(folder), library_root)
+    source_path = os.path.basename(os.path.normpath(library_root))
+
+    if relative_parent != ".":
+        source_path += "/" + relative_parent.replace("\\", "/")
+
     output_dir = os.path.join(viewer_folder, relative_parent)
     os.makedirs(output_dir, exist_ok=True)
 
@@ -189,6 +194,7 @@ def generate_chapter_html(
 
     template = render_chapter_template(
         folder_name,
+        source_path,
         back_button_html,
         images_html,
         previous_link,

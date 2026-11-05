@@ -1,5 +1,6 @@
 import json
 import os
+import html
 
 from core.paths import SCRIPT_DIR
 
@@ -49,6 +50,7 @@ def render_index_template(
 
 def render_chapter_template(
     title,
+    source_path,
     back_button_html,
     images_html,
     previous_link,
@@ -115,4 +117,5 @@ def render_chapter_template(
         .replace("{{REMOTE_CONTROLS_JS}}", remote_controls_js_path)
         .replace("{{READING_MODE_JS}}", reading_mode_js_path)
         .replace("{{CHAPTER_JS}}", chapter_js_path)
+        .replace("{{SOURCE_PATH}}", html.escape(source_path))
     )

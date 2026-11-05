@@ -431,6 +431,16 @@ async function regenerateChapter(oldPath, newPath) {
   const doc = new DOMParser().parseFromString(content, "text/html");
   const images = [...doc.querySelectorAll("img[src]")];
 
+  // 更新漫畫來源路徑
+  const sourcePath = doc.querySelector("#comic-source-path");
+
+  if (sourcePath) {
+    sourcePath.textContent = newPath
+      .split("/")
+      .slice(0, -1)
+      .join("/");
+  }
+
   const oldPrefix = toFileUrl(`${viewerPath}/${oldPath}/`);
   const newPrefix = toFileUrl(`${viewerPath}/${newPath}/`);
   const url = new URL(location.href);

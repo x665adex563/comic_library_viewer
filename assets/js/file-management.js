@@ -853,6 +853,11 @@ async function moveComic(card) {
     all.splice(index, 1);
   }
 
+  // 搜尋頁搬移成功後，重新顯示搜尋結果
+  if (searchInput.value.trim()) {
+    search();
+  }
+
   console.timeEnd("搬移總時間");
   showMoveStatus(`搬移成功：${name}`);
   setTimeout(hideMoveStatus, 3000);

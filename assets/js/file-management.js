@@ -414,6 +414,132 @@ async function writeIndexHtml(result) {
   }
 }
 
+async function syncMovedComicSearch(oldPath, newPath) {
+  const output = await getOutputFolderHandle();
+
+  const outputUrl = new URL(location.href);
+  const segments = outputUrl.pathname.split("/");
+  const rootIndex = segments.findIndex(
+    segment => decodeURIComponent(segment) === output.name
+  );
+
+  if (rootIndex === -1) {
+    throw new Error("無法定位 HTML 輸出根目錄");
+  }
+
+  outputUrl.pathname =
+    segments.slice(0, rootIndex + 1).join("/") + "/";
+
+  const newLink = new URL(
+    newPath.split("/").map(encodeURIComponent).join("/") + ".html",
+    outputUrl
+  ).href;
+
+  const oldPrefix = toFileUrl(`${viewerPath}/${oldPath}/`);
+  const newPrefix = toFileUrl(`${viewerPath}/${newPath}/`);
+
+  const updateItems = items => items.map(item => {
+    if (item.path !== oldPath) return item;
+
+    const oldThumb = new URL(item.thumb, location.href).href;
+
+    return {
+      ...item,
+      path: newPath,
+      link: newLink,
+      thumb: oldThumb.startsWith(oldPrefix)
+        ? newPrefix + oldThumb.slice(oldPrefix.length)
+        : oldThumb
+    };
+  });
+
+  const originalItem = all.find(item => item.path === oldPath);
+
+  if (!originalItem) {
+    throw new Error(`找不到搬移漫畫的搜尋資料：${oldPath}`);
+  }
+
+  const movedItem = updateItems([originalItem])[0];
+
+  // 同步目前頁面的搜尋資料
+  const updated = updateItems(all);
+  all.splice(0, all.length, ...updated);
+
+  // 同步各層目錄 HTML 中的搜尋資料
+  const directories = new Set([""]);
+
+  for (const path of [oldPath, newPath]) {
+    const parts = path.split("/").slice(0, -1);
+
+    for (let i = 1; i <= parts.length; i++) {
+      directories.add(parts.slice(0, i).join("/"));
+    }
+  }
+
+  for (const path of directories) {
+    let directory = output;
+
+    for (const part of path.split("/").filter(Boolean)) {
+      directory = await directory.getDirectoryHandle(part);
+    }
+
+    const htmlName = path
+      ? "index.html"
+      : `${output.name}.html`;
+
+    const file = await directory.getFileHandle(htmlName);
+    const content = await (await file.getFile()).text();
+
+    const doc = new DOMParser().parseFromString(content, "text/html");
+
+    const script = [...doc.querySelectorAll("script")].find(
+      element => element.textContent.includes("const all = ")
+    );
+
+    if (!script) {
+      throw new Error(`${htmlName} 找不到搜尋資料`);
+    }
+
+    const match = script.textContent.match(
+      /const all = (\[[\s\S]*?\]);/
+    );
+
+    if (!match) {
+      throw new Error(`${htmlName} 搜尋資料格式錯誤`);
+    }
+
+    const items = JSON.parse(match[1]);
+
+    // 移除舊路徑與重複的新路徑紀錄
+    const updatedItems = updateItems(items).filter(
+      item => item.path !== newPath
+    );
+
+    // 將搬移後的漫畫加入搜尋索引
+    updatedItems.push(movedItem);
+
+    script.textContent = script.textContent.replace(
+      /const all = \[[\s\S]*?\];/,
+      () => `const all = ${JSON.stringify(updatedItems)};`
+    );
+
+    const writable = await file.createWritable();
+
+    try {
+      await writable.write(
+        "<!DOCTYPE html>\n" + doc.documentElement.outerHTML
+      );
+      await writable.close();
+    } catch (error) {
+      await writable.abort().catch(() => {});
+      throw error;
+    }
+  }
+
+  // 舊卡片樣板已不適用，交由搜尋函式重新建立
+  cardTemplates.delete(oldPath);
+}
+
 async function regenerateChapter(oldPath, newPath) {
   const output = await getOutputFolderHandle();
   const parts = oldPath.split("/");
@@ -855,13 +981,8 @@ async function moveComic(card) {
   console.timeEnd("7. 刪除來源");
 
   card.remove();
-  cardTemplates.delete(path);
 
-  const index = all.findIndex(item => item.path === path);
-
-  if (index !== -1) {
-    all.splice(index, 1);
-  }
+  await syncMovedComicSearch(path, targetPath);
 
   // 搜尋頁搬移成功後，重新顯示搜尋結果
   if (searchInput.value.trim()) {
